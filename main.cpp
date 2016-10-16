@@ -2,13 +2,18 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <random>
-#include "screen.hpp"
+#include "system_interface.hpp"
+#include "system_sdl2.hpp"
 #include "sol.hpp"
 #include <iostream>
 
 int main(int argc, char *argv[]) {
-	printf("%s\n", SDL_GetPrefPath("Dan Lewis",
-                      "Rosebud"));
+	SystemInterface*  system = new SystemSdl2();
+	if (system->init(argc, argv)) {
+		system->run();
+	}
+
+
     // sol::state lua;
     // sol::optional<sol::function> init = lua["_init"];
     // sol::optional<sol::function> update = lua["_update"];
@@ -88,8 +93,7 @@ int main(int argc, char *argv[]) {
     //         printf("%d\n", thing);
 	// 	}
 	// }
-
-	// delete screen;
-	SDL_Quit();
+	
+	delete system;
 	return 0;
 }

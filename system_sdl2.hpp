@@ -1,47 +1,26 @@
-#ifndef SCREEN_HPP
-#define SCREEN_HPP
+#ifndef SYSTEM_SDL2_HPP
+#define SYSTEM_SDL2_HPP
 
 #include "config.hpp"
+#include "system_interface.hpp"
 #include "runtime.hpp"
 #include "editor.hpp"
 #include "cartridge.hpp"
 #include <SDL.h>
 
-enum ScreenMode {
-	RuntimeMode,
-	EditorMode
-};
-
 //Texture wrapper class
-class Screen
+class SystemSdl2: public SystemInterface
 {
 	public:
 		//Initializes variables
-		Screen();
+		SystemSdl2();
 
 		//Deallocates memory
-		~Screen();
+		~SystemSdl2();
 
-		bool init();
+		bool init(int argc, char *argv[]);
 
 		void run();
-
-		//Deallocates texture
-		void free();
-		
-		//Renders screen
-		void render();
-
-		//Gets screen dimensions
-		int getWindowWidth();
-		int getWindowHeight();
-
-		//Pixel manipulators
-		bool lockTexture();
-		bool unlockTexture();
-		void* getPixels();
-		void copyPixels( void* pixels );
-		int getPitch();
 		
 	private:
 		//The window we'll be rendering to
@@ -58,7 +37,8 @@ class Screen
 		int windowWidth;
 		int windowHeight;
 		//Image dimensions
-		unsigned int screenMult;
+		unsigned int widthMult;
+		unsigned int heightMult;
 
 		Cartridge* cartridge;
 
@@ -67,6 +47,20 @@ class Screen
 		Runtime* runtime;
 
 		ScreenMode screenMode;
+
+		//Renders screen
+		void render();
+
+		//Gets screen dimensions
+		int getWindowWidth();
+		int getWindowHeight();
+
+		//Pixel manipulators
+		bool lockTexture();
+		bool unlockTexture();
+		void* getPixels();
+		void copyPixels( void* pixels );
+		int getPitch();
 };
 
 #endif

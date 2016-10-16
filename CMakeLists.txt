@@ -5,7 +5,7 @@ find_package(LuaJIT REQUIRED)
 find_package(SDL2 REQUIRED)
 
 include_directories(${SDL2_INCLUDE_DIR} ${LUA_INCLUDE_DIR} ${CMAKE_SOURCE_DIR})
-add_executable(rosebud main.cpp screen.cpp runtime.cpp editor.cpp cartridge.cpp editorCartridge.cpp)
+add_executable(rosebud main.cpp system_sdl2.cpp runtime.cpp editor.cpp cartridge.cpp editor_cartridge.cpp)
 target_link_libraries(rosebud ${SDL2_LIBRARY} ${LUA_LIBRARIES})
 set_property(TARGET rosebud PROPERTY CXX_STANDARD 14)
 

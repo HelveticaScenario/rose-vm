@@ -7,7 +7,3 @@ Runtime::Runtime(const Cartridge* cart) {
 Runtime::~Runtime() {
 	
 }
-
-Runtime::doThing() {
-	this->cartridge->thing = 12;
-}
