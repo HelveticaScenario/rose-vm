@@ -1,8 +1,8 @@
 #ifndef CONFIG_HPP
 #define CONFIG_HPP
 
-const int SCREEN_WIDTH = 512;
-const int SCREEN_HEIGHT = 288;
+const int SCREEN_WIDTH = 256;
+const int SCREEN_HEIGHT = 144;
 const int INITIAL_WINDOW_WIDTH = SCREEN_WIDTH * 2;
 const int INITIAL_WINDOW_HEIGHT = SCREEN_HEIGHT * 2;
 
