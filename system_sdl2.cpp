@@ -9,8 +9,8 @@ SystemSdl2::SystemSdl2()
 	texture = NULL;
 	cartridge = NULL;
 	editor = NULL;
-	runtime = NULL;
-	screenMode = RuntimeMode;
+	game = NULL;
+	screenMode = GameMode;
 	pixels = NULL;
 	pitch = 0;
 	windowWidth = 0;
@@ -46,8 +46,8 @@ bool SystemSdl2::init(int argc, char *argv[]) {
 	}
 
 	SDL_GL_GetDrawableSize(this->window, &windowWidth, &windowHeight);
-	widthMult = (windowWidth * 2) / SCREEN_WIDTH;
-	heightMult = (windowHeight * 2) / SCREEN_HEIGHT;
+	widthMult = windowWidth / SCREEN_WIDTH;
+	heightMult = windowHeight / SCREEN_HEIGHT;
 
 	//Create renderer for window
 	renderer = SDL_CreateRenderer( window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC );
@@ -70,8 +70,8 @@ bool SystemSdl2::init(int argc, char *argv[]) {
 	}
 
 	cartridge = new Cartridge();
-	runtime = new Runtime(cartridge);
-	editor = new Editor(cartridge);
+	game = new GameRuntime(cartridge);
+	editor = new EditorRuntime(cartridge);
 
 	return true;
 }
@@ -85,6 +85,9 @@ void SystemSdl2::run() {
 	//Event handler
 	SDL_Event event;
 	//While application is running
+	SDL_StartTextInput();
+
+
 	while( !quit )
 	{
 		//Handle events on queue
@@ -100,11 +103,9 @@ void SystemSdl2::run() {
 						switch (event.window.event)  {
 
 						case SDL_WINDOWEVENT_SIZE_CHANGED:  {
-							// windowWidth = event.window.data1;
-							// windowHeight = event.window.data2;
 							SDL_GL_GetDrawableSize(this->window, &windowWidth, &windowHeight);
-							widthMult = (windowWidth * 2 ) / SCREEN_WIDTH;
-							heightMult = (windowHeight * 2) / SCREEN_HEIGHT;
+							widthMult = windowWidth  / SCREEN_WIDTH;
+							heightMult = windowHeight / SCREEN_HEIGHT;
 							break;
 						}
 
@@ -118,6 +119,28 @@ void SystemSdl2::run() {
 					}
 					break;
 				}
+				case SDL_TEXTINPUT: {
+					/* Add new text onto the end of our text */
+					
+					break;
+				}
+				case SDL_MOUSEMOTION: {
+					printf("%d %d %d %d %d\n", event.motion.x, event.motion.y, event.motion.xrel, event.motion.yrel, event.motion.state);
+					break;
+				}
+				case SDL_MOUSEBUTTONDOWN: {
+
+					break;
+				}
+				case SDL_MOUSEBUTTONUP: {
+
+					break;
+				}
+				case SDL_MOUSEWHEEL: {
+
+				}
+					
+
 			}
 			//User requests quit
 			if( event.type == SDL_QUIT )
@@ -127,15 +150,15 @@ void SystemSdl2::run() {
 		}
 
 		if (this->lockTexture()) {
-			Uint8* pixels = (Uint8*)this->getPixels();
-			int pitch = this->getPitch();
+			Uint8* pixels = (Uint8*)this->pixels;
+			int pitch = this->pitch;
 			
 			int pixelCount = ( pitch ) * SCREEN_HEIGHT;
 			for (int y = 0; y<SCREEN_HEIGHT; y++) {
 				for (int x = 0; x<SCREEN_WIDTH; x++) {
-					pixels[((x + (y*SCREEN_WIDTH)) * 3) + 0] = ((x%2)*255) + ((y%2)*255);
-					pixels[((x + (y*SCREEN_WIDTH)) * 3) + 1] = ((x%2)*255) + ((y%2)*255);
-					pixels[((x + (y*SCREEN_WIDTH)) * 3) + 2] = ((x%2)*255) + ((y%2)*255);
+					pixels[((x + (y*SCREEN_WIDTH)) * 3) + 0] = (((x%2)+(y%2))%2) * 255;
+					pixels[((x + (y*SCREEN_WIDTH)) * 3) + 1] = (((x%2)+(y%2))%2) * 255;
+					pixels[((x + (y*SCREEN_WIDTH)) * 3) + 2] = (((x%2)+(y%2))%2) * 255;
 				}
 			}
 			this->unlockTexture();
@@ -175,34 +198,15 @@ void SystemSdl2::render()
 {
 	SDL_RenderClear(renderer);
 	unsigned int mult = widthMult < heightMult ? widthMult : heightMult;
-	
-	if (mult < 30) {
-		mult -= (mult % 2);
-	}
 
-	if (mult < 2) {
-		mult = 2;
-	}
-	
 	SDL_Rect rect;
 	
-	rect.w = (SCREEN_WIDTH * mult) / 2;
-	rect.h = (SCREEN_HEIGHT * mult) / 2;
+	rect.w = SCREEN_WIDTH * mult;
+	rect.h = SCREEN_HEIGHT * mult;
 	rect.x = (windowWidth - rect.w) / 2;
 	rect.y = (windowHeight - rect.h) / 2;
 	SDL_RenderCopy( renderer, texture, NULL, &rect);
 	SDL_RenderPresent( renderer );
-}
-
-
-int SystemSdl2::getWindowWidth()
-{
-	return windowWidth;
-}
-
-int SystemSdl2::getWindowHeight()
-{
-	return windowHeight;
 }
 
 bool SystemSdl2::lockTexture()
@@ -239,11 +243,6 @@ bool SystemSdl2::unlockTexture()
 	return true;
 }
 
-void* SystemSdl2::getPixels()
-{
-	return pixels;
-}
-
 void SystemSdl2::copyPixels( void* newPixels )
 {
 	//Texture is locked
@@ -252,9 +251,4 @@ void SystemSdl2::copyPixels( void* newPixels )
 		//Copy to locked pixels
 		memcpy( pixels, newPixels, pitch * SCREEN_HEIGHT );
 	}
-}
-
-int SystemSdl2::getPitch()
-{
-	return pitch;
 }

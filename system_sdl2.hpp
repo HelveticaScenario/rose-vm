@@ -3,8 +3,9 @@
 
 #include "config.hpp"
 #include "system_interface.hpp"
-#include "runtime.hpp"
-#include "editor.hpp"
+#include "runtime_interface.hpp"
+#include "game_runtime.hpp"
+#include "editor_runtime.hpp"
 #include "cartridge.hpp"
 #include <SDL.h>
 
@@ -42,9 +43,9 @@ class SystemSdl2: public SystemInterface
 
 		Cartridge* cartridge;
 
-		Editor* editor;
+		EditorRuntime* editor;
 
-		Runtime* runtime;
+		GameRuntime* game;
 
 		ScreenMode screenMode;
 
@@ -58,9 +59,7 @@ class SystemSdl2: public SystemInterface
 		//Pixel manipulators
 		bool lockTexture();
 		bool unlockTexture();
-		void* getPixels();
 		void copyPixels( void* pixels );
-		int getPitch();
 };
 
 #endif

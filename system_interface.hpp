@@ -2,7 +2,7 @@
 #define SYSTEM_INTERFACE_HPP
 
 enum ScreenMode {
-	RuntimeMode,
+	GameMode,
 	EditorMode
 };
 
