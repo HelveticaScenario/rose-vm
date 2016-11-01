@@ -1,6 +1,6 @@
 #include "editor_runtime.hpp"
 
-EditorRuntime::EditorRuntime(const Cartridge* cart) {
+EditorRuntime::EditorRuntime(Cartridge* cart) {
 	this->cartridge = cart;
 }
 
@@ -16,11 +16,11 @@ void EditorRuntime::draw() {
 	
 }
 
-unsigned char* EditorRuntime::getScreen() {
-
+RuntimeMemorySegment EditorRuntime::getScreen() {
+	
 }
 
-unsigned char* EditorRuntime::getPalette() {
+RuntimeMemorySegment EditorRuntime::getPalette() {
 
 }
 

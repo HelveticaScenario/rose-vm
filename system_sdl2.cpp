@@ -37,6 +37,7 @@ bool SystemSdl2::init(int argc, char *argv[]) {
 	//Seed random
 	srand( SDL_GetTicks() );
 	
+	
 	//Create window
 	window = SDL_CreateWindow( "Rosebud", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, INITIAL_WINDOW_WIDTH, INITIAL_WINDOW_HEIGHT, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
 	if( window == NULL )

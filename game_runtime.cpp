@@ -1,6 +1,6 @@
 #include "game_runtime.hpp"
 
-GameRuntime::GameRuntime(const Cartridge* cart) {
+GameRuntime::GameRuntime(Cartridge* cart) {
 	this->cartridge = cart;
 }
 
@@ -16,11 +16,11 @@ void GameRuntime::draw() {
 	
 }
 
-unsigned char* GameRuntime::getScreen() {
+RuntimeMemorySegment GameRuntime::getScreen() {
 
 }
 
-unsigned char* GameRuntime::getPalette() {
+RuntimeMemorySegment GameRuntime::getPalette() {
 	
 }
 

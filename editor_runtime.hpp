@@ -7,17 +7,17 @@
 
 class EditorRuntime: public RuntimeInterface {
 	public:
-		EditorRuntime(const Cartridge* cart);
+		EditorRuntime(Cartridge* cart);
 		~EditorRuntime();
 
 		void update();
 		void draw();
-		unsigned char* getScreen();
-		unsigned char* getPalette();
+		RuntimeMemorySegment getScreen();
+		RuntimeMemorySegment getPalette();
 		void setModeChangeCallback(std::function<void(ScreenMode)> callback);
 		void updateMouseState(const MouseState& mouseState);
 	private:
-		const Cartridge* cartridge;
+		Cartridge* cartridge;
 };
 
 #endif

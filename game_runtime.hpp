@@ -4,20 +4,23 @@
 #include "config.hpp"
 #include "cartridge.hpp"
 #include "runtime_interface.hpp"
+#include <vector>
 
 class GameRuntime: public RuntimeInterface {
 	public:
-		GameRuntime(const Cartridge* cart);
+		GameRuntime(Cartridge* cart);
 		~GameRuntime();
 
 		void update();
 		void draw();
-		unsigned char* getScreen();
-		unsigned char* getPalette();
+		RuntimeMemorySegment getScreen();
+		RuntimeMemorySegment getPalette();
 		void setModeChangeCallback(std::function<void(ScreenMode)> callback);
 		void updateMouseState(const MouseState& mouseState);
 	private:
-		const Cartridge* cartridge;
+		Cartridge* cartridge;
+		RuntimeMemory* mem;
+
 
 };
 

@@ -2,13 +2,15 @@
 #define CARTRIDGE_HPP
 
 #include "config.hpp"
+#include <string>
 
 class Cartridge {
 	public:
 		Cartridge();
 		~Cartridge();
 
-		int thing;
+		std::string code;
+		unsigned char* data;
 };
 
 #endif
