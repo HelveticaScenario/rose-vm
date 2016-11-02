@@ -3,14 +3,17 @@
 
 #include "config.hpp"
 #include <string>
+#include <array>
 
 class Cartridge {
-	public:
-		Cartridge();
-		~Cartridge();
+public:
+  Cartridge();
+  ~Cartridge();
 
-		std::string code;
-		unsigned char* data;
+  std::string code;
+  std::array<unsigned char,
+             ROSE_MEMORY_SIZE - ROSE_RUNTIME_RESERVED_MEMORY_SIZE>
+      data;
 };
 
 #endif

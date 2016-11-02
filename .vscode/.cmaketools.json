@@ -1,9 +1,9 @@
 {
   "variant": {
-    "label": "Debug",
+    "label": "RelWithDebInfo",
     "keywordSettings": {
-      "buildType": "debug"
+      "buildType": "reldeb"
     },
-    "description": "Emit debug information without performing optimizations"
+    "description": "Perform optimizations AND include debugging information"
   }
 }

@@ -5,11 +5,10 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
 find_package(LuaJIT REQUIRED)
 find_package(SDL2 REQUIRED)
-find_package(Boost 1.62.0 REQUIRED)
 
-include_directories(${SDL2_INCLUDE_DIR} ${LUA_INCLUDE_DIR} ${Boost_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR})
-add_executable(rosebud main.cpp system_sdl2.cpp game_runtime.cpp editor_runtime.cpp cartridge.cpp editor_cartridge.cpp)
-target_link_libraries(rosebud ${SDL2_LIBRARY} ${LUA_LIBRARIES} ${Boost_LIBRARIES})
+include_directories(${SDL2_INCLUDE_DIR} ${LUA_INCLUDE_DIR} ${CMAKE_SOURCE_DIR})
+add_executable(rosebud main.cpp system_sdl2.cpp runtime_interface.cpp runtime_game.cpp runtime_editor.cpp cartridge.cpp editor_cartridge.cpp)
+target_link_libraries(rosebud ${SDL2_LIBRARY} ${LUA_LIBRARIES})
 set_property(TARGET rosebud PROPERTY CXX_STANDARD 14)
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin" AND CMAKE_SIZEOF_VOID_P EQUAL 8)
@@ -21,3 +20,4 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Darwin" AND CMAKE_SIZEOF_VOID_P EQUAL 8)
   set(CMAKE_MODULE_LINKER_FLAGS
     "${CMAKE_MODULE_LINKER_FLAGS} -image_base 100000000")
 endif()
+

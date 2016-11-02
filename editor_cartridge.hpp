@@ -3,10 +3,9 @@
 
 #include "config.hpp"
 
-
 class EditorCartridge {
-	EditorCartridge();
-	~EditorCartridge();
+  EditorCartridge();
+  ~EditorCartridge();
 };
 
 #endif
