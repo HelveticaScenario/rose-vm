@@ -29,6 +29,15 @@ typedef struct {
     uint_fast32_t mem_size;
     Rose_MemoryRange* screen;
     Rose_MemoryRange* palette;
+    Rose_MemoryRange* palette_filter; // TODO: rename this to something not shit
+    Rose_MemoryRange* palette_transparency;
+    Rose_MemoryRange* clipping_region;
+    Rose_MemoryIterator pen_color_addr;
+    Rose_MemoryRange* print_cursor;
+    Rose_MemoryRange* camera_offset;
+    Rose_MemoryRange* pointer_positions;
+    Rose_MemoryRange* btn_states;
+    
 } Rose_RuntimeBase;
 
 Rose_MemoryRange* rose_memory_range_create(uint8_t begin[], uint_fast32_t len);
@@ -37,27 +46,13 @@ Rose_MemoryIterator rose_memory_iterator_end(uint8_t m[], uint_fast32_t len);
 Rose_MemoryIterator rose_memory_iterator_next(Rose_MemoryIterator i);
 
 Rose_RuntimeBase* rose_runtime_base_create(Rose_Cartridge* cartridge);
+
 void rose_runtime_base_free(Rose_RuntimeBase* r);
 
 void updateMouseState(Rose_RuntimeBase* r, const Rose_MouseState* mouseState);
 
-static uint8_t default_palette[16*3] = {
-    0, 0, 0,   // black
-    29, 43, 83,  // dark-blue
-    126, 37, 83,  // dark-purple
-    0, 135, 81,  // dark-green
-    171, 82, 54,  // brown
-    95, 87, 79,  // dark-gray
-    194, 195, 199, // light-gray
-    255, 241, 232, // white
-    255, 0, 77,  // red
-    255, 164, 0,   // orange
-    255, 236, 39,  // yellow
-    0, 228, 54,  // green
-    41, 173, 255, // blue
-    131, 118, 156, // indigo
-    255, 119, 168, // pink
-    255, 204, 170  // peach
-};
+void rose_set_bit(uint8_t* trans, uint8_t addr, bool val);
+
+bool rose_get_bit(uint8_t* trans, uint8_t addr);
 
 #endif

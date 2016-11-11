@@ -6,8 +6,9 @@ Rose_Cartridge* rose_cartridge_create() {
     cart->code = (char *) malloc((cart->code_size + 1) * sizeof(char));
     cart->code[cart->code_size] = '\0';
     cart->data_size = ROSE_MEMORY_SIZE - ROSE_RUNTIME_RESERVED_MEMORY_SIZE;
-    cart->data = (uint8_t *) malloc(cart->data_size * sizeof(uint8_t));
-    memset(cart->data, 0, cart->data_size * sizeof(uint8_t));
+    cart->data = (uint8_t *) malloc(cart->data_size);
+    memset(cart->data, 0, cart->data_size);
+    memcpy(cart->data + cart->data_size - ROSE_PALETTE_SIZE, rose_default_palette, sizeof(rose_default_palette));
     return cart;
 }
 

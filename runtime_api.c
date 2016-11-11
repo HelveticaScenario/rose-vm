@@ -71,7 +71,7 @@ Rose_RuntimeApiError rose_runtime_base_rectfill_default(Rose_RuntimeBase* r, uin
 }
 
 Rose_RuntimeApiError rose_runtime_base_cls(Rose_RuntimeBase* r) {
-    return rose_runtime_base_rectfill(r, 0, 0, ROSE_SCREEN_WIDTH - 1, ROSE_SCREEN_HEIGHT - 1, 0);
+    
 }
 
 void rose_runtime_register_api(lua_State* L, Rose_RuntimeBase* r) {
