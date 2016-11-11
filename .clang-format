@@ -1,0 +1,17 @@
+BasedOnStyle: LLVM
+IndentWidth: 4
+
+Language: Cpp
+# Force pointers to the type for C++.
+#DerivePointerAlignment: false
+#PointerAlignment: Left
+AlignAfterOpenBracket: AlwaysBreak
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: false
+AllowShortBlocksOnASingleLine: false
+AllowShortCaseLabelsOnASingleLine: false
+Standard: Cpp11
+TabWidth: 4
+SortIncludes: true
+ReflowComments: true
+#ColumnLimit: 180

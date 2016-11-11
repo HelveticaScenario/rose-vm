@@ -1,5 +1,13 @@
-#ifndef CONFIG_HPP
-#define CONFIG_HPP
+#ifndef CONFIG_H
+#define CONFIG_H
+#include <stdint.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <lua.h>
+#include <lauxlib.h>
+#include <luaconf.h>
+#include <lualib.h>
+#include <luajit.h>
 
 #define ROSE_SCREEN_WIDTH 320
 #define ROSE_SCREEN_HEIGHT 180

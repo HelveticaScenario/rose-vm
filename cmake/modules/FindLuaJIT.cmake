@@ -14,6 +14,7 @@ find_path(LUA_INCLUDE_DIR luajit.h
   PATHS
   ~/Library/Frameworks
   /Library/Frameworks
+  /usr/local # Homebrew
   /sw # Fink
   /opt/local # DarwinPorts
   /opt/csw # Blastwave
@@ -28,6 +29,7 @@ find_library(LUA_LIBRARY
   PATHS
   ~/Library/Frameworks
   /Library/Frameworks
+  /usr/local
   /sw
   /opt/local
   /opt/csw

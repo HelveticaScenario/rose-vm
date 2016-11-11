@@ -1,4 +1,5 @@
 {
+  "selectedBuildType": "RelWithDebInfo",
   "variant": {
     "label": "RelWithDebInfo",
     "keywordSettings": {
