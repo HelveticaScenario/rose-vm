@@ -13,3 +13,4 @@ function _draw()
   -- rect(math.random(319),math.random(179),math.random(319),math.random(179),math.random(15))
   -- rectfill(math.random(319),math.random(179),math.random(319),math.random(179),math.random(15))
 end
+
