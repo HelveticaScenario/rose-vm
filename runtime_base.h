@@ -26,7 +26,7 @@ typedef struct {
 typedef struct {
     Rose_Cartridge* cartridge;
     uint8_t* mem;
-    uint_fast32_t mem_size;
+    uint32_t mem_size;
     Rose_MemoryRange* screen;
     Rose_MemoryRange* palette;
     Rose_MemoryRange* palette_filter; // TODO: rename this to something not shit
@@ -40,9 +40,9 @@ typedef struct {
     
 } Rose_RuntimeBase;
 
-Rose_MemoryRange* rose_memory_range_create(uint8_t begin[], uint_fast32_t len);
+Rose_MemoryRange* rose_memory_range_create(uint8_t begin[], uint32_t len);
 Rose_MemoryIterator rose_memory_iterator_begin(uint8_t m[]);
-Rose_MemoryIterator rose_memory_iterator_end(uint8_t m[], uint_fast32_t len);
+Rose_MemoryIterator rose_memory_iterator_end(uint8_t m[], uint32_t len);
 Rose_MemoryIterator rose_memory_iterator_next(Rose_MemoryIterator i);
 
 Rose_RuntimeBase* rose_runtime_base_create(Rose_Cartridge* cartridge);

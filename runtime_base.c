@@ -1,7 +1,7 @@
 #include "runtime_base.h"
 
 Rose_MemoryIterator rose_memory_iterator_begin(uint8_t m[]) { return &m[0]; }
-Rose_MemoryIterator rose_memory_iterator_end(uint8_t m[], uint_fast32_t len) { return &m[len]; }
+Rose_MemoryIterator rose_memory_iterator_end(uint8_t m[], uint32_t len) { return &m[len]; }
 Rose_MemoryIterator rose_memory_iterator_next(Rose_MemoryIterator i) { return ++i; }
 
 Rose_RuntimeBase* rose_runtime_base_create(Rose_Cartridge* cartridge) {
@@ -70,7 +70,7 @@ Rose_RuntimeBase* rose_runtime_base_create(Rose_Cartridge* cartridge) {
     camera_offset_range->begin = beg_camera_offset;
     camera_offset_range->end = end_camera_offset;
 
-    uint16_t* camera_offset = (uint16_t*) beg_camera_offset;
+    int16_t* camera_offset = (int16_t*) beg_camera_offset;
     camera_offset[0] = 0; // x0
     camera_offset[1] = 0; // y0 // TODO: replace with actual starting position once font size is finalized
 

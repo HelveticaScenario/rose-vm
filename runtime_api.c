@@ -1,6 +1,6 @@
 #include "runtime_api.h"
 
-Rose_RuntimeApiError rose_runtime_base_poke(Rose_RuntimeBase* r, uint_fast32_t idx, uint8_t val) {
+Rose_RuntimeApiError rose_runtime_base_poke(Rose_RuntimeBase* r, uint32_t idx, uint8_t val) {
     if (idx >= r->mem_size) {
         return ROSE_API_ERR_OUT_OF_BOUNDS;
     }
@@ -8,7 +8,7 @@ Rose_RuntimeApiError rose_runtime_base_poke(Rose_RuntimeBase* r, uint_fast32_t i
     return ROSE_API_ERR_NONE;
 }
 
-Rose_RuntimeApiError rose_runtime_base_peek(Rose_RuntimeBase* r, uint_fast32_t idx, uint8_t* res) {
+Rose_RuntimeApiError rose_runtime_base_peek(Rose_RuntimeBase* r, uint32_t idx, uint8_t* res) {
     if (idx >= r->mem_size) {
         return ROSE_API_ERR_OUT_OF_BOUNDS;
     }
@@ -25,7 +25,7 @@ Rose_RuntimeApiError rose_runtime_base_pset(Rose_RuntimeBase* r, int32_t x, int3
 }
 
 Rose_RuntimeApiError rose_runtime_base_pset_default(Rose_RuntimeBase* r, int32_t x, int32_t y) {
-    return rose_runtime_base_pset(r, x, y, 1);
+    return rose_runtime_base_pset(r, x, y, *r->pen_color_addr);
 }
 
 Rose_RuntimeApiError rose_runtime_base_pget(Rose_RuntimeBase* r, int32_t x, int32_t y, uint8_t* res) {
@@ -54,24 +54,118 @@ Rose_RuntimeApiError rose_runtime_base_palget(Rose_RuntimeBase* r, uint8_t idx, 
     return ROSE_API_ERR_NONE;
 }
 
-Rose_RuntimeApiError rose_runtime_base_rect(Rose_RuntimeBase* r, uint_fast16_t x0, uint_fast16_t y0, uint_fast16_t x1, uint_fast16_t y1, uint8_t col) {
-
+void rect_swap(int16_t* x0, int16_t* y0, int16_t* x1, int16_t* y1) {
+    bool swap_x = *x0 > *x1;
+    bool swap_y = *y0 > *y1;
+    if (swap_x) {
+        int16_t tmp = *x0;
+        *x0 = *x1;
+        *x1 = tmp;
+    }
+    if (swap_y) {
+        int16_t tmp = *y0;
+        *y0 = *y1;
+        *y1 = tmp;
+    }
 }
 
-Rose_RuntimeApiError rose_runtime_base_rect_default(Rose_RuntimeBase* r, uint_fast16_t x0, uint_fast16_t y0, uint_fast16_t x1, uint_fast16_t y1) {
-
+void rect_cam_offset(Rose_RuntimeBase* r, int16_t* x0, int16_t* y0, int16_t* x1, int16_t* y1) {
+    int16_t* camera_offset = (int16_t*) r->camera_offset->begin;
+    int16_t x_cam = camera_offset[0];
+    int16_t y_cam = camera_offset[1];
+    
+    // Offset
+    *x0 -= x_cam;
+    *x1 -= x_cam;
+    *y0 -= y_cam;
+    *y1 -= y_cam;
 }
 
-Rose_RuntimeApiError rose_runtime_base_rectfill(Rose_RuntimeBase* r, uint_fast16_t x0, uint_fast16_t y0, uint_fast16_t x1, uint_fast16_t y1, uint8_t col) {
-
+int rect_clip(int16_t* x0, int16_t* y0, int16_t* x1, int16_t* y1) {
+    if ((*x0 < 0 && *x1 < 0) || (*x0 > (ROSE_SCREEN_WIDTH-1) && *x0 > (ROSE_SCREEN_WIDTH-1)) || (*y0 < 0 && *y1 < 0) || (*y0 > (ROSE_SCREEN_HEIGHT-1) && *y0 > (ROSE_SCREEN_HEIGHT-1))) {
+        return 1;
+    }
+    if (*x0 < 0) {
+        *x0 = 0;
+    }
+    if (*x1 > (ROSE_SCREEN_WIDTH-1)) {
+        *x1 = (ROSE_SCREEN_WIDTH-1);
+    }
+    if (*y0 < 0) {
+        *y0 = 0;
+    }
+    if (*y1 > (ROSE_SCREEN_HEIGHT-1)) {
+        *y1 = (ROSE_SCREEN_HEIGHT-1);
+    }
+    return 0;
 }
 
-Rose_RuntimeApiError rose_runtime_base_rectfill_default(Rose_RuntimeBase* r, uint_fast16_t x0, uint_fast16_t y0, uint_fast16_t x1, uint_fast16_t y1) {
+Rose_RuntimeApiError rose_runtime_base_rect(Rose_RuntimeBase* r, int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t col) {
+    rect_swap(&x0, &y0, &x1, &y1);
+    rect_cam_offset(r, &x0, &y0, &x1, &y1);
 
+    // Draw
+    int i;
+    if (x0 >= 0 && x0 < ROSE_SCREEN_WIDTH) {
+        for (i = y0; i<=y1; ++i) {
+            if (i >= 0 && i < ROSE_SCREEN_HEIGHT) {
+                rose_runtime_base_pset(r, x0, i, col);
+            }
+        }
+    }
+
+    if (x1 >= 0 && x1 < ROSE_SCREEN_WIDTH) {
+        for (i = y0; i<=y1; ++i) {
+            if (i >= 0 && i < ROSE_SCREEN_HEIGHT) {
+                rose_runtime_base_pset(r, x1, i, col);
+            }
+        }
+    }
+
+     if (y0 >= 0 && y0 < ROSE_SCREEN_HEIGHT) {
+        for (i = x0; i<=x1; ++i) {
+            if (i >= 0 && i < ROSE_SCREEN_WIDTH) {
+                rose_runtime_base_pset(r, i, y0, col);
+            }
+        }
+    }
+
+    if (y1 >= 0 && y1 < ROSE_SCREEN_HEIGHT) {
+        for (i = x0; i<=x1; ++i) {
+            if (i >= 0 && i < ROSE_SCREEN_WIDTH) {
+                rose_runtime_base_pset(r, i, y1, col);
+            }
+        }
+    }
+    
+    return ROSE_API_ERR_NONE;
+}
+
+Rose_RuntimeApiError rose_runtime_base_rect_default(Rose_RuntimeBase* r, int16_t x0, int16_t y0, int16_t x1, int16_t y1) {
+    return rose_runtime_base_rect(r, x0, y0, x1, y1, *r->pen_color_addr);
+}
+
+Rose_RuntimeApiError rose_runtime_base_rectfill(Rose_RuntimeBase* r, int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t col) {
+    rect_swap(&x0, &y0, &x1, &y1);
+    rect_cam_offset(r, &x0, &y0, &x1, &y1);
+    int res = rect_clip(&x0, &y0, &x1, &y1);
+    if (res == 1) 
+        return ROSE_API_ERR_NONE;
+    // Draw
+    int i;
+    for (i = y0; i<=y1; ++i) {
+        memset(r->screen->begin + (i * ROSE_SCREEN_WIDTH) + x0, col, x1-x0+1);
+    }
+    return ROSE_API_ERR_NONE;
+}
+
+Rose_RuntimeApiError rose_runtime_base_rectfill_default(Rose_RuntimeBase* r, int16_t x0, int16_t y0, int16_t x1, int16_t y1) {
+    return rose_runtime_base_rectfill(r, x0, y0, x1, y1, *r->pen_color_addr);
 }
 
 Rose_RuntimeApiError rose_runtime_base_cls(Rose_RuntimeBase* r) {
-    
+    memset(r->screen->begin, 0, r->screen->end - r->screen->begin);
+    return ROSE_API_ERR_NONE;
 }
 
 void rose_runtime_register_api(lua_State* L, Rose_RuntimeBase* r) {
@@ -106,7 +200,7 @@ Rose_RuntimeBase* get_runtime_base(lua_State* L) {
 int rose_runtime_base_lua_poke(lua_State* L) {
     Rose_RuntimeBase* r = get_runtime_base(L);
     if (r == NULL) { return 0; }
-    uint_fast32_t idx = lua_tointeger(L, 1);
+    uint32_t idx = lua_tointeger(L, 1);
     uint8_t val = lua_tointeger(L, 2);
     int err = rose_runtime_base_poke(r, idx, val);
     switch (err) {
@@ -124,7 +218,7 @@ int rose_runtime_base_lua_peek(lua_State* L) {
     if (r == NULL) { return 0; }
     int nargs = lua_gettop(L);
     if (nargs >= 1) {
-        uint_fast32_t idx = lua_tointeger(L, 1);
+        uint32_t idx = lua_tointeger(L, 1);
         uint8_t res;
         int err = rose_runtime_base_peek(r, idx, &res);
         switch (err) {
@@ -149,8 +243,8 @@ int rose_runtime_base_lua_pset(lua_State* L) {
     if (r == NULL) { return 0; }
     int nargs = lua_gettop(L);
     if (nargs == 2) {
-        uint_fast16_t x = lua_tointeger(L, 1);
-        uint_fast16_t y = lua_tointeger(L, 2);
+        uint16_t x = lua_tointeger(L, 1);
+        uint16_t y = lua_tointeger(L, 2);
         int err = rose_runtime_base_pset_default(r, x, y);
         switch (err) {
             case ROSE_API_ERR_OUT_OF_BOUNDS:
@@ -160,8 +254,8 @@ int rose_runtime_base_lua_pset(lua_State* L) {
                 break;
         }
     } else if (nargs >= 3) {
-        uint_fast16_t x = lua_tointeger(L, 1);
-        uint_fast16_t y = lua_tointeger(L, 2);
+        uint16_t x = lua_tointeger(L, 1);
+        uint16_t y = lua_tointeger(L, 2);
         uint8_t val = lua_tointeger(L, 3);
         int err = rose_runtime_base_pset(r, x, y, val);
         switch (err) {
@@ -180,8 +274,8 @@ int rose_runtime_base_lua_pget(lua_State* L) {
     if (r == NULL) { return 0; }
     int nargs = lua_gettop(L);
     if (nargs >= 2) {
-        uint_fast16_t x = lua_tointeger(L, 1);
-        uint_fast16_t y = lua_tointeger(L, 2);
+        uint16_t x = lua_tointeger(L, 1);
+        uint16_t y = lua_tointeger(L, 2);
         uint8_t res;
         int err = rose_runtime_base_pget(r, x, y, &res);
         switch (err) {
@@ -245,14 +339,70 @@ int rose_runtime_base_lua_palget(lua_State* L) {
     return 3;
 }
 
-int rose_runtime_base_lua_rect(lua_State* L) {
+typedef Rose_RuntimeApiError (*rect_fp)(Rose_RuntimeBase* r, int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t col);
+typedef Rose_RuntimeApiError (*rect_default_fp)(Rose_RuntimeBase* r, int16_t x0, int16_t y0, int16_t x1, int16_t y1);
 
+int rect_common(lua_State* L, rect_fp rect, rect_default_fp rect_default) {
+    Rose_RuntimeBase* r = get_runtime_base(L);
+    if (r == NULL) { return 0; }
+    int nargs = lua_gettop(L);
+    int err = ROSE_API_ERR_NONE;
+    if (nargs >= 4) {
+        int16_t x0 = lua_tointeger(L, 1);
+        int16_t y0 = lua_tointeger(L, 2);
+        int16_t x1 = lua_tointeger(L, 3);
+        int16_t y1 = lua_tointeger(L, 4);
+        if (nargs == 5) {
+            uint8_t col = lua_tointeger(L, 5);
+            err = rect(r, x0, y0, x1, y1, col);
+        } else {
+            err = rect_default(r, x0, y0, x1, y1);
+        }
+        
+    } else if (nargs == 3) {
+        int16_t x0 = lua_tointeger(L, 1);
+        int16_t y0 = lua_tointeger(L, 2);
+        int16_t x1 = lua_tointeger(L, 3);
+        err = rect_default(r, x0, y0, x1, 0);
+    } else if (nargs >= 1) {
+        int16_t x1 = lua_tointeger(L, 1);
+        int16_t y1 = 0;
+        if (nargs == 2) {
+            y1 = lua_tointeger(L, 2);
+        }
+        err = rect_default(r, 0, 0, x1, y1);
+    }
+
+    switch (err) {
+        case ROSE_API_ERR_OUT_OF_BOUNDS:
+            return luaL_error(L, "Bad Memory Access");
+            break;
+        case ROSE_API_ERR_NONE:
+        default:
+            break;
+    }
+    return 0;
+}
+
+int rose_runtime_base_lua_rect(lua_State* L) {
+    return rect_common(L, &rose_runtime_base_rect, &rose_runtime_base_rect_default);
 }
 
 int rose_runtime_base_lua_rectfill(lua_State* L) {
-
+    return rect_common(L, &rose_runtime_base_rectfill, &rose_runtime_base_rectfill_default);
 }
 
 int rose_runtime_base_lua_cls(lua_State* L) {
-
+    Rose_RuntimeBase* r = get_runtime_base(L);
+    if (r == NULL) { return 0; }
+    int err = rose_runtime_base_cls(r);
+    switch (err) {
+        case ROSE_API_ERR_OUT_OF_BOUNDS:
+            return luaL_error(L, "Bad Memory Access");
+            break;
+        case ROSE_API_ERR_NONE:
+        default:
+            break;
+    }
+    return 0;
 }

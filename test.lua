@@ -8,8 +8,8 @@ function _update()
 end
 
 function _draw()
-  pset(0,0,6)
-  pset(319,179,6)
-  pset(0,179,6)
-  pset(319,0,6)
+  cls()
+  rectfill(0,0,0,0,5)
+  -- rect(math.random(319),math.random(179),math.random(319),math.random(179),math.random(15))
+  -- rectfill(math.random(319),math.random(179),math.random(319),math.random(179),math.random(15))
 end

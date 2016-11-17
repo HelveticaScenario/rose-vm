@@ -15,9 +15,9 @@ typedef struct {
     uint8_t b;
 } Rose_Color;
 
-Rose_RuntimeApiError rose_runtime_base_poke(Rose_RuntimeBase* r, uint_fast32_t idx, uint8_t val);
+Rose_RuntimeApiError rose_runtime_base_poke(Rose_RuntimeBase* r, uint32_t idx, uint8_t val);
 
-Rose_RuntimeApiError rose_runtime_base_peek(Rose_RuntimeBase* r, uint_fast32_t idx, uint8_t* res);
+Rose_RuntimeApiError rose_runtime_base_peek(Rose_RuntimeBase* r, uint32_t idx, uint8_t* res);
 
 Rose_RuntimeApiError rose_runtime_base_pset(Rose_RuntimeBase* r, int32_t x, int32_t y, uint8_t val);
 
@@ -29,13 +29,13 @@ Rose_RuntimeApiError rose_runtime_base_palset(Rose_RuntimeBase* r, uint8_t idx, 
 
 Rose_RuntimeApiError rose_runtime_base_palget(Rose_RuntimeBase* r, uint8_t idx, Rose_Color* res);
 
-Rose_RuntimeApiError rose_runtime_base_rect(Rose_RuntimeBase* r, uint_fast16_t x0, uint_fast16_t y0, uint_fast16_t x1, uint_fast16_t y1, uint8_t col);
+Rose_RuntimeApiError rose_runtime_base_rect(Rose_RuntimeBase* r, int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t col);
 
-Rose_RuntimeApiError rose_runtime_base_rect_default(Rose_RuntimeBase* r, uint_fast16_t x0, uint_fast16_t y0, uint_fast16_t x1, uint_fast16_t y1);
+Rose_RuntimeApiError rose_runtime_base_rect_default(Rose_RuntimeBase* r, int16_t x0, int16_t y0, int16_t x1, int16_t y1);
 
-Rose_RuntimeApiError rose_runtime_base_rectfill(Rose_RuntimeBase* r, uint_fast16_t x0, uint_fast16_t y0, uint_fast16_t x1, uint_fast16_t y1, uint8_t col);
+Rose_RuntimeApiError rose_runtime_base_rectfill(Rose_RuntimeBase* r, int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t col);
 
-Rose_RuntimeApiError rose_runtime_base_rectfill_default(Rose_RuntimeBase* r, uint_fast16_t x0, uint_fast16_t y0, uint_fast16_t x1, uint_fast16_t y1);
+Rose_RuntimeApiError rose_runtime_base_rectfill_default(Rose_RuntimeBase* r, int16_t x0, int16_t y0, int16_t x1, int16_t y1);
 
 Rose_RuntimeApiError rose_runtime_base_cls(Rose_RuntimeBase* r);
 

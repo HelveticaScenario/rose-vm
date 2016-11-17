@@ -192,7 +192,7 @@ void rose_run(Rose_SystemSdl2 *s) {
             Rose_MemoryRange* screen = s->game->base->screen;
             Rose_MemoryIterator it = screen->begin;
             for (; it < screen->end; it = rose_memory_iterator_next(it)) {
-                uint_fast16_t i = it - screen->begin;
+                uint16_t i = it - screen->begin;
                 uint8_t c = *it;
                 pixels[(i * 3) + 0] = *(palette->begin + (c * 3) + 0);
                 pixels[(i * 3) + 1] = *(palette->begin + (c * 3) + 1);
@@ -237,7 +237,7 @@ void rose_free(Rose_SystemSdl2 *s) {
 
 void render(Rose_SystemSdl2 *s) {
     SDL_RenderClear(s->renderer);
-    uint_fast32_t mult = s->widthMult < s->heightMult ? s->widthMult : s->heightMult;
+    uint32_t mult = s->widthMult < s->heightMult ? s->widthMult : s->heightMult;
 
     SDL_Rect rect;
 

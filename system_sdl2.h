@@ -23,12 +23,12 @@ typedef struct {
     SDL_Texture *texture;
 
     void *pixels;
-    int_fast32_t pitch;
-    int_fast32_t windowWidth;
-    int_fast32_t windowHeight;
+    int32_t pitch;
+    int32_t windowWidth;
+    int32_t windowHeight;
     // Image dimensions
-    uint_fast16_t widthMult;
-    uint_fast16_t heightMult;
+    uint16_t widthMult;
+    uint16_t heightMult;
 
     Rose_Cartridge *cartridge;
 
