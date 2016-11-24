@@ -11,9 +11,9 @@ set(LibArchive_LIBRARIES "/usr/local/opt/libarchive/lib/libarchive.a")
 # find_package(LibArchive REQUIRED)
 # pkg_search_module(LibArchive libarchive)
 find_package(ZLIB REQUIRED)
-
-include_directories(${SDL2_INCLUDE_DIR} ${LUA_INCLUDE_DIR} ${ZLIB_INCLUDE_DIRS} "/usr/local/opt/libarchive/include" ${CMAKE_SOURCE_DIR})
-add_executable(rosebud main.c system_sdl2.c cartridge.c runtime_base.c runtime_game.c runtime_api.c)
+file(GLOB_RECURSE SOURCES src/*.c)
+include_directories(${SDL2_INCLUDE_DIR} ${LUA_INCLUDE_DIR} ${ZLIB_INCLUDE_DIRS} "/usr/local/opt/libarchive/include" ${CMAKE_SOURCE_DIR}/include)
+add_executable(rosebud ${SOURCES})
 target_link_libraries(rosebud ${SDL2_LIBRARY} ${LUA_LIBRARIES} ${ZLIB_LIBRARIES}  "/usr/local/opt/libarchive/lib/libarchive.a")
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin" AND CMAKE_SIZEOF_VOID_P EQUAL 8)

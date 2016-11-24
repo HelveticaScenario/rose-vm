@@ -1,14 +1,12 @@
-#ifndef RUNTIME_BASE_H
-#define RUNTIME_BASE_H
+#ifndef ROSE_RT_BASE_H
+#define ROSE_RT_BASE_H
 
 #import "config.h"
 #import "cartridge.h"
 
 typedef struct {
-    short x;
-    short y;
-    short relX;
-    short relY;
+    int16_t x;
+    int16_t y;
     bool leftBtnDown;
     bool middleBtnDown;
     bool rightBtnDown;
@@ -49,7 +47,7 @@ Rose_RuntimeBase* rose_runtime_base_create(Rose_Cartridge* cartridge);
 
 void rose_runtime_base_free(Rose_RuntimeBase* r);
 
-void updateMouseState(Rose_RuntimeBase* r, const Rose_MouseState* mouseState);
+void rose_runtime_base_update_mousestate(Rose_RuntimeBase* r, const Rose_MouseState* mouseState);
 
 void rose_set_bit(uint8_t* trans, uint8_t addr, bool val);
 

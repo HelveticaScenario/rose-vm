@@ -1,10 +1,10 @@
-#ifndef RUNTIME_GAME_H
-#define RUNTIME_GAME_H
+#ifndef ROSE_RT_GAME_H
+#define ROSE_RT_GAME_H
 
 #include "config.h"
 #include "cartridge.h"
-#include "runtime_base.h"
-#include "runtime_api.h"
+#include "rt/rt_base.h"
+#include "rt/lua_api.h"
 
 typedef enum {
     ROSE_RT_GAME_FUN_NOT_FOUND,

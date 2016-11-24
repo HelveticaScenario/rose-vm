@@ -1,4 +1,4 @@
-#include "runtime_base.h"
+#include "rt/rt_base.h"
 
 Rose_MemoryIterator rose_memory_iterator_begin(uint8_t m[]) { return &m[0]; }
 Rose_MemoryIterator rose_memory_iterator_end(uint8_t m[], uint32_t len) { return &m[len]; }
@@ -76,7 +76,7 @@ Rose_RuntimeBase* rose_runtime_base_create(Rose_Cartridge* cartridge) {
 
     Rose_MemoryRange* pointer_positions_range = (Rose_MemoryRange*) malloc(sizeof(Rose_MemoryRange));
     Rose_MemoryIterator beg_pointer_positions = end_camera_offset;
-    Rose_MemoryIterator end_pointer_positions = beg_pointer_positions + (11 * 2 /* 16 bit number */);
+    Rose_MemoryIterator end_pointer_positions = beg_pointer_positions + (11 * 4 /* 16 bit number */);
     pointer_positions_range->begin = beg_pointer_positions;
     pointer_positions_range->end = end_pointer_positions;
 
@@ -116,6 +116,13 @@ void rose_runtime_base_free(Rose_RuntimeBase* r) {
     free(r->pointer_positions);
     free(r->btn_states);
     free(r);
+}
+
+void rose_runtime_base_update_mousestate(Rose_RuntimeBase* r, const Rose_MouseState* mouseState) {
+    int16_t* pointer = (int16_t*) r->pointer_positions;
+    pointer[20] = mouseState->x;
+    pointer[21] = mouseState->y;
+    // printf("%d %d\n", pointer[20], pointer[21]);
 }
 
 void rose_set_bit(uint8_t* arr, uint8_t addr, bool val) {

@@ -1,4 +1,4 @@
-#include "runtime_game.h"
+#include "rt/rt_game.h"
 
 Rose_RuntimeGame* rose_runtime_game_create(Rose_Cartridge* cartridge) {
     Rose_RuntimeGame* r = (Rose_RuntimeGame*) malloc(sizeof(Rose_RuntimeGame));
@@ -25,7 +25,7 @@ bool rose_runtime_game_reload(Rose_RuntimeGame* r) {
     if (r->lua != NULL) lua_close(r->lua);
     r->lua = luaL_newstate();
     luaL_openlibs(r->lua);
-    rose_runtime_register_api(r->lua, r->base);
+    rose_lua_register_api(r->lua, r->base);
     int ret;
     ret = luaL_loadbuffer(r->lua, r->cartridge->code, r->cartridge->code_size, "main");
     if (ret != 0) {

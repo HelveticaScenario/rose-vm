@@ -1,15 +1,12 @@
-#ifndef SYSTEM_SDL2_HPP
-#define SYSTEM_SDL2_HPP
+#ifndef ROSE_SYS_SDL2_H
+#define ROSE_SYS_SDL2_H
 
 #include <SDL.h>
 #include <zlib.h>
 #include <archive.h>
 #include "config.h"
-#include "system_interface.h"
-#include "runtime_base.h"
-#include "runtime_api.h"
-#include "runtime_game.h"
-// #include "runtime_editor.hpp"
+#include "rt/rt_base.h"
+#include "rt/rt_game.h"
 #include "cartridge.h"
 
 typedef struct {
@@ -39,10 +36,10 @@ typedef struct {
     Rose_ScreenMode screenMode;
 } Rose_SystemSdl2;
 
-bool rose_init(Rose_SystemSdl2* s, int argc, char* argv[]);
+bool rose_sys_sdl2_init(Rose_SystemSdl2* s, int argc, char* argv[]);
 
-void rose_run(Rose_SystemSdl2* s);
+void rose_sys_sdl2_run(Rose_SystemSdl2* s);
 
-void rose_free(Rose_SystemSdl2* s);
+void rose_sys_sdl2_free(Rose_SystemSdl2* s);
 
 #endif

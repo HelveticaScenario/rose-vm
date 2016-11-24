@@ -1,5 +1,5 @@
-#ifndef CONFIG_H
-#define CONFIG_H
+#ifndef ROSE_CONFIG_H
+#define ROSE_CONFIG_H
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -8,6 +8,8 @@
 #include <luaconf.h>
 #include <lualib.h>
 #include <luajit.h>
+
+#include "types.h"
 
 #define ROSE_SCREEN_WIDTH 320
 #define ROSE_SCREEN_HEIGHT 180
