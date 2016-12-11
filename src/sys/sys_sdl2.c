@@ -12,6 +12,8 @@ void copyPixels(Rose_SystemSdl2 *s, void *pixels);
 
 uint32_t get_screen_mult(Rose_SystemSdl2 *s);
 
+void make_screen_rect(Rose_SystemSdl2 *s, SDL_Rect* rect);
+
 bool rose_sys_sdl2_init(Rose_SystemSdl2* s, int argc, char* argv[]) {
 
     s->window = NULL;
@@ -53,10 +55,6 @@ bool rose_sys_sdl2_init(Rose_SystemSdl2* s, int argc, char* argv[]) {
         return false;
     }
 
-    SDL_GL_GetDrawableSize(s->window, &(s->windowWidth), &(s->windowHeight));
-    s->widthMult = s->windowWidth / ROSE_SCREEN_WIDTH;
-    s->heightMult = s->windowHeight / ROSE_SCREEN_HEIGHT;
-
     // Create renderer for window
     s->renderer = SDL_CreateRenderer(s->window, -1, SDL_RENDERER_ACCELERATED |
                                               SDL_RENDERER_PRESENTVSYNC);
@@ -64,6 +62,10 @@ bool rose_sys_sdl2_init(Rose_SystemSdl2* s, int argc, char* argv[]) {
         printf("Renderer could not be created! SDL Error: %s\n", SDL_GetError());
         return false;
     }
+
+    SDL_GL_GetDrawableSize(s->window, &(s->windowWidth), &(s->windowHeight));
+    s->widthMult = s->windowWidth / ROSE_SCREEN_WIDTH;
+    s->heightMult = s->windowHeight / ROSE_SCREEN_HEIGHT;
 
     // Initialize renderer color
     SDL_SetRenderDrawColor(s->renderer, 0, 0, 0, 0xFF);
@@ -122,10 +124,14 @@ void rose_sys_sdl2_run(Rose_SystemSdl2 *s) {
     mouseState.middleBtnDown = false;
     mouseState.x1BtnDown = false;
     mouseState.x2BtnDown = false;
+    mouseState.wheel_x = 0;
+    mouseState.wheel_y = 0;
+    SDL_Rect screen_rect;
+    make_screen_rect(s, &screen_rect);
 
     while (!quit) {
         // Handle events on queue
-        while (SDL_PollEvent(&event) != 0) {
+        while (SDL_PollEvent(&event)) {
             switch (event.type) {
                 case SDL_QUIT: {
                     quit = true;
@@ -139,6 +145,7 @@ void rose_sys_sdl2_run(Rose_SystemSdl2 *s) {
                                 SDL_GL_GetDrawableSize(s->window, &(s->windowWidth), &(s->windowHeight));
                                 s->widthMult = s->windowWidth / ROSE_SCREEN_WIDTH;
                                 s->heightMult = s->windowHeight / ROSE_SCREEN_HEIGHT;
+                                make_screen_rect(s, &screen_rect);
                                 printf("%d %d\n", s->widthMult, s->heightMult);
                                 break;
                             }
@@ -158,11 +165,11 @@ void rose_sys_sdl2_run(Rose_SystemSdl2 *s) {
                     break;
                 }
                 case SDL_MOUSEMOTION: {
-                    uint32_t mult = get_screen_mult(s);
+                    int32_t mult = (int32_t) get_screen_mult(s);
                     if (mult == 0) 
                         break;
-                    mouseState.x = event.motion.x / mult;
-                    mouseState.y = event.motion.y / mult;
+                    mouseState.x = (int16_t)((event.motion.x - ((int32_t)screen_rect.x)) / mult);
+                    mouseState.y = (int16_t)((event.motion.y - ((int32_t)screen_rect.y)) / mult);
                     break;
                 }
                 case SDL_MOUSEBUTTONDOWN: {
@@ -211,6 +218,18 @@ void rose_sys_sdl2_run(Rose_SystemSdl2 *s) {
                     break;
                 }
                 case SDL_MOUSEWHEEL: {
+                    int32_t x = event.wheel.x;
+                    int32_t y = event.wheel.y;
+                    if (event.wheel.direction == SDL_MOUSEWHEEL_FLIPPED) {
+                        x *= -1;
+                        y *= -1;
+                        mouseState.wheel_inverted = true;
+                    } else {
+                        mouseState.wheel_inverted = false;
+                    }
+                    mouseState.wheel_x += x;
+                    mouseState.wheel_y += y;
+
                 }
             }
             // User requests quit
@@ -239,6 +258,9 @@ void rose_sys_sdl2_run(Rose_SystemSdl2 *s) {
                 break;
         }
 
+        mouseState.wheel_x = 0;
+        mouseState.wheel_y = 0;
+
         if (lockTexture(s)) {
             uint8_t* pixels = (uint8_t *) s->pixels;
             int pitch = s->pitch;
@@ -257,8 +279,6 @@ void rose_sys_sdl2_run(Rose_SystemSdl2 *s) {
             }
             unlockTexture(s);
         }
-        // TODO: fix this hack for 30fps
-        render(s);
         render(s);
     }
 }
@@ -299,16 +319,18 @@ uint32_t get_screen_mult(Rose_SystemSdl2 *s) {
 
 void render(Rose_SystemSdl2 *s) {
     SDL_RenderClear(s->renderer);
-    uint32_t mult = get_screen_mult(s);
-
     SDL_Rect rect;
-
-    rect.w = ROSE_SCREEN_WIDTH * mult;
-    rect.h = ROSE_SCREEN_HEIGHT * mult;
-    rect.x = (s->windowWidth - rect.w) / 2;
-    rect.y = (s->windowHeight - rect.h) / 2;
+    make_screen_rect(s, &rect);
     SDL_RenderCopy(s->renderer, s->texture, NULL, &rect);
     SDL_RenderPresent(s->renderer);
+}
+
+void make_screen_rect(Rose_SystemSdl2 *s, SDL_Rect* rect) {
+    uint32_t mult = get_screen_mult(s);
+    rect->w = ROSE_SCREEN_WIDTH * mult;
+    rect->h = ROSE_SCREEN_HEIGHT * mult;
+    rect->x = (s->windowWidth - rect->w) / 2;
+    rect->y = (s->windowHeight - rect->h) / 2;
 }
 
 bool lockTexture(Rose_SystemSdl2 *s) {

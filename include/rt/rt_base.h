@@ -12,6 +12,9 @@ typedef struct {
     bool rightBtnDown;
     bool x1BtnDown;
     bool x2BtnDown;
+    int16_t wheel_x;
+    int16_t wheel_y;
+    bool wheel_inverted;
 } Rose_MouseState;
 
 typedef uint8_t* Rose_MemoryIterator;
@@ -35,7 +38,7 @@ typedef struct {
     Rose_MemoryRange* camera_offset;
     Rose_MemoryRange* pointer_positions;
     Rose_MemoryRange* btn_states;
-    
+    Rose_MemoryRange* mouse_wheel;
 } Rose_RuntimeBase;
 
 Rose_MemoryRange* rose_memory_range_create(uint8_t begin[], uint32_t len);

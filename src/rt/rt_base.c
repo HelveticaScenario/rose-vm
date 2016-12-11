@@ -86,6 +86,12 @@ Rose_RuntimeBase* rose_runtime_base_create(Rose_Cartridge* cartridge) {
     btn_states_range->begin = beg_btn_states;
     btn_states_range->end = end_btn_states;
 
+    Rose_MemoryRange* mouse_wheel_range = (Rose_MemoryRange*) malloc(sizeof(Rose_MemoryRange));
+    Rose_MemoryIterator beg_mouse_wheel = end_btn_states;
+    Rose_MemoryIterator end_mouse_wheel = beg_mouse_wheel + 5 /* 2 16 bit ints and one bool */;
+    mouse_wheel_range->begin = beg_mouse_wheel;
+    mouse_wheel_range->end = end_mouse_wheel;
+
     Rose_RuntimeBase* r = (Rose_RuntimeBase*) malloc(sizeof(Rose_RuntimeBase));
     r->cartridge = cartridge;
     r->mem = mem;
@@ -100,6 +106,7 @@ Rose_RuntimeBase* rose_runtime_base_create(Rose_Cartridge* cartridge) {
     r->camera_offset = camera_offset_range;
     r->pointer_positions = pointer_positions_range;
     r->btn_states = btn_states_range;
+    r->mouse_wheel = mouse_wheel_range;
     
     return r;
 }
@@ -115,19 +122,33 @@ void rose_runtime_base_free(Rose_RuntimeBase* r) {
     free(r->camera_offset);
     free(r->pointer_positions);
     free(r->btn_states);
+    free(r->mouse_wheel);
     free(r);
 }
 
 void rose_runtime_base_update_mousestate(Rose_RuntimeBase* r, const Rose_MouseState* mouseState) {
-    int16_t* pointer = (int16_t*) r->pointer_positions;
+    int16_t* pointer = (int16_t*) r->pointer_positions->begin;
     pointer[20] = mouseState->x;
     pointer[21] = mouseState->y;
-    // printf("%d %d\n", pointer[20], pointer[21]);
+
+    rose_set_bit(r->btn_states->begin, ROSE_LEFT_MOUSE_IDX, mouseState->leftBtnDown);
+    rose_set_bit(r->btn_states->begin, ROSE_RIGHT_MOUSE_IDX, mouseState->rightBtnDown);
+    rose_set_bit(r->btn_states->begin, ROSE_MIDDLE_MOUSE_IDX, mouseState->middleBtnDown);
+    rose_set_bit(r->btn_states->begin, ROSE_X1_MOUSE_IDX, mouseState->x1BtnDown);
+    rose_set_bit(r->btn_states->begin, ROSE_X2_MOUSE_IDX, mouseState->x2BtnDown);
+
+    int16_t* wheel_delta = (int16_t*) r->mouse_wheel->begin;
+    wheel_delta[0] = mouseState->wheel_x;
+    wheel_delta[1] = mouseState->wheel_y;
+
+    bool* wheel_inverted = (bool*) (r->mouse_wheel->begin + 4);
+    *wheel_inverted = mouseState->wheel_inverted;
+    // printf("X:%hd Y:%hd\n", mouseState->x, mouseState->y);
 }
 
 void rose_set_bit(uint8_t* arr, uint8_t addr, bool val) {
-    uint8_t idx = addr / 8;
-    uint8_t bit = addr % 8;
+    uint8_t idx = (uint8_t) (addr / 8);
+    uint8_t bit = (uint8_t) (addr % 8);
     if (val) {
         arr[idx] |= 1 << bit;
     } else {
@@ -136,7 +157,7 @@ void rose_set_bit(uint8_t* arr, uint8_t addr, bool val) {
 }
 
 bool rose_get_bit(uint8_t* arr, uint8_t addr) {
-    uint8_t idx = addr / 8;
-    uint8_t bit = addr % 8;
-    return (arr[idx] >> bit) & 1;
+    uint8_t idx = (uint8_t) (addr / 8);
+    uint8_t bit = (uint8_t) (addr % 8);
+    return (bool) ((arr[idx] >> bit) & 1);
 }
