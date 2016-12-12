@@ -5,6 +5,7 @@ void rose_lua_register_api(lua_State* L, Rose_RuntimeBase* r) {
     rose_lua_register_function(L, r, rose_lua_memory_peek, "peek");
     rose_lua_register_function(L, r, rose_lua_memory_memcpy, "memcpy");
     rose_lua_register_function(L, r, rose_lua_memory_memset, "memset");
+    
     rose_lua_register_function(L, r, rose_lua_graphics_pset, "pset");
     rose_lua_register_function(L, r, rose_lua_graphics_pget, "pget");
     rose_lua_register_function(L, r, rose_lua_graphics_palset, "palset");
@@ -15,6 +16,7 @@ void rose_lua_register_api(lua_State* L, Rose_RuntimeBase* r) {
     rose_lua_register_function(L, r, rose_lua_graphics_circ, "circ");
     rose_lua_register_function(L, r, rose_lua_graphics_circfill, "circfill");
     rose_lua_register_function(L, r, rose_lua_graphics_cls, "cls");
+
     rose_lua_register_function(L, r, rose_lua_input_mouse, "mouse");
     rose_lua_register_function(L, r, rose_lua_input_btn, "btn");
     rose_lua_register_function(L, r, rose_lua_input_wheel, "wheel");

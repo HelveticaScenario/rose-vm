@@ -76,3 +76,7 @@ int rose_lua_input_wheel(lua_State* L) {
     }
     return 2;
 }
+
+int rose_lua_input_key(lua_State* L) {
+    return 0;
+}

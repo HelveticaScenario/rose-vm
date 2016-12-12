@@ -11,4 +11,6 @@ int rose_lua_input_btn(lua_State* L);
 
 int rose_lua_input_wheel(lua_State* L);
 
+int rose_lua_input_key(lua_State* L);
+
 #endif

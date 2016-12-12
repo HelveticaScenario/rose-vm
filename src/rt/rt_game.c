@@ -74,3 +74,28 @@ Rose_RuntimeGameError rose_runtime_game_draw(Rose_RuntimeGame* r) {
     lua_getglobal(r->lua, "_draw");
     return rose_pcall(r);
 }
+
+Rose_RuntimeGameError rose_runtime_game_onmouse(Rose_RuntimeGame* r, int16_t x, int16_t y) {
+    lua_getglobal(r->lua, "_onmouse");
+    return rose_pcall(r);
+}
+
+Rose_RuntimeGameError rose_runtime_game_onwheel(Rose_RuntimeGame* r, int16_t x, int16_t y, bool inverted) {
+    lua_getglobal(r->lua, "_onwheel");
+    return rose_pcall(r);
+}
+
+Rose_RuntimeGameError rose_runtime_game_onbtn(Rose_RuntimeGame* r, uint8_t code, bool pressed) {
+    lua_getglobal(r->lua, "_onbtn");
+    return rose_pcall(r);
+}
+
+Rose_RuntimeGameError rose_runtime_game_onkey(Rose_RuntimeGame* r, Rose_KeyCode keycode, bool pressed, bool repeat) {
+    lua_getglobal(r->lua, "_onkey");
+    return rose_pcall(r);
+}
+
+Rose_RuntimeGameError rose_runtime_game_ontouch(Rose_RuntimeGame* r) {
+    lua_getglobal(r->lua, "_ontouch");
+    return rose_pcall(r);
+}
