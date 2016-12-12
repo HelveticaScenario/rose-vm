@@ -130,9 +130,10 @@ void rose_sys_sdl2_run(Rose_SystemSdl2 *s) {
     mouseState.x2BtnDown = false;
     mouseState.wheel_x = 0;
     mouseState.wheel_y = 0;
+    bool wheelChanged = false;
     SDL_Rect screen_rect;
     make_screen_rect(s, &screen_rect);
-
+    Rose_RuntimeGameError err;
     while (!quit) {
         // Handle events on queue
         while (SDL_PollEvent(&event)) {
@@ -167,7 +168,14 @@ void rose_sys_sdl2_run(Rose_SystemSdl2 *s) {
                 case SDL_KEYDOWN: {
                     Rose_KeyCode code = sdl_scancode_to_rose_keycode(event.key.keysym.scancode);
                     rose_runtime_base_update_keystate(s->game->base, code, event.key.state == SDL_PRESSED);
-                    rose_runtime_game_onkey(s->game, code, event.key.state == SDL_PRESSED, event.key.repeat != 0);
+                    err = rose_runtime_game_onkey(s->game, code, event.key.state == SDL_PRESSED, event.key.repeat != 0);
+                    switch (err) {
+                        case ROSE_RT_GAME_CRITICAL_ERR:
+                            quit = true;
+                            break;
+                        default:
+                            break;
+                    }
                     break;
                 }
                 case SDL_MOUSEMOTION: {
@@ -176,47 +184,89 @@ void rose_sys_sdl2_run(Rose_SystemSdl2 *s) {
                         break;
                     mouseState.x = (int16_t)((event.motion.x - ((int32_t)screen_rect.x)) / mult);
                     mouseState.y = (int16_t)((event.motion.y - ((int32_t)screen_rect.y)) / mult);
+                    rose_runtime_base_update_mousestate(s->game->base, &mouseState);
+                    err = rose_runtime_game_onmouse(s->game, mouseState.x, mouseState.y);
+                    switch (err) {
+                        case ROSE_RT_GAME_CRITICAL_ERR:
+                            quit = true;
+                            break;
+                        default:
+                            break;
+                    }
                     break;
                 }
                 case SDL_MOUSEBUTTONDOWN: {
                     switch (event.button.button) {
                         case SDL_BUTTON_LEFT:
                             mouseState.leftBtnDown = true;
+                            rose_runtime_base_update_mousestate(s->game->base, &mouseState);
+                            err = rose_runtime_game_onbtn(s->game, ROSE_LEFT_MOUSE_IDX, true);
                             break;
                         case SDL_BUTTON_RIGHT:
                             mouseState.rightBtnDown = true;
+                            rose_runtime_base_update_mousestate(s->game->base, &mouseState);
+                            err = rose_runtime_game_onbtn(s->game, ROSE_RIGHT_MOUSE_IDX, true);
                             break;
                         case SDL_BUTTON_MIDDLE:
                             mouseState.middleBtnDown = true;
+                            rose_runtime_base_update_mousestate(s->game->base, &mouseState);
+                            err = rose_runtime_game_onbtn(s->game, ROSE_MIDDLE_MOUSE_IDX, true);
                             break;
                         case SDL_BUTTON_X1:
                             mouseState.x1BtnDown = true;
+                            rose_runtime_base_update_mousestate(s->game->base, &mouseState);
+                            err = rose_runtime_game_onbtn(s->game, ROSE_X1_MOUSE_IDX, true);
                             break;
                         case SDL_BUTTON_X2:
                             mouseState.x2BtnDown = true;
+                            rose_runtime_base_update_mousestate(s->game->base, &mouseState);
+                            err = rose_runtime_game_onbtn(s->game, ROSE_X2_MOUSE_IDX, true);
                             break;
                         default:
                             break;
                     }
-                    
+                    switch (err) {
+                        case ROSE_RT_GAME_CRITICAL_ERR:
+                            quit = true;
+                            break;
+                        default:
+                            break;
+                    }
                     break;
                 }
                 case SDL_MOUSEBUTTONUP: {
                     switch (event.button.button) {
                         case SDL_BUTTON_LEFT:
                             mouseState.leftBtnDown = false;
+                            rose_runtime_base_update_mousestate(s->game->base, &mouseState);
+                            err = rose_runtime_game_onbtn(s->game, ROSE_LEFT_MOUSE_IDX, false);
                             break;
                         case SDL_BUTTON_RIGHT:
                             mouseState.rightBtnDown = false;
+                            rose_runtime_base_update_mousestate(s->game->base, &mouseState);
+                            err = rose_runtime_game_onbtn(s->game, ROSE_RIGHT_MOUSE_IDX, false);
                             break;
                         case SDL_BUTTON_MIDDLE:
                             mouseState.middleBtnDown = false;
+                            rose_runtime_base_update_mousestate(s->game->base, &mouseState);
+                            err = rose_runtime_game_onbtn(s->game, ROSE_MIDDLE_MOUSE_IDX, false);
                             break;
                         case SDL_BUTTON_X1:
                             mouseState.x1BtnDown = false;
+                            rose_runtime_base_update_mousestate(s->game->base, &mouseState);
+                            err = rose_runtime_game_onbtn(s->game, ROSE_X1_MOUSE_IDX, false);
                             break;
                         case SDL_BUTTON_X2:
                             mouseState.x2BtnDown = false;
+                            rose_runtime_base_update_mousestate(s->game->base, &mouseState);
+                            err = rose_runtime_game_onbtn(s->game, ROSE_X2_MOUSE_IDX, false);
+                            break;
+                        default:
+                            break;
+                    }
+                    switch (err) {
+                        case ROSE_RT_GAME_CRITICAL_ERR:
+                            quit = true;
                             break;
                         default:
                             break;
@@ -235,7 +285,8 @@ void rose_sys_sdl2_run(Rose_SystemSdl2 *s) {
                     }
                     mouseState.wheel_x += x;
                     mouseState.wheel_y += y;
-
+                    wheelChanged = true;
+                    break;
                 }
             }
             // User requests quit
@@ -243,8 +294,18 @@ void rose_sys_sdl2_run(Rose_SystemSdl2 *s) {
                 quit = true;
             }
         }
-        Rose_RuntimeGameError err;
-        rose_runtime_base_update_mousestate(s->game->base, &mouseState);
+        if (wheelChanged) {
+            rose_runtime_base_update_mousestate(s->game->base, &mouseState);
+            err = rose_runtime_game_onwheel(s->game, mouseState.wheel_x, mouseState.wheel_x, mouseState.wheel_inverted);
+            switch (err) {
+                case ROSE_RT_GAME_CRITICAL_ERR:
+                    quit = true;
+                    break;
+                default:
+                    break;
+            }
+            wheelChanged = false;
+        }
         err = rose_runtime_game_update(s->game);
         switch (err) {
             case ROSE_RT_GAME_CRITICAL_ERR:

@@ -1,5 +1,17 @@
 function _onkey(code, pressed, isrepeat) 
-  print(code, pressed, isrepeat)
+  print("key", code, pressed, isrepeat)
+end
+
+function _onbtn(code, pressed) 
+  print("btn", code, pressed)
+end
+
+function _onmouse(x, y) 
+  print("mouse", x, y)
+end
+
+function _onwheel(x, y, inverted) 
+  print("wheel", x, y, inverted)
 end
 
 function _init()
