@@ -78,5 +78,31 @@ int rose_lua_input_wheel(lua_State* L) {
 }
 
 int rose_lua_input_key(lua_State* L) {
-    return 0;
+    Rose_RuntimeBase* r = rose_lua_base_get_runtime_base(L);
+    if (r == NULL) { return 0; }
+    int nargs = lua_gettop(L) - 1; // first arg will always be self
+    if (nargs >= 1) {
+        uint32_t i;
+        for (i = 0; i < nargs; i++) {
+            const char* type = luaL_typename(L, i + 2);
+            uint8_t idx = lua_tointeger(L, i + 2);
+            if (idx >= ROSE_KEYCODE_UNKNOWN) {
+                idx = ROSE_KEYCODE_UNKNOWN - 1;
+            }
+            bool res;
+            int err = rose_api_input_key(r, idx, &res);
+            switch (err) {
+                case ROSE_API_ERR_OUT_OF_BOUNDS:
+                    return luaL_error(L, "Bad Memory Access");
+                    break;
+                case ROSE_API_ERR_NONE:
+                default:
+                    lua_pushboolean(L, res);
+                    break;
+            }
+        }
+        return nargs;
+    } else {
+        return 0;
+    }
 }

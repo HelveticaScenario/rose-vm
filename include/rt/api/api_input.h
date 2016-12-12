@@ -13,6 +13,6 @@ Rose_RuntimeApiError rose_api_input_wheel(Rose_RuntimeBase* r, int16_t* x, int16
 
 Rose_RuntimeApiError rose_api_input_wheel_inverted(Rose_RuntimeBase* r, bool* res);
 
-Rose_RuntimeApiError rose_api_input_key(Rose_RuntimeBase* r, uint16_t* keycode);
+Rose_RuntimeApiError rose_api_input_key(Rose_RuntimeBase* r, Rose_KeyCode keycode, bool* res);
 
 #endif

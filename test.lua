@@ -1,3 +1,7 @@
+function _onkey(code, pressed, isrepeat) 
+  print(code, pressed, isrepeat)
+end
+
 function _init()
   screen = {}
   for x=1,320 do
@@ -28,5 +32,9 @@ end
 function _draw()
   cls()
   drawscreen()
-  pset(x, y, 5)
+  c = 5
+  if key(key.space) then
+    c = 9
+  end
+  pset(x, y, c)
 end

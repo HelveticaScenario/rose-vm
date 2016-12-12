@@ -24,3 +24,11 @@ Rose_RuntimeApiError rose_api_input_wheel_inverted(Rose_RuntimeBase* r, bool* re
     *res = *inverted;
     return ROSE_API_ERR_NONE;
 }
+
+Rose_RuntimeApiError rose_api_input_key(Rose_RuntimeBase* r, Rose_KeyCode keycode, bool* res) {
+    if (keycode >= ROSE_KEYCODE_UNKNOWN) {
+        return ROSE_API_ERR_OUT_OF_BOUNDS;
+    }
+    *res = rose_get_bit(r->key_states->begin, keycode);
+    return ROSE_API_ERR_NONE;
+}

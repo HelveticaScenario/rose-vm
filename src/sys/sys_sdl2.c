@@ -165,16 +165,9 @@ void rose_sys_sdl2_run(Rose_SystemSdl2 *s) {
                 }
                 case SDL_KEYUP:
                 case SDL_KEYDOWN: {
-                    // SDL_Log("Physical %s key acting as %s key",
-                    //     SDL_GetScancodeName(event.key.keysym.scancode),
-                    //     SDL_GetKeyName(event.key.keysym.sym));
-
-
-                    break;
-                }
-                case SDL_TEXTINPUT: {
-                    /* Add new text onto the end of our text */
-
+                    Rose_KeyCode code = sdl_scancode_to_rose_keycode(event.key.keysym.scancode);
+                    rose_runtime_base_update_keystate(s->game->base, code, event.key.state == SDL_PRESSED);
+                    rose_runtime_game_onkey(s->game, code, event.key.state == SDL_PRESSED, event.key.repeat != 0);
                     break;
                 }
                 case SDL_MOUSEMOTION: {

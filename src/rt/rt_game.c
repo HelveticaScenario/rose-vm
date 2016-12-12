@@ -41,12 +41,12 @@ bool rose_runtime_game_reload(Rose_RuntimeGame* r) {
     return true;
 }
 
-Rose_RuntimeGameError rose_pcall(Rose_RuntimeGame* r) {
-    if (lua_isfunction(r->lua, -1) == 0) {
+Rose_RuntimeGameError rose_pcall(Rose_RuntimeGame* r, uint8_t nargs) {
+    if (lua_isfunction(r->lua, 1) == 0) {
         return ROSE_RT_GAME_FUN_NOT_FOUND;
     }
     //TODO: add stop the world and output error functionality
-    int res = lua_pcall(r->lua, 0, 0, 0);
+    int res = lua_pcall(r->lua, nargs, 0, 0);
     switch (res) {
         case LUA_ERRRUN:
         case LUA_ERRMEM:
@@ -62,40 +62,51 @@ Rose_RuntimeGameError rose_pcall(Rose_RuntimeGame* r) {
 
 Rose_RuntimeGameError rose_runtime_game_init(Rose_RuntimeGame* r) {
     lua_getglobal(r->lua, "_init");
-    return rose_pcall(r);
+    return rose_pcall(r, 0);
 }
 
 Rose_RuntimeGameError rose_runtime_game_update(Rose_RuntimeGame* r) {
     lua_getglobal(r->lua, "_update");
-    return rose_pcall(r);
+    return rose_pcall(r, 0);
 }
 
 Rose_RuntimeGameError rose_runtime_game_draw(Rose_RuntimeGame* r) {
     lua_getglobal(r->lua, "_draw");
-    return rose_pcall(r);
+    return rose_pcall(r, 0);
 }
 
 Rose_RuntimeGameError rose_runtime_game_onmouse(Rose_RuntimeGame* r, int16_t x, int16_t y) {
     lua_getglobal(r->lua, "_onmouse");
-    return rose_pcall(r);
+    lua_pushinteger(r->lua, x);
+    lua_pushinteger(r->lua, y);
+    return rose_pcall(r, 2);
 }
 
 Rose_RuntimeGameError rose_runtime_game_onwheel(Rose_RuntimeGame* r, int16_t x, int16_t y, bool inverted) {
     lua_getglobal(r->lua, "_onwheel");
-    return rose_pcall(r);
+    lua_pushinteger(r->lua, x);
+    lua_pushinteger(r->lua, y);
+    lua_pushboolean(r->lua, inverted);
+    return rose_pcall(r, 3);
 }
 
 Rose_RuntimeGameError rose_runtime_game_onbtn(Rose_RuntimeGame* r, uint8_t code, bool pressed) {
     lua_getglobal(r->lua, "_onbtn");
-    return rose_pcall(r);
+    lua_pushinteger(r->lua, code);
+    lua_pushboolean(r->lua, pressed);
+    return rose_pcall(r, 2);
 }
 
 Rose_RuntimeGameError rose_runtime_game_onkey(Rose_RuntimeGame* r, Rose_KeyCode keycode, bool pressed, bool repeat) {
     lua_getglobal(r->lua, "_onkey");
-    return rose_pcall(r);
+    lua_pushinteger(r->lua, keycode);
+    lua_pushboolean(r->lua, pressed);
+    lua_pushboolean(r->lua, repeat);
+    return rose_pcall(r, 3);
 }
 
 Rose_RuntimeGameError rose_runtime_game_ontouch(Rose_RuntimeGame* r) {
+    // TODO: make this actually do something
     lua_getglobal(r->lua, "_ontouch");
-    return rose_pcall(r);
+    return rose_pcall(r, 0);
 }
