@@ -42,7 +42,8 @@ bool rose_runtime_game_reload(Rose_RuntimeGame* r) {
 }
 
 Rose_RuntimeGameError rose_pcall(Rose_RuntimeGame* r, uint8_t nargs) {
-    if (lua_isfunction(r->lua, 1) == 0) {
+    if (lua_isfunction(r->lua, -1) == 0) {
+        lua_settop(r->lua, 0);
         return ROSE_RT_GAME_FUN_NOT_FOUND;
     }
     //TODO: add stop the world and output error functionality
@@ -52,10 +53,12 @@ Rose_RuntimeGameError rose_pcall(Rose_RuntimeGame* r, uint8_t nargs) {
         case LUA_ERRMEM:
         case LUA_ERRERR:
             printf("%s\n", lua_tostring(r->lua, -1));
+            lua_settop(r->lua, 0);
             return ROSE_RT_GAME_CRITICAL_ERR;
             break;
         case 0:
         default:
+            lua_settop(r->lua, 0);
             return ROSE_RT_GAME_NO_ERR;
     }
 }
