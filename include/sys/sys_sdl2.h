@@ -2,24 +2,24 @@
 #define ROSE_SYS_SDL2_H
 
 #include <SDL.h>
-#include <zlib.h>
-#include <archive.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include "config.h"
 #include "rt/rt_base.h"
 #include "rt/rt_game.h"
-#include "cartridge.h"
+#include "rt/fs/fs_cartridge.h"
 
 typedef struct {
     // The window we'll be rendering to
-    SDL_Window *window;
+    SDL_Window* window;
 
     // The window renderer
-    SDL_Renderer *renderer;
+    SDL_Renderer* renderer;
 
     // The actual hardware texture
-    SDL_Texture *texture;
+    SDL_Texture* texture;
 
-    void *pixels;
+    void* pixels;
     int32_t pitch;
     int32_t windowWidth;
     int32_t windowHeight;
@@ -27,11 +27,11 @@ typedef struct {
     uint16_t widthMult;
     uint16_t heightMult;
 
-    Rose_Cartridge *cartridge;
+    Rose_Cartridge* cartridge;
 
     // RuntimeEditor *editor;
 
-    Rose_RuntimeGame *game;
+    Rose_RuntimeGame* game;
 
     Rose_ScreenMode screenMode;
 } Rose_SystemSdl2;

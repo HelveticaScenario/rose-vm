@@ -2,7 +2,7 @@
 #define ROSE_RT_GAME_H
 
 #include "config.h"
-#include "cartridge.h"
+#include "rt/fs/fs_cartridge.h"
 #include "rt/rt_base.h"
 #include "rt/lua_api.h"
 

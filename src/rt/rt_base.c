@@ -1,7 +1,9 @@
 #include "rt/rt_base.h"
 
 Rose_MemoryIterator rose_memory_iterator_begin(uint8_t m[]) { return &m[0]; }
+
 Rose_MemoryIterator rose_memory_iterator_end(uint8_t m[], uint32_t len) { return &m[len]; }
+
 Rose_MemoryIterator rose_memory_iterator_next(Rose_MemoryIterator i) { return ++i; }
 
 Rose_RuntimeBase* rose_runtime_base_create(Rose_Cartridge* cartridge) {
@@ -28,7 +30,7 @@ Rose_RuntimeBase* rose_runtime_base_create(Rose_Cartridge* cartridge) {
 
     int i;
     for (i = 0; i < ROSE_PALETTE_INDEX_NUM; ++i) {
-        beg_palette_filter[i] = i;
+        beg_palette_filter[i] = (uint8_t) i;
     }
 
     Rose_MemoryRange* palette_transparency_range = (Rose_MemoryRange*) malloc(sizeof(Rose_MemoryRange));
@@ -46,9 +48,9 @@ Rose_RuntimeBase* rose_runtime_base_create(Rose_Cartridge* cartridge) {
     clipping_region_range->end = end_clipping_region;
 
     uint16_t* clipping_region = (uint16_t*) beg_clipping_region;
-    clipping_region[0] = 0; // x0
-    clipping_region[1] = 0; // y0
-    clipping_region[2] = ROSE_SCREEN_WIDTH - 1; // x1
+    clipping_region[0] = 0;                      // x0
+    clipping_region[1] = 0;                      // y0
+    clipping_region[2] = ROSE_SCREEN_WIDTH - 1;  // x1
     clipping_region[3] = ROSE_SCREEN_HEIGHT - 1; // y1
 
     Rose_MemoryIterator pen_color_addr = end_clipping_region;
@@ -62,7 +64,8 @@ Rose_RuntimeBase* rose_runtime_base_create(Rose_Cartridge* cartridge) {
 
     uint16_t* print_cursor = (uint16_t*) beg_print_cursor;
     print_cursor[0] = 0; // x0
-    print_cursor[1] = 0; // y0 // TODO: replace with actual starting position once font size is finalized
+    print_cursor[1] = 0; // y0 // TODO: replace with actual starting position
+    // once font size is finalized
 
     Rose_MemoryRange* camera_offset_range = (Rose_MemoryRange*) malloc(sizeof(Rose_MemoryRange));
     Rose_MemoryIterator beg_camera_offset = end_print_cursor;
@@ -72,7 +75,8 @@ Rose_RuntimeBase* rose_runtime_base_create(Rose_Cartridge* cartridge) {
 
     int16_t* camera_offset = (int16_t*) beg_camera_offset;
     camera_offset[0] = 0; // x0
-    camera_offset[1] = 0; // y0 // TODO: replace with actual starting position once font size is finalized
+    camera_offset[1] = 0; // y0 // TODO: replace with actual starting position
+    // once font size is finalized
 
     Rose_MemoryRange* pointer_positions_range = (Rose_MemoryRange*) malloc(sizeof(Rose_MemoryRange));
     Rose_MemoryIterator beg_pointer_positions = end_camera_offset;
@@ -114,7 +118,7 @@ Rose_RuntimeBase* rose_runtime_base_create(Rose_Cartridge* cartridge) {
     r->btn_states = btn_states_range;
     r->mouse_wheel = mouse_wheel_range;
     r->key_states = key_states_range;
-    
+
     return r;
 }
 

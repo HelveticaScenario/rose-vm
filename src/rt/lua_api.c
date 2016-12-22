@@ -32,7 +32,7 @@ void rose_lua_register_function(lua_State* L, Rose_RuntimeBase* r, lua_CFunction
 void rose_lua_register_key_table(lua_State* L, Rose_RuntimeBase* r) {
     lua_createtable (L, 0, ROSE_KEYCODE_UNKNOWN /* last keycode */);
     Rose_KeyCode keycode;
-    for (keycode = 0; keycode < ROSE_KEYCODE_UNKNOWN; ++keycode) {
+    for (keycode = ROSE_KEYCODE_A; keycode < ROSE_KEYCODE_UNKNOWN; ++keycode) {
         const char * name = rose_keycode_to_string(keycode);
         lua_pushinteger(L, keycode);
         lua_setfield(L, 1, name);

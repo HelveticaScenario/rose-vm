@@ -2,7 +2,7 @@
 #define ROSE_RT_BASE_H
 
 #import "config.h"
-#import "cartridge.h"
+#import "rt/fs/fs_cartridge.h"
 
 typedef enum {
     ROSE_KEYCODE_A = 0,
@@ -289,8 +289,11 @@ typedef struct {
 } Rose_RuntimeBase;
 
 Rose_MemoryRange* rose_memory_range_create(uint8_t begin[], uint32_t len);
+
 Rose_MemoryIterator rose_memory_iterator_begin(uint8_t m[]);
+
 Rose_MemoryIterator rose_memory_iterator_end(uint8_t m[], uint32_t len);
+
 Rose_MemoryIterator rose_memory_iterator_next(Rose_MemoryIterator i);
 
 Rose_RuntimeBase* rose_runtime_base_create(Rose_Cartridge* cartridge);

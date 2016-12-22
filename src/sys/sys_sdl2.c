@@ -1,18 +1,18 @@
 #include "sys/sys_sdl2.h"
 
 // Renders screen
-void render(Rose_SystemSdl2 *s);
+void render(Rose_SystemSdl2* s);
 
 // Pixel manipulators
-bool lockTexture(Rose_SystemSdl2 *s);
+bool lockTexture(Rose_SystemSdl2* s);
 
-bool unlockTexture(Rose_SystemSdl2 *s);
+bool unlockTexture(Rose_SystemSdl2* s);
 
-void copyPixels(Rose_SystemSdl2 *s, void *pixels);
+void copyPixels(Rose_SystemSdl2* s, void* pixels);
 
-uint32_t get_screen_mult(Rose_SystemSdl2 *s);
+uint32_t get_screen_mult(Rose_SystemSdl2* s);
 
-void make_screen_rect(Rose_SystemSdl2 *s, SDL_Rect* rect);
+void make_screen_rect(Rose_SystemSdl2* s, SDL_Rect* rect);
 
 SDL_Scancode rose_keycode_to_sdl_scancode(Rose_KeyCode key);
 
@@ -34,8 +34,7 @@ bool rose_sys_sdl2_init(Rose_SystemSdl2* s, int argc, char* argv[]) {
     s->widthMult = 0;
     s->heightMult = 0;
 
-
-        // Initialize SDL
+    // Initialize SDL
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         printf("SDL could not initialize! SDL Error: %s\n", SDL_GetError());
         return false;
@@ -60,45 +59,41 @@ bool rose_sys_sdl2_init(Rose_SystemSdl2* s, int argc, char* argv[]) {
     }
 
     // Create renderer for window
-    s->renderer = SDL_CreateRenderer(s->window, -1, SDL_RENDERER_ACCELERATED |
-                                              SDL_RENDERER_PRESENTVSYNC);
+    s->renderer = SDL_CreateRenderer(s->window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     if (s->renderer == NULL) {
         printf("Renderer could not be created! SDL Error: %s\n", SDL_GetError());
         return false;
     }
 
     SDL_GL_GetDrawableSize(s->window, &(s->windowWidth), &(s->windowHeight));
-    s->widthMult = s->windowWidth / ROSE_SCREEN_WIDTH;
-    s->heightMult = s->windowHeight / ROSE_SCREEN_HEIGHT;
+    s->widthMult = (uint16_t) (s->windowWidth / ROSE_SCREEN_WIDTH);
+    s->heightMult = (uint16_t) (s->windowHeight / ROSE_SCREEN_HEIGHT);
 
     // Initialize renderer color
     SDL_SetRenderDrawColor(s->renderer, 0, 0, 0, 0xFF);
 
     // Create uninitialized texture
-    s->texture = SDL_CreateTexture(s->renderer, SDL_PIXELFORMAT_RGB24,
-                                SDL_TEXTUREACCESS_STREAMING, ROSE_SCREEN_WIDTH,
-                                ROSE_SCREEN_HEIGHT);
+    s->texture = SDL_CreateTexture(s->renderer, SDL_PIXELFORMAT_RGB24, SDL_TEXTUREACCESS_STREAMING, ROSE_SCREEN_WIDTH, ROSE_SCREEN_HEIGHT);
     if (s->texture == NULL) {
         printf("Unable to create blank texture! SDL Error: %s\n", SDL_GetError());
         return false;
     }
 
     s->cartridge = rose_cartridge_create();
-    FILE * f = fopen ("/Users/contrarian/Documents/Play/Rosebud/test.lua", "rb");
+    FILE* f = fopen("/Users/contrarian/Documents/Play/Rosebud/test.lua", "rb");
 
     if (f) {
         free(s->cartridge->code); // free previous code buffer
 
-        fseek (f, 0, SEEK_END);
-        s->cartridge->code_size = ftell (f);
-        fseek (f, 0, SEEK_SET);
-        s->cartridge->code = malloc (s->cartridge->code_size + 1);
-        if (s->cartridge->code)
-        {
-            fread (s->cartridge->code, 1, s->cartridge->code_size, f);
+        fseek(f, 0, SEEK_END);
+        s->cartridge->code_size = (size_t) ftell(f);
+        fseek(f, 0, SEEK_SET);
+        s->cartridge->code = malloc(s->cartridge->code_size + 1);
+        if (s->cartridge->code) {
+            fread(s->cartridge->code, 1, s->cartridge->code_size, f);
             s->cartridge->code[s->cartridge->code_size] = '\0';
         }
-        fclose (f);
+        fclose(f);
     }
 
     s->cartridge->data[0] = 2;
@@ -106,10 +101,12 @@ bool rose_sys_sdl2_init(Rose_SystemSdl2* s, int argc, char* argv[]) {
     Rose_RuntimeGameError err = rose_runtime_game_init(s->game);
     SDL_ShowCursor(SDL_DISABLE);
 
+    char* base_path = SDL_GetPrefPath("", "Rosebud");
+
     return true;
 }
 
-void rose_sys_sdl2_run(Rose_SystemSdl2 *s) {
+void rose_sys_sdl2_run(Rose_SystemSdl2* s) {
     Uint32 windowID = SDL_GetWindowID(s->window);
 
     // Main loop flag
@@ -148,8 +145,8 @@ void rose_sys_sdl2_run(Rose_SystemSdl2 *s) {
 
                             case SDL_WINDOWEVENT_SIZE_CHANGED: {
                                 SDL_GL_GetDrawableSize(s->window, &(s->windowWidth), &(s->windowHeight));
-                                s->widthMult = s->windowWidth / ROSE_SCREEN_WIDTH;
-                                s->heightMult = s->windowHeight / ROSE_SCREEN_HEIGHT;
+                                s->widthMult = (uint16_t) (s->windowWidth / ROSE_SCREEN_WIDTH);
+                                s->heightMult = (uint16_t) (s->windowHeight / ROSE_SCREEN_HEIGHT);
                                 make_screen_rect(s, &screen_rect);
                                 printf("%d %d\n", s->widthMult, s->heightMult);
                                 break;
@@ -180,10 +177,10 @@ void rose_sys_sdl2_run(Rose_SystemSdl2 *s) {
                 }
                 case SDL_MOUSEMOTION: {
                     int32_t mult = (int32_t) get_screen_mult(s);
-                    if (mult == 0) 
+                    if (mult == 0)
                         break;
-                    mouseState.x = (int16_t)((event.motion.x - ((int32_t)screen_rect.x)) / mult);
-                    mouseState.y = (int16_t)((event.motion.y - ((int32_t)screen_rect.y)) / mult);
+                    mouseState.x = (int16_t) ((event.motion.x - ((int32_t) screen_rect.x)) / mult);
+                    mouseState.y = (int16_t) ((event.motion.y - ((int32_t) screen_rect.y)) / mult);
                     rose_runtime_base_update_mousestate(s->game->base, &mouseState);
                     err = rose_runtime_game_onmouse(s->game, mouseState.x, mouseState.y);
                     switch (err) {
@@ -315,7 +312,6 @@ void rose_sys_sdl2_run(Rose_SystemSdl2 *s) {
                 break;
         }
 
-       
         err = rose_runtime_game_draw(s->game);
         switch (err) {
             case ROSE_RT_GAME_CRITICAL_ERR:
@@ -329,7 +325,7 @@ void rose_sys_sdl2_run(Rose_SystemSdl2 *s) {
         mouseState.wheel_y = 0;
 
         if (lockTexture(s)) {
-            uint8_t* pixels = (uint8_t *) s->pixels;
+            uint8_t* pixels = (uint8_t*) s->pixels;
             int pitch = s->pitch;
 
             int pixelCount = (pitch) * ROSE_SCREEN_HEIGHT;
@@ -338,7 +334,7 @@ void rose_sys_sdl2_run(Rose_SystemSdl2 *s) {
             Rose_MemoryRange* screen = s->game->base->screen;
             Rose_MemoryIterator it = screen->begin;
             for (; it < screen->end; it = rose_memory_iterator_next(it)) {
-                uint16_t i = it - screen->begin;
+                uint16_t i = (uint16_t) (it - screen->begin);
                 uint8_t c = *it;
                 pixels[(i * 3) + 0] = *(palette->begin + (c * 3) + 0);
                 pixels[(i * 3) + 1] = *(palette->begin + (c * 3) + 1);
@@ -350,7 +346,7 @@ void rose_sys_sdl2_run(Rose_SystemSdl2 *s) {
     }
 }
 
-void rose_sys_sdl2_free(Rose_SystemSdl2 *s) {
+void rose_sys_sdl2_free(Rose_SystemSdl2* s) {
     if (s->texture != NULL) {
         SDL_DestroyTexture(s->texture);
         s->texture = NULL;
@@ -380,11 +376,11 @@ void rose_sys_sdl2_free(Rose_SystemSdl2 *s) {
     SDL_Quit();
 }
 
-uint32_t get_screen_mult(Rose_SystemSdl2 *s) {
+uint32_t get_screen_mult(Rose_SystemSdl2* s) {
     return s->widthMult < s->heightMult ? s->widthMult : s->heightMult;
 }
 
-void render(Rose_SystemSdl2 *s) {
+void render(Rose_SystemSdl2* s) {
     SDL_RenderClear(s->renderer);
     SDL_Rect rect;
     make_screen_rect(s, &rect);
@@ -392,7 +388,7 @@ void render(Rose_SystemSdl2 *s) {
     SDL_RenderPresent(s->renderer);
 }
 
-void make_screen_rect(Rose_SystemSdl2 *s, SDL_Rect* rect) {
+void make_screen_rect(Rose_SystemSdl2* s, SDL_Rect* rect) {
     uint32_t mult = get_screen_mult(s);
     rect->w = ROSE_SCREEN_WIDTH * mult;
     rect->h = ROSE_SCREEN_HEIGHT * mult;
@@ -400,7 +396,7 @@ void make_screen_rect(Rose_SystemSdl2 *s, SDL_Rect* rect) {
     rect->y = (s->windowHeight - rect->h) / 2;
 }
 
-bool lockTexture(Rose_SystemSdl2 *s) {
+bool lockTexture(Rose_SystemSdl2* s) {
     // Texture is already locked
     if (s->pixels != NULL) {
         printf("Texture is already locked!\n");
@@ -415,7 +411,7 @@ bool lockTexture(Rose_SystemSdl2 *s) {
     return true;
 }
 
-bool unlockTexture(Rose_SystemSdl2 *s) {
+bool unlockTexture(Rose_SystemSdl2* s) {
     // Texture is not locked
     if (s->pixels == NULL) {
         printf("Texture is not locked!\n");
@@ -429,7 +425,7 @@ bool unlockTexture(Rose_SystemSdl2 *s) {
     return true;
 }
 
-void copyPixels(Rose_SystemSdl2 *s, void *newPixels) {
+void copyPixels(Rose_SystemSdl2* s, void* newPixels) {
     // Texture is locked
     if (s->pixels != NULL) {
         // Copy to locked pixels
