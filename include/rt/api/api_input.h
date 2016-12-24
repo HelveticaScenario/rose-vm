@@ -5,14 +5,14 @@
 #include "rt/api/api_memory.h"
 #include "rt/rt_base.h"
 
-Rose_RuntimeApiError rose_api_input_mouse(Rose_RuntimeBase* r, int16_t* x, int16_t* y);
+rose_runtime_api_error rose_api_input_mouse(rose_runtime_base* r, int16_t* x, int16_t* y);
 
-Rose_RuntimeApiError rose_api_input_btn(Rose_RuntimeBase* r, uint8_t idx, bool* res);
+rose_runtime_api_error rose_api_input_btn(rose_runtime_base* r, uint8_t idx, bool* res);
 
-Rose_RuntimeApiError rose_api_input_wheel(Rose_RuntimeBase* r, int16_t* x, int16_t* y);
+rose_runtime_api_error rose_api_input_wheel(rose_runtime_base* r, int16_t* x, int16_t* y);
 
-Rose_RuntimeApiError rose_api_input_wheel_inverted(Rose_RuntimeBase* r, bool* res);
+rose_runtime_api_error rose_api_input_wheel_inverted(rose_runtime_base* r, bool* res);
 
-Rose_RuntimeApiError rose_api_input_key(Rose_RuntimeBase* r, Rose_KeyCode keycode, bool* res);
+rose_runtime_api_error rose_api_input_key(rose_runtime_base* r, rose_keycode keycode, bool* res);
 
 #endif

@@ -1,30 +1,37 @@
+#include <rt/fs/fs_base.h>
+#include <types.h>
 #include "rt/rt_base.h"
 
-Rose_MemoryIterator rose_memory_iterator_begin(uint8_t m[]) { return &m[0]; }
+rose_memory_iterator rose_memory_iterator_begin(uint8_t m[]) { return &m[0]; }
 
-Rose_MemoryIterator rose_memory_iterator_end(uint8_t m[], uint32_t len) { return &m[len]; }
+rose_memory_iterator rose_memory_iterator_end(uint8_t m[], uint32_t len) { return &m[len]; }
 
-Rose_MemoryIterator rose_memory_iterator_next(Rose_MemoryIterator i) { return ++i; }
+rose_memory_iterator rose_memory_iterator_next(rose_memory_iterator i) { return ++i; }
 
-Rose_RuntimeBase* rose_runtime_base_create(Rose_Cartridge* cartridge) {
+rose_runtime_base* rose_runtime_base_create(rose_fs* fs) {
+    if (fs == NULL) {
+        fprintf(stderr, "tried to create runtime base with null fs\n");
+        exit(1);
+    }
+
     uint8_t* mem = (uint8_t*) malloc(ROSE_MEMORY_SIZE);
     memset(mem, 0, ROSE_MEMORY_SIZE);
 
-    Rose_MemoryRange* screen_range = (Rose_MemoryRange*) malloc(sizeof(Rose_MemoryRange));
-    Rose_MemoryIterator end = rose_memory_iterator_end(mem, ROSE_MEMORY_SIZE);
-    Rose_MemoryIterator beg_screen = end - (ROSE_SCREEN_SIZE);
+    rose_memory_range* screen_range = (rose_memory_range*) malloc(sizeof(rose_memory_range));
+    rose_memory_iterator end = rose_memory_iterator_end(mem, ROSE_MEMORY_SIZE);
+    rose_memory_iterator beg_screen = end - (ROSE_SCREEN_SIZE);
     screen_range->begin = beg_screen;
     screen_range->end = end;
 
-    Rose_MemoryRange* palette_range = (Rose_MemoryRange*) malloc(sizeof(Rose_MemoryRange));
-    Rose_MemoryIterator beg_palette = end - ROSE_RUNTIME_RESERVED_MEMORY_SIZE - ROSE_PALETTE_SIZE;
-    Rose_MemoryIterator end_palette = beg_palette + ROSE_PALETTE_SIZE;
+    rose_memory_range* palette_range = (rose_memory_range*) malloc(sizeof(rose_memory_range));
+    rose_memory_iterator beg_palette = end - ROSE_RUNTIME_RESERVED_MEMORY_SIZE - ROSE_PALETTE_SIZE;
+    rose_memory_iterator end_palette = beg_palette + ROSE_PALETTE_SIZE;
     palette_range->begin = beg_palette;
     palette_range->end = end_palette;
 
-    Rose_MemoryRange* palette_filter_range = (Rose_MemoryRange*) malloc(sizeof(Rose_MemoryRange));
-    Rose_MemoryIterator beg_palette_filter = end_palette;
-    Rose_MemoryIterator end_palette_filter = beg_palette_filter + ROSE_PALETTE_INDEX_NUM;
+    rose_memory_range* palette_filter_range = (rose_memory_range*) malloc(sizeof(rose_memory_range));
+    rose_memory_iterator beg_palette_filter = end_palette;
+    rose_memory_iterator end_palette_filter = beg_palette_filter + ROSE_PALETTE_INDEX_NUM;
     palette_filter_range->begin = beg_palette_filter;
     palette_filter_range->end = end_palette_filter;
 
@@ -33,17 +40,17 @@ Rose_RuntimeBase* rose_runtime_base_create(Rose_Cartridge* cartridge) {
         beg_palette_filter[i] = (uint8_t) i;
     }
 
-    Rose_MemoryRange* palette_transparency_range = (Rose_MemoryRange*) malloc(sizeof(Rose_MemoryRange));
-    Rose_MemoryIterator beg_palette_transparency = end_palette_filter;
-    Rose_MemoryIterator end_palette_transparency = beg_palette_transparency + (ROSE_PALETTE_INDEX_NUM / 8);
+    rose_memory_range* palette_transparency_range = (rose_memory_range*) malloc(sizeof(rose_memory_range));
+    rose_memory_iterator beg_palette_transparency = end_palette_filter;
+    rose_memory_iterator end_palette_transparency = beg_palette_transparency + (ROSE_PALETTE_INDEX_NUM / 8);
     palette_transparency_range->begin = beg_palette_transparency;
     palette_transparency_range->end = end_palette_transparency;
 
     rose_set_bit(beg_palette_transparency, 0, true);
 
-    Rose_MemoryRange* clipping_region_range = (Rose_MemoryRange*) malloc(sizeof(Rose_MemoryRange));
-    Rose_MemoryIterator beg_clipping_region = end_palette_transparency;
-    Rose_MemoryIterator end_clipping_region = beg_clipping_region + 8;
+    rose_memory_range* clipping_region_range = (rose_memory_range*) malloc(sizeof(rose_memory_range));
+    rose_memory_iterator beg_clipping_region = end_palette_transparency;
+    rose_memory_iterator end_clipping_region = beg_clipping_region + 8;
     clipping_region_range->begin = beg_clipping_region;
     clipping_region_range->end = end_clipping_region;
 
@@ -53,12 +60,12 @@ Rose_RuntimeBase* rose_runtime_base_create(Rose_Cartridge* cartridge) {
     clipping_region[2] = ROSE_SCREEN_WIDTH - 1;  // x1
     clipping_region[3] = ROSE_SCREEN_HEIGHT - 1; // y1
 
-    Rose_MemoryIterator pen_color_addr = end_clipping_region;
+    rose_memory_iterator pen_color_addr = end_clipping_region;
     *pen_color_addr = 6;
 
-    Rose_MemoryRange* print_cursor_range = (Rose_MemoryRange*) malloc(sizeof(Rose_MemoryRange));
-    Rose_MemoryIterator beg_print_cursor = pen_color_addr + 1;
-    Rose_MemoryIterator end_print_cursor = beg_print_cursor + 4;
+    rose_memory_range* print_cursor_range = (rose_memory_range*) malloc(sizeof(rose_memory_range));
+    rose_memory_iterator beg_print_cursor = pen_color_addr + 1;
+    rose_memory_iterator end_print_cursor = beg_print_cursor + 4;
     print_cursor_range->begin = beg_print_cursor;
     print_cursor_range->end = end_print_cursor;
 
@@ -67,9 +74,9 @@ Rose_RuntimeBase* rose_runtime_base_create(Rose_Cartridge* cartridge) {
     print_cursor[1] = 0; // y0 // TODO: replace with actual starting position
     // once font size is finalized
 
-    Rose_MemoryRange* camera_offset_range = (Rose_MemoryRange*) malloc(sizeof(Rose_MemoryRange));
-    Rose_MemoryIterator beg_camera_offset = end_print_cursor;
-    Rose_MemoryIterator end_camera_offset = beg_camera_offset + 4;
+    rose_memory_range* camera_offset_range = (rose_memory_range*) malloc(sizeof(rose_memory_range));
+    rose_memory_iterator beg_camera_offset = end_print_cursor;
+    rose_memory_iterator end_camera_offset = beg_camera_offset + 4;
     camera_offset_range->begin = beg_camera_offset;
     camera_offset_range->end = end_camera_offset;
 
@@ -78,32 +85,33 @@ Rose_RuntimeBase* rose_runtime_base_create(Rose_Cartridge* cartridge) {
     camera_offset[1] = 0; // y0 // TODO: replace with actual starting position
     // once font size is finalized
 
-    Rose_MemoryRange* pointer_positions_range = (Rose_MemoryRange*) malloc(sizeof(Rose_MemoryRange));
-    Rose_MemoryIterator beg_pointer_positions = end_camera_offset;
-    Rose_MemoryIterator end_pointer_positions = beg_pointer_positions + (11 * 4 /* 16 bit number */);
+    rose_memory_range* pointer_positions_range = (rose_memory_range*) malloc(sizeof(rose_memory_range));
+    rose_memory_iterator beg_pointer_positions = end_camera_offset;
+    rose_memory_iterator end_pointer_positions = beg_pointer_positions + (11 * 4 /* 16 bit number */);
     pointer_positions_range->begin = beg_pointer_positions;
     pointer_positions_range->end = end_pointer_positions;
 
-    Rose_MemoryRange* btn_states_range = (Rose_MemoryRange*) malloc(sizeof(Rose_MemoryRange));
-    Rose_MemoryIterator beg_btn_states = end_pointer_positions;
-    Rose_MemoryIterator end_btn_states = beg_btn_states + 4 /* 32 bit fields */;
+    rose_memory_range* btn_states_range = (rose_memory_range*) malloc(sizeof(rose_memory_range));
+    rose_memory_iterator beg_btn_states = end_pointer_positions;
+    rose_memory_iterator end_btn_states = beg_btn_states + 4 /* 32 bit fields */;
     btn_states_range->begin = beg_btn_states;
     btn_states_range->end = end_btn_states;
 
-    Rose_MemoryRange* mouse_wheel_range = (Rose_MemoryRange*) malloc(sizeof(Rose_MemoryRange));
-    Rose_MemoryIterator beg_mouse_wheel = end_btn_states;
-    Rose_MemoryIterator end_mouse_wheel = beg_mouse_wheel + 5 /* 2 16 bit ints and one bool */;
+    rose_memory_range* mouse_wheel_range = (rose_memory_range*) malloc(sizeof(rose_memory_range));
+    rose_memory_iterator beg_mouse_wheel = end_btn_states;
+    rose_memory_iterator end_mouse_wheel = beg_mouse_wheel + 5 /* 2 16 bit ints and one bool */;
     mouse_wheel_range->begin = beg_mouse_wheel;
     mouse_wheel_range->end = end_mouse_wheel;
 
-    Rose_MemoryRange* key_states_range = (Rose_MemoryRange*) malloc(sizeof(Rose_MemoryRange));
-    Rose_MemoryIterator beg_key_states = end_btn_states;
-    Rose_MemoryIterator end_key_states = beg_key_states + 30 /* 240 bit fields */;
+    rose_memory_range* key_states_range = (rose_memory_range*) malloc(sizeof(rose_memory_range));
+    rose_memory_iterator beg_key_states = end_btn_states;
+    rose_memory_iterator end_key_states = beg_key_states + 30 /* 240 bit fields */;
     key_states_range->begin = beg_key_states;
     key_states_range->end = end_key_states;
 
-    Rose_RuntimeBase* r = (Rose_RuntimeBase*) malloc(sizeof(Rose_RuntimeBase));
-    r->cartridge = cartridge;
+    rose_runtime_base* r = (rose_runtime_base*) malloc(sizeof(rose_runtime_base));
+    r->lua = NULL;
+    r->fs = fs;
     r->mem = mem;
     r->mem_size = ROSE_MEMORY_SIZE;
     r->screen = screen_range;
@@ -118,11 +126,60 @@ Rose_RuntimeBase* rose_runtime_base_create(Rose_Cartridge* cartridge) {
     r->btn_states = btn_states_range;
     r->mouse_wheel = mouse_wheel_range;
     r->key_states = key_states_range;
-
     return r;
 }
 
-void rose_runtime_base_free(Rose_RuntimeBase* r) {
+bool rose_runtime_base_clear(rose_runtime_base* r) {
+    memset(r->mem, 0, r->mem_size);
+    if (r->fs->cart->data_size > (r->mem_size - ROSE_RUNTIME_RESERVED_MEMORY_SIZE)) {
+        fprintf(stderr, "ERROR: tried to reload runtime and cartridge memory size was bigger than available memory size\n");
+        exit(1);
+    }
+    if (r->lua != NULL) lua_close(r->lua);
+    r->lua = luaL_newstate();
+    luaL_openlibs(r->lua);
+    rose_lua_register_api(r->lua, r);
+}
+
+bool rose_runtime_base_load_run_main(rose_runtime_base* r) {
+    memcpy(r->mem, r->fs->cart->data, r->fs->cart->data_size);
+    rose_cartridge* cart = r->fs->cart;
+    rose_file_info* main = NULL;
+    int i;
+    for (i = 0; i < cart->code_size; i++) {
+        rose_file_info* info = cart->code[i];
+        if (strcmp(info->name, "main.lua") == 0) {
+            main = info;
+            break;
+        }
+    }
+    if (main == NULL) {
+        return false;
+    }
+    size_t main_size;
+    uint8_t* main_code;
+    if (r->fs->getfile == NULL) {
+        return false;
+    }
+    r->fs->getfile(main->path, &main_code, &main_size);
+    int ret = luaL_loadbuffer(r->lua, (const char*) main_code, main_size, "main");
+    free(main_code);
+    if (ret != 0) {
+        fprintf(stderr, "%s\r\n", luaL_checkstring(r->lua, -1));
+        return false;
+    }
+    ret = lua_pcall(r->lua, 0, LUA_MULTRET, 0);
+    if (ret != 0) {
+        fprintf(stderr, "%s\r\n", luaL_checkstring(r->lua, -1));
+        return false;
+    }
+
+    return true;
+}
+
+void rose_runtime_base_free(rose_runtime_base* r) {
+    lua_close(r->lua);
+    // dont free fs, managed by system layer
     free(r->mem);
     free(r->screen);
     free(r->palette);
@@ -138,27 +195,27 @@ void rose_runtime_base_free(Rose_RuntimeBase* r) {
     free(r);
 }
 
-void rose_runtime_base_update_mousestate(Rose_RuntimeBase* r, const Rose_MouseState* mouseState) {
+void rose_runtime_base_update_mousestate(rose_runtime_base* r, const rose_mousestate* mousestate) {
     int16_t* pointer = (int16_t*) r->pointer_positions->begin;
-    pointer[20] = mouseState->x;
-    pointer[21] = mouseState->y;
+    pointer[20] = mousestate->x;
+    pointer[21] = mousestate->y;
 
-    rose_set_bit(r->btn_states->begin, ROSE_LEFT_MOUSE_IDX, mouseState->leftBtnDown);
-    rose_set_bit(r->btn_states->begin, ROSE_RIGHT_MOUSE_IDX, mouseState->rightBtnDown);
-    rose_set_bit(r->btn_states->begin, ROSE_MIDDLE_MOUSE_IDX, mouseState->middleBtnDown);
-    rose_set_bit(r->btn_states->begin, ROSE_X1_MOUSE_IDX, mouseState->x1BtnDown);
-    rose_set_bit(r->btn_states->begin, ROSE_X2_MOUSE_IDX, mouseState->x2BtnDown);
+    rose_set_bit(r->btn_states->begin, ROSE_LEFT_MOUSE_IDX, mousestate->left_btn_down);
+    rose_set_bit(r->btn_states->begin, ROSE_RIGHT_MOUSE_IDX, mousestate->right_btn_down);
+    rose_set_bit(r->btn_states->begin, ROSE_MIDDLE_MOUSE_IDX, mousestate->middle_btn_down);
+    rose_set_bit(r->btn_states->begin, ROSE_X1_MOUSE_IDX, mousestate->x1_btn_down);
+    rose_set_bit(r->btn_states->begin, ROSE_X2_MOUSE_IDX, mousestate->x2_btn_down);
 
     int16_t* wheel_delta = (int16_t*) r->mouse_wheel->begin;
-    wheel_delta[0] = mouseState->wheel_x;
-    wheel_delta[1] = mouseState->wheel_y;
+    wheel_delta[0] = mousestate->wheel_x;
+    wheel_delta[1] = mousestate->wheel_y;
 
     bool* wheel_inverted = (bool*) (r->mouse_wheel->begin + 4);
-    *wheel_inverted = mouseState->wheel_inverted;
-    // printf("X:%hd Y:%hd\n", mouseState->x, mouseState->y);
+    *wheel_inverted = mousestate->wheel_inverted;
+    // printf("X:%hd Y:%hd\n", mousestate->x, mousestate->y);
 }
 
-void rose_runtime_base_update_keystate(Rose_RuntimeBase* r, Rose_KeyCode keycode, bool pressed) {
+void rose_runtime_base_update_keystate(rose_runtime_base* r, rose_keycode keycode, bool pressed) {
     if (keycode < ROSE_KEYCODE_UNKNOWN) {
         rose_set_bit(r->key_states->begin, keycode, pressed);
     }
@@ -180,7 +237,7 @@ bool rose_get_bit(uint8_t* arr, uint8_t addr) {
     return (bool) ((arr[idx] >> bit) & 1);
 }
 
-const char* rose_keycode_to_string(Rose_KeyCode key) {
+const char* rose_keycode_to_string(rose_keycode key) {
     switch (key) {
         case ROSE_KEYCODE_A:
             return "a";

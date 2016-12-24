@@ -8,10 +8,10 @@
 #include "rt/lua_api/lua_graphics.h"
 #include "rt/lua_api/lua_input.h"
 
-void rose_lua_register_api(lua_State* L, Rose_RuntimeBase* r);
+void rose_lua_register_api(lua_State* L, rose_runtime_base* r);
 
-void rose_lua_register_function(lua_State* L, Rose_RuntimeBase* r, lua_CFunction fun, const char* name);
+void rose_lua_register_function(lua_State* L, rose_runtime_base* r, lua_CFunction fun, const char* name);
 
-void rose_lua_register_key_table(lua_State* L, Rose_RuntimeBase* r);
+void rose_lua_register_key_table(lua_State* L, rose_runtime_base* r);
 
 #endif

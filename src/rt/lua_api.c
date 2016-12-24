@@ -1,6 +1,6 @@
 #include "rt/lua_api.h"
 
-void rose_lua_register_api(lua_State* L, Rose_RuntimeBase* r) {
+void rose_lua_register_api(lua_State* L, rose_runtime_base* r) {
     rose_lua_register_function(L, r, rose_lua_memory_poke, "poke");
     rose_lua_register_function(L, r, rose_lua_memory_peek, "peek");
     rose_lua_register_function(L, r, rose_lua_memory_memcpy, "memcpy");
@@ -23,15 +23,15 @@ void rose_lua_register_api(lua_State* L, Rose_RuntimeBase* r) {
     rose_lua_register_key_table(L, r);
 }
 
-void rose_lua_register_function(lua_State* L, Rose_RuntimeBase* r, lua_CFunction fun, const char* name) {
+void rose_lua_register_function(lua_State* L, rose_runtime_base* r, lua_CFunction fun, const char* name) {
     lua_pushlightuserdata(L, r);
     lua_pushcclosure(L, fun, 1);
     lua_setglobal(L, name);
 }
 
-void rose_lua_register_key_table(lua_State* L, Rose_RuntimeBase* r) {
+void rose_lua_register_key_table(lua_State* L, rose_runtime_base* r) {
     lua_createtable (L, 0, ROSE_KEYCODE_UNKNOWN /* last keycode */);
-    Rose_KeyCode keycode;
+    rose_keycode keycode;
     for (keycode = ROSE_KEYCODE_A; keycode < ROSE_KEYCODE_UNKNOWN; ++keycode) {
         const char * name = rose_keycode_to_string(keycode);
         lua_pushinteger(L, keycode);

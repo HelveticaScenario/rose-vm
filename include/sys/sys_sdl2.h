@@ -7,7 +7,8 @@
 #include "config.h"
 #include "rt/rt_base.h"
 #include "rt/rt_game.h"
-#include "rt/fs/fs_cartridge.h"
+#include "rt/fs/fs_base.h"
+#include "sys/sys_key_conversion.h"
 
 typedef struct {
     // The window we'll be rendering to
@@ -21,25 +22,25 @@ typedef struct {
 
     void* pixels;
     int32_t pitch;
-    int32_t windowWidth;
-    int32_t windowHeight;
+    int32_t window_width;
+    int32_t window_height;
     // Image dimensions
-    uint16_t widthMult;
-    uint16_t heightMult;
+    uint16_t width_mult;
+    uint16_t height_mult;
 
-    Rose_Cartridge* cartridge;
+    rose_cartridge* cartridge;
 
     // RuntimeEditor *editor;
 
-    Rose_RuntimeGame* game;
+    rose_runtime_game* game;
 
-    Rose_ScreenMode screenMode;
-} Rose_SystemSdl2;
+    rose_screenmode screen_mode;
+} rose_system_sdl2;
 
-bool rose_sys_sdl2_init(Rose_SystemSdl2* s, int argc, char* argv[]);
+bool rose_sys_sdl2_init(rose_system_sdl2* s, int argc, char* argv[]);
 
-void rose_sys_sdl2_run(Rose_SystemSdl2* s);
+void rose_sys_sdl2_run(rose_system_sdl2* s);
 
-void rose_sys_sdl2_free(Rose_SystemSdl2* s);
+void rose_sys_sdl2_free(rose_system_sdl2* s);
 
 #endif

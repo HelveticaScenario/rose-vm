@@ -1,7 +1,7 @@
 #include "rt/lua_api/lua_memory.h"
 
 int rose_lua_memory_poke(lua_State* L) {
-    Rose_RuntimeBase* r = rose_lua_base_get_runtime_base(L);
+    rose_runtime_base* r = rose_lua_base_get_runtime_base(L);
     if (r == NULL) { return 0; }
     uint32_t idx = (uint32_t) lua_tointeger(L, 1);
     uint8_t val = (uint8_t) lua_tointeger(L, 2);
@@ -17,7 +17,7 @@ int rose_lua_memory_poke(lua_State* L) {
 }
 
 int rose_lua_memory_peek(lua_State* L) {
-    Rose_RuntimeBase* r = rose_lua_base_get_runtime_base(L);
+    rose_runtime_base* r = rose_lua_base_get_runtime_base(L);
     if (r == NULL) { return 0; }
     int nargs = lua_gettop(L);
     if (nargs >= 1) {
@@ -40,7 +40,7 @@ int rose_lua_memory_peek(lua_State* L) {
 }
 
 int rose_lua_memory_memcpy(lua_State* L) {
-    Rose_RuntimeBase* r = rose_lua_base_get_runtime_base(L);
+    rose_runtime_base* r = rose_lua_base_get_runtime_base(L);
     if (r == NULL) { return 0; }
     int nargs = lua_gettop(L);
     if (nargs >= 3) {
@@ -61,7 +61,7 @@ int rose_lua_memory_memcpy(lua_State* L) {
 }
 
 int rose_lua_memory_memset(lua_State* L) {
-    Rose_RuntimeBase* r = rose_lua_base_get_runtime_base(L);
+    rose_runtime_base* r = rose_lua_base_get_runtime_base(L);
     if (r == NULL) { return 0; }
     int nargs = lua_gettop(L);
     if (nargs >= 3) {

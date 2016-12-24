@@ -1,7 +1,7 @@
 #include "rt/lua_api/lua_graphics.h"
 
 int rose_lua_graphics_pset(lua_State* L) {
-    Rose_RuntimeBase* r = rose_lua_base_get_runtime_base(L);
+    rose_runtime_base* r = rose_lua_base_get_runtime_base(L);
     if (r == NULL) { return 0; }
     int nargs = lua_gettop(L);
     if (nargs == 2) {
@@ -32,7 +32,7 @@ int rose_lua_graphics_pset(lua_State* L) {
 }
 
 int rose_lua_graphics_pget(lua_State* L) {
-    Rose_RuntimeBase* r = rose_lua_base_get_runtime_base(L);
+    rose_runtime_base* r = rose_lua_base_get_runtime_base(L);
     if (r == NULL) { return 0; }
     int nargs = lua_gettop(L);
     if (nargs >= 2) {
@@ -56,7 +56,7 @@ int rose_lua_graphics_pget(lua_State* L) {
 }
 
 int rose_lua_graphics_palset(lua_State* L) {
-    Rose_RuntimeBase* r = rose_lua_base_get_runtime_base(L);
+    rose_runtime_base* r = rose_lua_base_get_runtime_base(L);
     if (r == NULL) { return 0; }
     int nargs = lua_gettop(L);
     if (nargs >= 4) {
@@ -64,7 +64,7 @@ int rose_lua_graphics_palset(lua_State* L) {
         uint8_t red = (uint8_t) lua_tointeger(L, 2);
         uint8_t green = (uint8_t) lua_tointeger(L, 3);
         uint8_t blue = (uint8_t) lua_tointeger(L, 4);
-        Rose_Color c = {.r = red, .g = green, .b = blue};
+        rose_color c = {.r = red, .g = green, .b = blue};
         int err = rose_api_graphics_palset(r, idx, c);
         switch (err) {
             case ROSE_API_ERR_OUT_OF_BOUNDS:
@@ -79,12 +79,12 @@ int rose_lua_graphics_palset(lua_State* L) {
 }
 
 int rose_lua_graphics_palget(lua_State* L) {
-    Rose_RuntimeBase* r = rose_lua_base_get_runtime_base(L);
+    rose_runtime_base* r = rose_lua_base_get_runtime_base(L);
     if (r == NULL) { return 0; }
     int nargs = lua_gettop(L);
     if (nargs >= 1) {
         uint8_t idx = (uint8_t) lua_tointeger(L, 1);
-        Rose_Color res;
+        rose_color res;
         int err = rose_api_graphics_palget(r, idx, &res);
         switch (err) {
             case ROSE_API_ERR_OUT_OF_BOUNDS:
@@ -102,7 +102,7 @@ int rose_lua_graphics_palget(lua_State* L) {
 }
 
 int rose_lua_graphics_line(lua_State* L) {
-    Rose_RuntimeBase* r = rose_lua_base_get_runtime_base(L);
+    rose_runtime_base* r = rose_lua_base_get_runtime_base(L);
     if (r == NULL) { return 0; }
     int nargs = lua_gettop(L);
     int err;
@@ -128,11 +128,11 @@ int rose_lua_graphics_line(lua_State* L) {
     return 0;
 }
 
-typedef Rose_RuntimeApiError (*rect_fp)(Rose_RuntimeBase* r, int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t col);
-typedef Rose_RuntimeApiError (*rect_default_fp)(Rose_RuntimeBase* r, int16_t x0, int16_t y0, int16_t x1, int16_t y1);
+typedef rose_runtime_api_error (*rect_fp)(rose_runtime_base* r, int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t col);
+typedef rose_runtime_api_error (*rect_default_fp)(rose_runtime_base* r, int16_t x0, int16_t y0, int16_t x1, int16_t y1);
 
 int rect_lua_common(lua_State* L, rect_fp rect, rect_default_fp rect_default) {
-    Rose_RuntimeBase* r = rose_lua_base_get_runtime_base(L);
+    rose_runtime_base* r = rose_lua_base_get_runtime_base(L);
     if (r == NULL) { return 0; }
     int nargs = lua_gettop(L);
     int err = ROSE_API_ERR_NONE;
@@ -181,11 +181,11 @@ int rose_lua_graphics_rectfill(lua_State* L) {
     return rect_lua_common(L, &rose_api_graphics_rectfill, &rose_api_graphics_rectfill_default);
 }
 
-typedef Rose_RuntimeApiError (*circ_fp)(Rose_RuntimeBase* r, int16_t x0, int16_t y0, uint16_t radius, uint8_t col);
-typedef Rose_RuntimeApiError (*circ_default_fp)(Rose_RuntimeBase* r, int16_t x0, int16_t y0, uint16_t radius);
+typedef rose_runtime_api_error (*circ_fp)(rose_runtime_base* r, int16_t x0, int16_t y0, uint16_t radius, uint8_t col);
+typedef rose_runtime_api_error (*circ_default_fp)(rose_runtime_base* r, int16_t x0, int16_t y0, uint16_t radius);
 
 int circ_lua_common(lua_State* L, circ_fp circ, circ_default_fp circ_default) {
-    Rose_RuntimeBase* r = rose_lua_base_get_runtime_base(L);
+    rose_runtime_base* r = rose_lua_base_get_runtime_base(L);
     if (r == NULL) { return 0; }
     int nargs = lua_gettop(L);
     int err = ROSE_API_ERR_NONE;
@@ -226,7 +226,7 @@ int rose_lua_graphics_circfill(lua_State* L) {
 }
 
 int rose_lua_graphics_cls(lua_State* L) {
-    Rose_RuntimeBase* r = rose_lua_base_get_runtime_base(L);
+    rose_runtime_base* r = rose_lua_base_get_runtime_base(L);
     if (r == NULL) { return 0; }
     int err = rose_api_graphics_cls(r);
     switch (err) {

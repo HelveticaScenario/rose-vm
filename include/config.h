@@ -13,6 +13,8 @@
 
 #include "types.h"
 
+#define ROSE_APP_NAME "Rosebud"
+
 #define ROSE_SCREEN_WIDTH 320
 #define ROSE_SCREEN_HEIGHT 180
 #define ROSE_SCREEN_SIZE (ROSE_SCREEN_WIDTH * ROSE_SCREEN_HEIGHT)

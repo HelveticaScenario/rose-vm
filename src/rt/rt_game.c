@@ -1,115 +1,97 @@
+#include <types.h>
 #include "rt/rt_game.h"
 
-Rose_RuntimeGame* rose_runtime_game_create(Rose_Cartridge* cartridge) {
-    Rose_RuntimeGame* r = (Rose_RuntimeGame*) malloc(sizeof(Rose_RuntimeGame));
-    r->cartridge = cartridge;
-    r->base = rose_runtime_base_create(cartridge);
-    r->lua = NULL;
+rose_runtime_game* rose_runtime_game_create(rose_fs* fs) {
+    if (fs == NULL) {
+        fprintf(stderr, "tried to create runtime game with null fs\n");
+        exit(1);
+    }
+    rose_runtime_game* r = (rose_runtime_game*) malloc(sizeof(rose_runtime_game));
+    r->base = rose_runtime_base_create(fs);
     rose_runtime_game_reload(r);
     return r;
 }
 
-void rose_runtime_game_free(Rose_RuntimeGame* r) {
+void rose_runtime_game_free(rose_runtime_game* r) {
     rose_runtime_base_free(r->base);
-    lua_close(r->lua);
     free(r);
 }
 
-bool rose_runtime_game_reload(Rose_RuntimeGame* r) {
-    memset(r->base->mem, 0, r->base->mem_size);
-    if (r->cartridge->data_size > (r->base->mem_size - ROSE_RUNTIME_RESERVED_MEMORY_SIZE)) {
-        fprintf(stderr, "ERROR: tried to reload runtime and cartridge memory size was bigger than available memory size\n");
-        exit(1);
-    }
-    memcpy(r->base->mem, r->cartridge->data, r->cartridge->data_size);
-    if (r->lua != NULL) lua_close(r->lua);
-    r->lua = luaL_newstate();
-    luaL_openlibs(r->lua);
-    rose_lua_register_api(r->lua, r->base);
-    int ret;
-    ret = luaL_loadbuffer(r->lua, r->cartridge->code, r->cartridge->code_size, "main");
-    if (ret != 0) {
-        fprintf(stderr, "%s\r\n", luaL_checkstring(r->lua, -1));
-        return false;
-    }
-    ret = lua_pcall(r->lua, 0, LUA_MULTRET, 0);
-    if (ret != 0) {
-        fprintf(stderr, "%s\r\n", luaL_checkstring(r->lua, -1));
-        return false;
-    }
-
-    return true;
+bool rose_runtime_game_reload(rose_runtime_game* r) {
+    rose_runtime_base_clear(r->base);
+    // insert any game runtime specific init code here
+    return rose_runtime_base_load_run_main(r->base);
 }
 
-Rose_RuntimeGameError rose_pcall(Rose_RuntimeGame* r, uint8_t nargs) {
-    if (lua_isfunction(r->lua, -1) == 0) {
-        lua_settop(r->lua, 0);
+rose_runtime_game_error rose_pcall(rose_runtime_game* r, uint8_t nargs) {
+    if (lua_isfunction(r->base->lua, -1) == 0) {
+        lua_settop(r->base->lua, 0);
         return ROSE_RT_GAME_FUN_NOT_FOUND;
     }
     //TODO: add stop the world and output error functionality
-    int res = lua_pcall(r->lua, nargs, 0, 0);
+    int res = lua_pcall(r->base->lua, nargs, 0, 0);
     switch (res) {
         case LUA_ERRRUN:
         case LUA_ERRMEM:
         case LUA_ERRERR:
-            printf("%s\n", lua_tostring(r->lua, -1));
-            lua_settop(r->lua, 0);
+            printf("%s\n", lua_tostring(r->base->lua, -1));
+            lua_settop(r->base->lua, 0);
             return ROSE_RT_GAME_CRITICAL_ERR;
             break;
         case 0:
         default:
-            lua_settop(r->lua, 0);
+            lua_settop(r->base->lua, 0);
             return ROSE_RT_GAME_NO_ERR;
     }
 }
 
-Rose_RuntimeGameError rose_runtime_game_init(Rose_RuntimeGame* r) {
-    lua_getglobal(r->lua, "_init");
+rose_runtime_game_error rose_runtime_game_init(rose_runtime_game* r) {
+    lua_getglobal(r->base->lua, "_init");
     return rose_pcall(r, 0);
 }
 
-Rose_RuntimeGameError rose_runtime_game_update(Rose_RuntimeGame* r) {
-    lua_getglobal(r->lua, "_update");
+rose_runtime_game_error rose_runtime_game_update(rose_runtime_game* r) {
+    lua_getglobal(r->base->lua, "_update");
     return rose_pcall(r, 0);
 }
 
-Rose_RuntimeGameError rose_runtime_game_draw(Rose_RuntimeGame* r) {
-    lua_getglobal(r->lua, "_draw");
+rose_runtime_game_error rose_runtime_game_draw(rose_runtime_game* r) {
+    lua_getglobal(r->base->lua, "_draw");
     return rose_pcall(r, 0);
 }
 
-Rose_RuntimeGameError rose_runtime_game_onmouse(Rose_RuntimeGame* r, int16_t x, int16_t y) {
-    lua_getglobal(r->lua, "_onmouse");
-    lua_pushinteger(r->lua, x);
-    lua_pushinteger(r->lua, y);
+rose_runtime_game_error rose_runtime_game_onmouse(rose_runtime_game* r, int16_t x, int16_t y) {
+    lua_getglobal(r->base->lua, "_onmouse");
+    lua_pushinteger(r->base->lua, x);
+    lua_pushinteger(r->base->lua, y);
     return rose_pcall(r, 2);
 }
 
-Rose_RuntimeGameError rose_runtime_game_onwheel(Rose_RuntimeGame* r, int16_t x, int16_t y, bool inverted) {
-    lua_getglobal(r->lua, "_onwheel");
-    lua_pushinteger(r->lua, x);
-    lua_pushinteger(r->lua, y);
-    lua_pushboolean(r->lua, inverted);
+rose_runtime_game_error rose_runtime_game_onwheel(rose_runtime_game* r, int16_t x, int16_t y, bool inverted) {
+    lua_getglobal(r->base->lua, "_onwheel");
+    lua_pushinteger(r->base->lua, x);
+    lua_pushinteger(r->base->lua, y);
+    lua_pushboolean(r->base->lua, inverted);
     return rose_pcall(r, 3);
 }
 
-Rose_RuntimeGameError rose_runtime_game_onbtn(Rose_RuntimeGame* r, uint8_t code, bool pressed) {
-    lua_getglobal(r->lua, "_onbtn");
-    lua_pushinteger(r->lua, code);
-    lua_pushboolean(r->lua, pressed);
+rose_runtime_game_error rose_runtime_game_onbtn(rose_runtime_game* r, uint8_t code, bool pressed) {
+    lua_getglobal(r->base->lua, "_onbtn");
+    lua_pushinteger(r->base->lua, code);
+    lua_pushboolean(r->base->lua, pressed);
     return rose_pcall(r, 2);
 }
 
-Rose_RuntimeGameError rose_runtime_game_onkey(Rose_RuntimeGame* r, Rose_KeyCode keycode, bool pressed, bool repeat) {
-    lua_getglobal(r->lua, "_onkey");
-    lua_pushinteger(r->lua, keycode);
-    lua_pushboolean(r->lua, pressed);
-    lua_pushboolean(r->lua, repeat);
+rose_runtime_game_error rose_runtime_game_onkey(rose_runtime_game* r, rose_keycode keycode, bool pressed, bool repeat) {
+    lua_getglobal(r->base->lua, "_onkey");
+    lua_pushinteger(r->base->lua, keycode);
+    lua_pushboolean(r->base->lua, pressed);
+    lua_pushboolean(r->base->lua, repeat);
     return rose_pcall(r, 3);
 }
 
-Rose_RuntimeGameError rose_runtime_game_ontouch(Rose_RuntimeGame* r) {
+rose_runtime_game_error rose_runtime_game_ontouch(rose_runtime_game* r) {
     // TODO: make this actually do something
-    lua_getglobal(r->lua, "_ontouch");
+    lua_getglobal(r->base->lua, "_ontouch");
     return rose_pcall(r, 0);
 }
