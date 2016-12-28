@@ -563,7 +563,7 @@ rose_file* rose_sys_recursive_file_create(const char* path, const char* name) {
 
                     #ifdef _WIN32
                         if (path[strlen(path) - 1] != '\\') {
-                            strcat(new_path, "\");
+                            strcat(new_path, "\\");
                         }
                     #else
                         if (path[strlen(path) - 1] != '/') {

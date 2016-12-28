@@ -26,8 +26,32 @@ rose_fs* rose_fs_create() {
 }
 
 char* rose_construct_path(rose_file* file) {
-    fprintf(stderr, "rose_contruct_path unimplemented\n");
-    exit(1);
+    size_t file_count = 0;
+    size_t arr_size = 64;
+    rose_file** arr = (rose_file**)malloc(sizeof(*arr) * arr_size);
+    size_t path_len = 1;
+    while (file != NULL && file->parent != NULL) {
+        arr[file_count] = file;
+        path_len += strlen(file->name);
+        file_count++;
+        file = file->parent;
+    }
+    size_t num_path_separator = file_count < 1 ? 0 : (file_count - 1);
+    char* path = (char*)malloc(sizeof(char) * (path_len + num_path_separator));
+    memset(path, '\0', sizeof(char) * (path_len + num_path_separator));
+    size_t i;
+    for (i = file_count; i > 0; i--) {
+        strcat(path, arr[i - 1]->name);
+        if (i > 1) {
+            #ifdef _WIN32
+                strcat(path, "\\");
+            #else
+                strcat(path, "/");
+            #endif
+        }
+    }
+
+    return path;
 }
 
 void rose_fill_file_struct(rose_file** file, rose_file_type type, const char* name, off_t size, time_t last_disk_modification) {
