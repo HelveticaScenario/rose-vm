@@ -6,7 +6,6 @@ int main(int argc, char *argv[]) {
         rose_sys_sdl2_run(system);
     }
 
-    // delete system;
     rose_sys_sdl2_free(system);
     return 0;
 }

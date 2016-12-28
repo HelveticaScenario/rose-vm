@@ -1,52 +1,91 @@
-#include <types.h>
 #include "rt/fs/fs_base.h"
 
-void rose_file_info_free(rose_file_info* info) {
+void rose_file_free_recurse(rose_file* info) {
     if (info->name != NULL) {
         free((void*) info->name);
     }
-    if (info->path != NULL) {
-        free((void*) info->path);
+    int i;
+    for (i = 0; i < info->contents_len; i++ ) {
+        rose_file_free_recurse(info->contents[i]);
     }
     free(info);
 }
 
-void rose_cartridge_free(rose_cartridge *cart) {
-    int i;
-    for (i = 0; i < cart->code_size; i++) {
-        rose_file_info_free(cart->code[i]);
-    }
-    free(cart->code);
-    free(cart->data);
-    free(cart);
-}
+
 
 void rose_fs_free(rose_fs* fs) {
-    rose_cartridge_free(fs->cart);
+    rose_file_free_recurse(fs->root);
     free(fs);
 }
 
 rose_fs* rose_fs_create() {
     rose_fs *fs = (rose_fs *)malloc(sizeof(rose_fs));
-    fs->cart = rose_cartridge_create();
+    fs->root = NULL;
+    fs->cart = NULL;
     return fs;
 }
 
-
-rose_cartridge* rose_cartridge_create() {
-    rose_cartridge *cart = (rose_cartridge *)malloc(sizeof(rose_cartridge));
-    cart->code_size = 0;
-    cart->code = NULL;
-    cart->data_size = 0; // ROSE_MEMORY_SIZE - ROSE_RUNTIME_RESERVED_MEMORY_SIZE;
-    cart->data = NULL; //(uint8_t *)malloc(cart->data_size);
-//    memset(cart->data, 0, cart->data_size);
-//    memcpy(
-//        cart->data + cart->data_size - ROSE_PALETTE_SIZE, rose_default_palette,
-//        sizeof(rose_default_palette));
-    return cart;
+char* rose_construct_path(rose_file* file) {
+    fprintf(stderr, "rose_contruct_path unimplemented\n");
+    exit(1);
 }
 
+void rose_fill_file_struct(rose_file** file, rose_file_type type, const char* name, off_t size, time_t last_disk_modification) {
+    if (*file == NULL) {
+        *file = (rose_file*)malloc(sizeof(**file));
+        memset(*file, 0, sizeof(**file));
+    }
+    if (name != (*file)->name && (*file)->name != NULL) {
+        free((void*) (*file)->name);
+    }
+    char* name_cpy = NULL;
+    if (name == (*file)->name) {
+        name_cpy = (char*) name;
+    } else if (name != NULL) {
+        name_cpy = (char*)malloc(strlen(name));
+        strcpy(name_cpy, name);
+    }
+    rose_file file_stack = {
+            .type = type,
+            .name = name_cpy,
+            .size = size,
+            .last_disk_modification = last_disk_modification,
+            .parent = (*file)->parent,
+            .contents = (*file)->contents,
+            .contents_len = (*file)->contents_len
+    };
 
+    memcpy(*file, &file_stack, sizeof(**file));
+}
+
+rose_file* rose_fs_fetch_cart_data_file(rose_file* cart_root) {
+    rose_file* cart_data = NULL;
+    int i;
+    for (i = 0; i < cart_root->contents_len; i++) {
+        if (cart_root->contents[i]->type == ROSE_DATA_FILE) {
+            cart_data = cart_root->contents[i];
+            break;
+        }
+    }
+    return cart_data;
+}
+
+rose_file* rose_fs_fetch_cart_lua_main(rose_file* cart_root) {
+    rose_file* lua_main = NULL;
+    int i;
+    for (i = 0; i < cart_root->contents_len; i++) {
+        if (cart_root->contents[i]->type == ROSE_CODE_FILE && strcmp(cart_root->contents[i]->name, ROSE_MAIN_CODE_FILE_NAME) == 0) {
+            lua_main = cart_root->contents[i];
+            break;
+        }
+    }
+    return lua_main;
+}
+
+rose_file* rose_fs_fetch_cart_root(rose_file* file) {
+    fprintf(stderr, "rose_fs_fetch_cart_root unimplemented\n");
+    exit(1);
+}
 
 void archive_test(const char *base_path) {
 

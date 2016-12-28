@@ -7,15 +7,21 @@
 #include <archive.h>
 #include <archive_entry.h>
 
-void rose_fs_free(rose_fs* fs);
+void rose_file_free_recurse(rose_file* info);
 
-void rose_file_info_free(rose_file_info* info);
+char* rose_construct_path(rose_file* file);
 
 rose_fs* rose_fs_create();
 
-rose_cartridge *rose_cartridge_create();
+void rose_fs_free(rose_fs* fs);
 
-void rose_cartridge_free(rose_cartridge *cart);
+void rose_fill_file_struct(rose_file** file, rose_file_type type, const char* name, off_t size, time_t last_disk_modification);
+
+rose_file* rose_fs_fetch_cart_data_file(rose_file* cart_root);
+
+rose_file* rose_fs_fetch_cart_lua_main(rose_file* cart_root);
+
+rose_file* rose_fs_fetch_cart_root(rose_file* file);
 
 static uint8_t rose_default_palette[16 * 3] = {
         0,   0,   0,   // black

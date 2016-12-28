@@ -1,4 +1,3 @@
-#include <types.h>
 #include "sys/sys_sdl2.h"
 
 // Renders screen
@@ -9,17 +8,19 @@ bool lock_texture(rose_system_sdl2* s);
 
 bool unlock_texture(rose_system_sdl2* s);
 
-void copy_pixels(rose_system_sdl2* s, void* pixels);
-
 uint32_t get_screen_mult(rose_system_sdl2* s);
 
 void make_screen_rect(rose_system_sdl2* s, SDL_Rect* rect);
 
-SDL_Scancode rose_keycode_to_sdl_scancode(rose_keycode key);
+char* rose_sys_construct_full_path(rose_file* file);
 
-rose_keycode sdl_scancode_to_rose_keycode(SDL_Scancode scan);
+rose_fs_error rose_sys_readfile(rose_file* file, uint8_t** buffer, size_t* buffer_len);
+rose_fs_error rose_sys_writefile(rose_file* file, uint8_t* buffer, size_t buffer_len);
+rose_fs_error rose_sys_update_file(rose_file* old, rose_file* new);
+rose_fs_error rose_sys_new_file(rose_file* parent, rose_file** res, const char* name, const rose_file_type file_type);
+rose_fs_error rose_sys_shutdown();
 
-void getfile(const char* abs_path, uint8_t** buffer, size_t* buffer_len);
+rose_file* rose_sys_recursive_file_create(const char* path, const char* name);
 
 static char* PERF_PATH = NULL;
 
@@ -46,9 +47,9 @@ bool rose_sys_sdl2_init(rose_system_sdl2* s, int argc, char* argv[]) {
     s->window = NULL;
     s->renderer = NULL;
     s->texture = NULL;
-    s->cartridge = NULL;
+    s->fs = NULL;
     // s->editor = NULL;
-    // s->game = NULL;
+    s->game = NULL;
     s->screen_mode = ROSE_GAMEMODE;
     s->pixels = NULL;
     s->pitch = 0;
@@ -104,29 +105,25 @@ bool rose_sys_sdl2_init(rose_system_sdl2* s, int argc, char* argv[]) {
 
 
     rose_fs* fs = rose_fs_create();
-    fs->getfile = &getfile;
+    fs->read_file = &rose_sys_readfile;
+    fs->write_file = &rose_sys_writefile;
+    fs->update_file = &rose_sys_update_file;
+    fs->new_file = &rose_sys_new_file;
+    fs->shutdown = &rose_sys_shutdown;
 
-    getfile("test/CART_DATA", &fs->cart->data, &fs->cart->data_size);
-    char* main_name = (char*)malloc(strlen("main.lua"));
-    strcpy(main_name, "main.lua");
-    char* main_path = (char*)malloc(strlen("test/main.lua"));
-    strcpy(main_path, "test/main.lua");
-    rose_file_info main_info = {
-            .type = ROSE_FILE_DISK,
-            .name = main_name,
-            .path = main_path
-    };
-    fs->cart->code = (rose_file_info**)malloc(sizeof(*fs->cart->code) * 1);
-    rose_file_info* main_info_heap = (rose_file_info*)malloc(sizeof(*main_info_heap));
-    memcpy(main_info_heap, &main_info, sizeof(*main_info_heap));
-    fs->cart->code[0] = main_info_heap;
-    fs->cart->code_size = 1;
+    char* root_path = rose_sys_construct_full_path(NULL);
+    rose_file* root = rose_sys_recursive_file_create(root_path, "");
+    fs->root = root;
+    fs->pwd = root;
+    fs->cart = NULL;
+
+
+    // TODO: Remove this
+    fs->cart = fs->root->contents[0];
 
     s->game = rose_runtime_game_create(fs);
     rose_runtime_game_error err = rose_runtime_game_init(s->game);
     SDL_ShowCursor(SDL_DISABLE);
-
-
     return true;
 }
 
@@ -154,7 +151,7 @@ void rose_sys_sdl2_run(rose_system_sdl2* s) {
     bool wheel_changed = false;
     SDL_Rect screen_rect;
     make_screen_rect(s, &screen_rect);
-    rose_runtime_game_error err;
+    rose_runtime_game_error err = ROSE_RT_GAME_NO_ERR;
     while (!quit) {
         // Handle events on queue
         while (SDL_PollEvent(&event)) {
@@ -393,9 +390,9 @@ void rose_sys_sdl2_free(rose_system_sdl2* s) {
         s->game = NULL;
     }
 
-    if (s->cartridge != NULL) {
-        rose_cartridge_free(s->cartridge);
-        s->cartridge = NULL;
+    if (s->fs != NULL) {
+        rose_fs_free(s->fs);
+        s->fs = NULL;
     }
     SDL_Quit();
 }
@@ -449,29 +446,28 @@ bool unlock_texture(rose_system_sdl2* s) {
     return true;
 }
 
-void copy_pixels(rose_system_sdl2* s, void* newPixels) {
-    // Texture is locked
-    if (s->pixels != NULL) {
-        // Copy to locked pixels
-        memcpy(s->pixels, newPixels, s->pitch * ROSE_SCREEN_HEIGHT);
+char* rose_sys_construct_full_path(rose_file* file) {
+    if (file == NULL) {
+        return get_perf_path();
     }
-}
-
-void getfile(const char* abs_path, uint8_t** buffer, size_t* buffer_len) {
-    if (abs_path[0] == '/') {
-        abs_path = abs_path+1;
-    }
+    char* path = rose_construct_path(file);
     char* base_path = get_perf_path();
     size_t base_path_len = strlen(base_path);
-    size_t abs_path_len = strlen(abs_path);
+    size_t abs_path_len = strlen(path);
     char* full_path = (char*)malloc(base_path_len + abs_path_len + 1);
-    memcpy(full_path, base_path, base_path_len);
-    memcpy(full_path + base_path_len, abs_path, abs_path_len);
-    full_path[base_path_len + abs_path_len] = '\0';
+    memset(full_path, '\0', base_path_len + abs_path_len + 1);
+    strcpy(full_path, base_path);
+    strcat(full_path, path);
+    free(path);
+    return full_path;
+}
 
+rose_fs_error rose_sys_readfile(rose_file* file, uint8_t** buffer, size_t* buffer_len) {
+    char* full_path = rose_sys_construct_full_path(file);
     SDL_RWops *rw = SDL_RWFromFile(full_path, "rb");
     free(full_path);
-    if (rw == NULL) return;
+    if (rw == NULL)
+        return ROSE_FS_CRITICAL_ERR;
 
     Sint64 res_size = SDL_RWsize(rw);
     uint8_t* res = (uint8_t*)malloc((size_t) (res_size + 1));
@@ -486,8 +482,130 @@ void getfile(const char* abs_path, uint8_t** buffer, size_t* buffer_len) {
     SDL_RWclose(rw);
     if (nb_read_total != res_size) {
         free(res);
-        return;
+        return ROSE_FS_CRITICAL_ERR;
     }
     *buffer = res;
     *buffer_len = (size_t) nb_read_total;
+    return ROSE_FS_NO_ERR;
+}
+
+rose_fs_error rose_sys_writefile(rose_file* file, uint8_t* buffer, size_t buffer_len) {
+    fprintf(stderr, "rose_sys_writefile unimplemented\n");
+    exit(1);
+}
+
+rose_fs_error rose_sys_update_file(rose_file* old, rose_file* new) {
+    fprintf(stderr, "rose_sys_update_file unimplemented\n");
+    exit(1);
+}
+
+rose_fs_error rose_sys_new_file(rose_file* parent, rose_file** res, const char* name, rose_file_type file_type) {
+    fprintf(stderr, "rose_sys_new_file unimplemented\n");
+    exit(1);
+}
+
+rose_fs_error rose_sys_shutdown() {
+    fprintf(stderr, "rose_sys_shutdown unimplemented\n");
+    exit(1);
+}
+
+rose_file* rose_sys_recursive_file_create(const char* path, const char* name) {
+
+    struct stat attrib;
+    stat(path, &attrib);
+    rose_file* file = NULL;
+
+    rose_file_type type;
+    if ((attrib.st_mode & S_IFMT) == S_IFDIR) {
+        type = ROSE_DIRECTORY;
+    } else if((attrib.st_mode & S_IFMT) == S_IFREG) {
+        if (strcmp(name, ROSE_DATA_FILE_NAME) == 0) {
+            type = ROSE_DATA_FILE;
+        } else if (strcmp(name + (strlen(name) - strlen(ROSE_CODE_FILE_SUFFIX)), ROSE_CODE_FILE_SUFFIX) == 0) {
+            type = ROSE_CODE_FILE;
+        } else {
+            return NULL;
+        }
+    } else {
+        return NULL;
+    }
+
+    rose_fill_file_struct(&file, type, name, attrib.st_size, attrib.st_mtime);
+
+    size_t file_count = 0;
+    size_t arr_size = 64;
+    rose_file** arr = (rose_file**)malloc(sizeof(*arr) * arr_size);
+
+    if (type == ROSE_DIRECTORY) {
+        DIR *dp;
+        struct dirent *ep;
+        dp = opendir (path);
+        if (dp != NULL)
+        {
+
+            while ((ep = readdir(dp))) {
+                if (strcmp(ep->d_name,".") == 0 || strcmp(ep->d_name,"..") == 0 || strcmp(ep->d_name,".DS_Store") == 0) {
+                    continue;
+                }
+                if (ep->d_type == DT_REG || ep->d_type == DT_DIR) { /* If the entry is a regular file or directory*/
+                    file_count++;
+                    if (file_count > arr_size) {
+                        arr_size *= 2;
+                        arr = realloc(arr, sizeof(*arr) * arr_size);
+                    }
+                    char* new_name = (char*) malloc(sizeof(char) * (ep->d_namlen + 1));
+                    memset(new_name, '\0', sizeof(char) * (ep->d_namlen + 1));
+                    strcpy(new_name, ep->d_name);
+
+                    char* new_path = (char*) malloc(sizeof(char) * (strlen(path) + ep->d_namlen + 1));
+                    memset(new_path, '\0', sizeof(char) * (strlen(path) + ep->d_namlen + 2));
+                    strcpy(new_path, path);
+
+                    #ifdef _WIN32
+                        if (path[strlen(path) - 1] != '\\') {
+                            strcat(new_path, "\");
+                        }
+                    #else
+                        if (path[strlen(path) - 1] != '/') {
+                            strcat(new_path, "/");
+                        }
+                    #endif
+                    strcat(new_path, ep->d_name);
+                    rose_file* new_file = rose_sys_recursive_file_create(new_path, new_name);
+                    free(new_name);
+                    free(new_path);
+                    if (new_file == NULL) {
+                        file_count--;
+                        continue;
+                    } else {
+                        new_file->parent = file;
+                        arr[file_count-1] = new_file;
+                    }
+
+                }
+            }
+
+            (void) closedir (dp);
+        }
+        else {
+            perror ("Couldn't open the directory");
+            free(arr);
+            exit(1);
+        }
+    }
+
+    if (file_count == 0) {
+        free(arr);
+        arr = NULL;
+    } else {
+        arr = realloc(arr, sizeof(*arr) * file_count);
+    }
+
+    file->contents = arr;
+    file->contents_len = file_count;
+    if (rose_fs_fetch_cart_data_file(file) != NULL && rose_fs_fetch_cart_lua_main(file) != NULL) {
+        rose_fill_file_struct(&file, ROSE_CART_DIRECTORY, file->name, file->size, file->last_disk_modification);
+    }
+
+    return file;
 }

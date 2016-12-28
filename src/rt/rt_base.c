@@ -1,5 +1,3 @@
-#include <rt/fs/fs_base.h>
-#include <types.h>
 #include "rt/rt_base.h"
 
 rose_memory_iterator rose_memory_iterator_begin(uint8_t m[]) { return &m[0]; }
@@ -131,39 +129,45 @@ rose_runtime_base* rose_runtime_base_create(rose_fs* fs) {
 
 bool rose_runtime_base_clear(rose_runtime_base* r) {
     memset(r->mem, 0, r->mem_size);
-    if (r->fs->cart->data_size > (r->mem_size - ROSE_RUNTIME_RESERVED_MEMORY_SIZE)) {
-        fprintf(stderr, "ERROR: tried to reload runtime and cartridge memory size was bigger than available memory size\n");
-        exit(1);
-    }
     if (r->lua != NULL) lua_close(r->lua);
     r->lua = luaL_newstate();
     luaL_openlibs(r->lua);
     rose_lua_register_api(r->lua, r);
+    return true;
 }
 
 bool rose_runtime_base_load_run_main(rose_runtime_base* r) {
-    memcpy(r->mem, r->fs->cart->data, r->fs->cart->data_size);
-    rose_cartridge* cart = r->fs->cart;
-    rose_file_info* main = NULL;
-    int i;
-    for (i = 0; i < cart->code_size; i++) {
-        rose_file_info* info = cart->code[i];
-        if (strcmp(info->name, "main.lua") == 0) {
-            main = info;
-            break;
-        }
+    if (r->fs->cart == NULL) {
+        return false;
     }
+
+    rose_file* cart_data = rose_fs_fetch_cart_data_file(r->fs->cart);
+    if (cart_data == NULL) {
+        fprintf(stderr, "ERROR: no data file found\n");
+        return false;
+    }
+
+    uint8_t* cart_data_buffer = NULL;
+    size_t cart_data_size = 0;
+    r->fs->read_file(cart_data, &cart_data_buffer, &cart_data_size);
+    if (cart_data_size > (r->mem_size - ROSE_RUNTIME_RESERVED_MEMORY_SIZE)) {
+        fprintf(stderr, "ERROR: tried to reload runtime and cartridge memory size was bigger than available memory size\n");
+        free(cart_data_buffer);
+        return false;
+    }
+    memcpy(r->mem, cart_data_buffer, cart_data_size);
+    free(cart_data_buffer);
+    rose_file* main = rose_fs_fetch_cart_lua_main(r->fs->cart);
     if (main == NULL) {
+        fprintf(stderr, "ERROR: no main file found\n");
         return false;
     }
+
+    uint8_t* main_buffer = NULL;
     size_t main_size;
-    uint8_t* main_code;
-    if (r->fs->getfile == NULL) {
-        return false;
-    }
-    r->fs->getfile(main->path, &main_code, &main_size);
-    int ret = luaL_loadbuffer(r->lua, (const char*) main_code, main_size, "main");
-    free(main_code);
+    r->fs->read_file(main, &main_buffer, &main_size);
+    int ret = luaL_loadbuffer(r->lua, (const char*) main_buffer, main_size, "main");
+    free(main_buffer);
     if (ret != 0) {
         fprintf(stderr, "%s\r\n", luaL_checkstring(r->lua, -1));
         return false;

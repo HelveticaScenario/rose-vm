@@ -13,7 +13,12 @@
 
 #include "types.h"
 
-#define ROSE_APP_NAME "Rosebud"
+#define ROSE_APP_NAME ("Rosebud")
+#define ROSE_DATA_FILE_NAME ("CART_DATA")
+#define ROSE_MAIN_CODE_FILE_NAME ("main.lua")
+#define ROSE_CODE_FILE_SUFFIX (".lua")
+
+
 
 #define ROSE_SCREEN_WIDTH 320
 #define ROSE_SCREEN_HEIGHT 180

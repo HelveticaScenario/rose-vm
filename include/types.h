@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <time.h>
 #include <lua.h>
 #include <lauxlib.h>
 #include <luaconf.h>
@@ -28,47 +29,38 @@ typedef struct {
 
 // ***** fs_base
 
-typedef enum { ROSE_FILE_DISK, ROSE_FILE_MEMORY, ROSE_DIRECTORY } rose_file_type;
-typedef struct {
+typedef enum {
+    ROSE_FS_NO_ERR,
+    ROSE_FS_CRITICAL_ERR
+} rose_fs_error;
+
+typedef enum { ROSE_CODE_FILE, ROSE_DATA_FILE, ROSE_DIRECTORY, ROSE_CART_DIRECTORY } rose_file_type;
+
+typedef struct rose_file {
     const rose_file_type type;
     const char* name;
-    const char* path;
-} rose_file_info;
-
-typedef struct {
-
-} rose_file_memory;
-typedef struct {
-
-} rose_file_disk;
-
-typedef struct {
-    rose_file_type type;
-    rose_file_memory memory;
-    rose_file_disk disk;
-    const char* name;
+    const off_t size;
+    const time_t last_disk_modification;
+    struct rose_file* parent;
+    struct rose_file** contents;
+    size_t contents_len;
 } rose_file;
 
-typedef struct {
-    uint8_t* data;
-    size_t data_size;
-    rose_file_info** code;
-    size_t code_size;
-} rose_cartridge;
+typedef rose_fs_error (*rose_fd_hook_readfile)(rose_file* file, uint8_t** buffer, size_t* buffer_len);
+typedef rose_fs_error (*rose_fs_hook_writefile)(rose_file* file, uint8_t* buffer, size_t buffer_len);
+typedef rose_fs_error (*rose_fs_hook_update_file)(rose_file* old_file, rose_file* new_file);
+typedef rose_fs_error (*rose_fs_hook_new_file)(rose_file* parent, rose_file** res, const char* name, rose_file_type file_type);
+typedef rose_fs_error (*rose_fs_hook_shutdown)();
 
-typedef void (*rose_hook_ls)(const char* relative_path, rose_file_info** res, size_t* res_len);
-typedef void (*rose_hook_cd)(const char* relative_path, char* abs_path);
-typedef void (*rose_hook_mkdir)(const char* relative_path);
-typedef void (*rose_hook_getfile)(const char* abs_path, uint8_t** buffer, size_t* buffer_len);
-typedef void (*rose_hook_shutdown)();
-
-typedef struct {
-    rose_cartridge* cart;
-    rose_hook_ls ls;
-    rose_hook_cd cd;
-    rose_hook_mkdir mkdir;
-    rose_hook_getfile getfile;
-    rose_hook_shutdown shutdown;
+typedef struct rose_fs {
+    rose_file* cart;
+    rose_file* root;
+    rose_file* pwd;
+    rose_fd_hook_readfile read_file;
+    rose_fs_hook_writefile write_file;
+    rose_fs_hook_update_file update_file;
+    rose_fs_hook_new_file new_file;
+    rose_fs_hook_shutdown shutdown;
 } rose_fs;
 
 

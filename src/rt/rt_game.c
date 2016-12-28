@@ -1,4 +1,3 @@
-#include <types.h>
 #include "rt/rt_game.h"
 
 rose_runtime_game* rose_runtime_game_create(rose_fs* fs) {
@@ -8,7 +7,9 @@ rose_runtime_game* rose_runtime_game_create(rose_fs* fs) {
     }
     rose_runtime_game* r = (rose_runtime_game*) malloc(sizeof(rose_runtime_game));
     r->base = rose_runtime_base_create(fs);
-    rose_runtime_game_reload(r);
+    if (!rose_runtime_game_reload(r)) {
+        fprintf(stderr, "reload could not finish\n");
+    }
     return r;
 }
 

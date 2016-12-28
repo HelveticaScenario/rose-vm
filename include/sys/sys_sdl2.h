@@ -2,7 +2,9 @@
 #define ROSE_SYS_SDL2_H
 
 #include <SDL.h>
+#include <stdio.h>
 #include <sys/types.h>
+#include <dirent.h>
 #include <sys/stat.h>
 #include "config.h"
 #include "rt/rt_base.h"
@@ -28,7 +30,7 @@ typedef struct {
     uint16_t width_mult;
     uint16_t height_mult;
 
-    rose_cartridge* cartridge;
+    rose_fs* fs;
 
     // RuntimeEditor *editor;
 
