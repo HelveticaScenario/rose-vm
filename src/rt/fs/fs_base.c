@@ -11,8 +11,6 @@ void rose_file_free_recurse(rose_file* info) {
     free(info);
 }
 
-
-
 void rose_fs_free(rose_fs* fs) {
     rose_file_free_recurse(fs->root);
     free(fs);
@@ -50,6 +48,7 @@ char* rose_construct_path(rose_file* file) {
             #endif
         }
     }
+    free(arr);
 
     return path;
 }
@@ -107,8 +106,12 @@ rose_file* rose_fs_fetch_cart_lua_main(rose_file* cart_root) {
 }
 
 rose_file* rose_fs_fetch_cart_root(rose_file* file) {
-    fprintf(stderr, "rose_fs_fetch_cart_root unimplemented\n");
-    exit(1);
+    printf("rose_fs_fetch_cart_root should work, but it is untested\n");
+
+    while (file != NULL && file->type != ROSE_CART_DIRECTORY) {
+        file = file->parent;
+    }
+    return file;
 }
 
 void archive_test(const char *base_path) {
