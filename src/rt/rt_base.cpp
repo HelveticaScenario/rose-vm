@@ -3,7 +3,7 @@
 
 static v8::Platform* static_platform;
 
-bool rose_init(const char* base_path) {
+void rose_init(const char* base_path) {
     v8::V8::InitializeICUDefaultLocation(base_path);
     v8::V8::InitializeExternalStartupData(base_path);
     static_platform = v8::platform::CreateDefaultPlatform();
@@ -11,7 +11,7 @@ bool rose_init(const char* base_path) {
     v8::V8::Initialize();
 }
 
-bool rose_deinit() {
+void rose_deinit() {
     V8::Dispose();
     V8::ShutdownPlatform();
     delete static_platform;
@@ -211,9 +211,10 @@ bool rose_runtime_base_load_run_main(rose_runtime_base* r) {
     }
     bool success = ExecuteString(isolate, source, file_name, true);
     free(main_buffer);
-    if (!success)
+    if (!success) {
         ReportException(isolate, &try_catch);
         return false;
+    }
     while (v8::platform::PumpMessageLoop(static_platform, isolate))
         continue;
 

@@ -48,8 +48,8 @@ void rose_set_bit(uint8_t* trans, uint8_t addr, bool val);
 
 bool rose_get_bit(uint8_t* trans, uint8_t addr);
 
-bool rose_init(const char* base_path);
+void rose_init(const char* base_path);
 
-bool rose_deinit();
+void rose_deinit();
 
 #endif
