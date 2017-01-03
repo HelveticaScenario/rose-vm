@@ -3,7 +3,8 @@
 
 #include "config.h"
 #include "rt/fs/fs_base.h"
-#include "rt/lua_api.h"
+#include "rt/js/js_common.h"
+#include "rt/js/js_base.h"
 
 const char* rose_keycode_to_string(rose_keycode key);
 
@@ -46,5 +47,9 @@ rose_runtime_base_error rose_runtime_base_ontouch(rose_runtime_base* r);
 void rose_set_bit(uint8_t* trans, uint8_t addr, bool val);
 
 bool rose_get_bit(uint8_t* trans, uint8_t addr);
+
+void rose_init(const char* base_path);
+
+void rose_deinit();
 
 #endif

@@ -1,4 +1,21 @@
+#include <cassert>
 #include "rt/rt_base.h"
+
+static v8::Platform* static_platform;
+
+void rose_init(const char* base_path) {
+    v8::V8::InitializeICUDefaultLocation(base_path);
+    v8::V8::InitializeExternalStartupData(base_path);
+    static_platform = v8::platform::CreateDefaultPlatform();
+    v8::V8::InitializePlatform(static_platform);
+    v8::V8::Initialize();
+}
+
+void rose_deinit() {
+    V8::Dispose();
+    V8::ShutdownPlatform();
+    delete static_platform;
+}
 
 rose_memory_iterator rose_memory_iterator_begin(uint8_t m[]) { return &m[0]; }
 
@@ -108,7 +125,7 @@ rose_runtime_base* rose_runtime_base_create(rose_fs* fs) {
     key_states_range->end = end_key_states;
 
     rose_runtime_base* r = (rose_runtime_base*) malloc(sizeof(rose_runtime_base));
-    r->lua = NULL;
+
     r->fs = fs;
     r->mem = mem;
     r->mem_size = ROSE_MEMORY_SIZE;
@@ -124,17 +141,17 @@ rose_runtime_base* rose_runtime_base_create(rose_fs* fs) {
     r->btn_states = btn_states_range;
     r->mouse_wheel = mouse_wheel_range;
     r->key_states = key_states_range;
+
+    r->js = rose_js_base_create(r);
     return r;
 }
 
 bool rose_runtime_base_clear(rose_runtime_base* r) {
     memset(r->mem, 0, r->mem_size);
-    if (r->lua != NULL) lua_close(r->lua);
-    r->lua = luaL_newstate();
-    luaL_openlibs(r->lua);
-    rose_lua_register_api(r->lua, r);
+    r->js->context.Reset();
     return true;
 }
+
 
 bool rose_runtime_base_load_run_main(rose_runtime_base* r) {
     if (r->fs->cart == NULL) {
@@ -157,7 +174,7 @@ bool rose_runtime_base_load_run_main(rose_runtime_base* r) {
     }
     memcpy(r->mem, cart_data_buffer, cart_data_size);
     free(cart_data_buffer);
-    rose_file* main = rose_fs_fetch_cart_lua_main(r->fs->cart);
+    rose_file* main = rose_fs_fetch_cart_js_main(r->fs->cart);
     if (main == NULL) {
         fprintf(stderr, "ERROR: no main file found\n");
         return false;
@@ -166,23 +183,46 @@ bool rose_runtime_base_load_run_main(rose_runtime_base* r) {
     uint8_t* main_buffer = NULL;
     size_t main_size;
     r->fs->read_file(main, &main_buffer, &main_size);
-    int ret = luaL_loadbuffer(r->lua, (const char*) main_buffer, main_size, "main");
+
+    if (main_buffer[main_size-1] != '\0') {
+        main_size++;
+        main_buffer = (uint8_t*) realloc(main_buffer, main_size);
+        main_buffer[main_size-1] = '\0';
+    }
+
+    auto isolate = r->js->isolate;
+    v8::Isolate::Scope isolate_scope(isolate);
+    v8::HandleScope handle_scope(isolate);
+    v8::TryCatch try_catch(isolate);
+
+    Local<Context> context = Context::New(isolate, NULL, r->js->global_template.Get(isolate));
+
+    r->js->context.Reset(isolate, context);
+    if (context.IsEmpty()) {
+        fprintf(stderr, "something went horribly wrong and I'm so, so sorry.\n");
+    }
+    v8::Context::Scope context_scope(context);
+
+    v8::Local<v8::String> file_name = v8::String::NewFromUtf8(isolate, r->fs->cart->name, v8::NewStringType::kNormal).ToLocalChecked();
+    v8::Local<v8::String> source;
+    if (!v8::String::NewFromUtf8(isolate, (const char*) main_buffer, v8::NewStringType::kNormal).ToLocal(&source)) {
+        ReportException(isolate, &try_catch);
+        return false;
+    }
+    bool success = ExecuteString(isolate, source, file_name, true);
     free(main_buffer);
-    if (ret != 0) {
-        fprintf(stderr, "%s\r\n", luaL_checkstring(r->lua, -1));
+    if (!success) {
+        ReportException(isolate, &try_catch);
         return false;
     }
-    ret = lua_pcall(r->lua, 0, LUA_MULTRET, 0);
-    if (ret != 0) {
-        fprintf(stderr, "%s\r\n", luaL_checkstring(r->lua, -1));
-        return false;
-    }
+    while (v8::platform::PumpMessageLoop(static_platform, isolate))
+        continue;
 
     return true;
 }
 
 void rose_runtime_base_free(rose_runtime_base* r) {
-    lua_close(r->lua);
+    rose_js_base_free(r->js);
     // dont free fs, managed by system layer
     free(r->mem);
     free(r->screen);
@@ -216,7 +256,6 @@ void rose_runtime_base_update_mousestate(rose_runtime_base* r, const rose_mouses
 
     bool* wheel_inverted = (bool*) (r->mouse_wheel->begin + 4);
     *wheel_inverted = mousestate->wheel_inverted;
-    // printf("X:%hd Y:%hd\n", mousestate->x, mousestate->y);
 }
 
 void rose_runtime_base_update_keystate(rose_runtime_base* r, rose_keycode keycode, bool pressed) {

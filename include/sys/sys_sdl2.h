@@ -12,7 +12,7 @@
 #include "rt/fs/fs_base.h"
 #include "sys/sys_key_conversion.h"
 
-typedef struct {
+struct rose_system_sdl2 {
     // The window we'll be rendering to
     SDL_Window* window;
 
@@ -37,7 +37,7 @@ typedef struct {
     rose_runtime_game* game;
 
     rose_screenmode screen_mode;
-} rose_system_sdl2;
+};
 
 bool rose_sys_sdl2_init(rose_system_sdl2* s, int argc, char* argv[]);
 
