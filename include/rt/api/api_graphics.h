@@ -4,6 +4,11 @@
 #include "config.h"
 #include "rt/api/api_memory.h"
 #include "rt/rt_base.h"
+#include <algorithm>
+#include <cassert>
+#include <functional>
+#include <iterator>
+#include <array>
 
 rose_runtime_api_error rose_api_graphics_pset(rose_runtime_base* r, int16_t x, int16_t y, uint8_t val);
 
@@ -34,6 +39,14 @@ rose_runtime_api_error rose_api_graphics_circ_default(rose_runtime_base* r, int1
 rose_runtime_api_error rose_api_graphics_circfill(rose_runtime_base* r, int16_t x0, int16_t y0, uint16_t radius, uint8_t c);
 
 rose_runtime_api_error rose_api_graphics_circfill_default(rose_runtime_base* r, int16_t x0, int16_t y0, uint16_t radius);
+
+rose_runtime_api_error rose_api_graphics_tri(rose_runtime_base* r, int16_t v1_x, int16_t v1_y, int16_t v2_x, int16_t v2_y, int16_t v3_x, int16_t v3_y, uint8_t c);
+
+rose_runtime_api_error rose_api_graphics_tri_default(rose_runtime_base* r, int16_t v0_x, int16_t v0_y, int16_t v1_x, int16_t v1_y, int16_t v2_x, int16_t v2_y);
+
+rose_runtime_api_error rose_api_graphics_trifill(rose_runtime_base* r, int16_t v1_x, int16_t v1_y, int16_t v2_x, int16_t v2_y, int16_t v3_x, int16_t v3_y, uint8_t c);
+
+rose_runtime_api_error rose_api_graphics_trifill_default(rose_runtime_base* r, int16_t v0_x, int16_t v0_y, int16_t v1_x, int16_t v1_y, int16_t v2_x, int16_t v2_y);
 
 rose_runtime_api_error rose_api_graphics_cls(rose_runtime_base* r);
 

@@ -26,6 +26,10 @@ void rose_js_graphics_circ(const v8::FunctionCallbackInfo<v8::Value>& args);
 
 void rose_js_graphics_circfill(const v8::FunctionCallbackInfo<v8::Value>& args);
 
+void rose_js_graphics_tri(const v8::FunctionCallbackInfo<v8::Value>& args);
+
+void rose_js_graphics_trifill(const v8::FunctionCallbackInfo<v8::Value>& args);
+
 void rose_js_graphics_cls(const v8::FunctionCallbackInfo<v8::Value>& args);
 
 #endif //ROSEBUD_JS_GRAPHICS_H

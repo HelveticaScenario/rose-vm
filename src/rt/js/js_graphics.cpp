@@ -263,8 +263,71 @@ void rose_js_graphics_circfill(const v8::FunctionCallbackInfo<v8::Value>& args) 
     return circ_js_common(args, &rose_api_graphics_circfill, &rose_api_graphics_circfill_default);
 }
 
+void rose_js_graphics_tri(const v8::FunctionCallbackInfo<v8::Value>& args) {
+    if (args.Length() < 6) return;
+    HandleScope scope(args.GetIsolate());
+    rose_runtime_base* r = static_cast<rose_runtime_base*>(Local<External>::Cast(args.Data())->Value());
+
+    rose_runtime_api_error err = ROSE_API_ERR_NONE;
+    int16_t x0 = (int16_t) args[0]->Int32Value();
+    int16_t y0 = (int16_t) args[1]->Int32Value();
+    int16_t x1 = (int16_t) args[2]->Int32Value();
+    int16_t y1 = (int16_t) args[3]->Int32Value();
+    int16_t x2 = (int16_t) args[4]->Int32Value();
+    int16_t y2 = (int16_t) args[5]->Int32Value();
+    if (args.Length() >= 7) {
+        uint8_t col = (uint8_t) args[6]->Int32Value();
+        err = rose_api_graphics_tri(r, x0, y0, x1, y1, x2, y2, col);
+    } else {
+        err = rose_api_graphics_tri_default(r, x0, y0, x1, y1, x2, y2);
+    }
+
+    switch (err) {
+        case ROSE_API_ERR_OUT_OF_BOUNDS: {
+            Isolate* isolate = Isolate::GetCurrent();
+            isolate->ThrowException(String::NewFromUtf8(isolate, "Bad Memory Access"));
+            break;
+        }
+        case ROSE_API_ERR_NONE:
+        default: {
+            break;
+        }
+    }
+}
+
+void rose_js_graphics_trifill(const v8::FunctionCallbackInfo<v8::Value>& args) {
+    if (args.Length() < 6) return;
+    HandleScope scope(args.GetIsolate());
+    rose_runtime_base* r = static_cast<rose_runtime_base*>(Local<External>::Cast(args.Data())->Value());
+
+    rose_runtime_api_error err = ROSE_API_ERR_NONE;
+    int16_t x0 = (int16_t) args[0]->Int32Value();
+    int16_t y0 = (int16_t) args[1]->Int32Value();
+    int16_t x1 = (int16_t) args[2]->Int32Value();
+    int16_t y1 = (int16_t) args[3]->Int32Value();
+    int16_t x2 = (int16_t) args[4]->Int32Value();
+    int16_t y2 = (int16_t) args[5]->Int32Value();
+    if (args.Length() >= 7) {
+        uint8_t col = (uint8_t) args[6]->Int32Value();
+        err = rose_api_graphics_trifill(r, x0, y0, x1, y1, x2, y2, col);
+    } else {
+        err = rose_api_graphics_trifill_default(r, x0, y0, x1, y1, x2, y2);
+    }
+
+    switch (err) {
+        case ROSE_API_ERR_OUT_OF_BOUNDS: {
+            Isolate* isolate = Isolate::GetCurrent();
+            isolate->ThrowException(String::NewFromUtf8(isolate, "Bad Memory Access"));
+            break;
+        }
+        case ROSE_API_ERR_NONE:
+        default: {
+            break;
+        }
+    }
+}
+
 void rose_js_graphics_cls(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    if (args.Length() < 2) return;
     HandleScope scope(args.GetIsolate());
     rose_runtime_base* r = static_cast<rose_runtime_base*>(Local<External>::Cast(args.Data())->Value());
 

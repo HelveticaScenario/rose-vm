@@ -59,6 +59,12 @@ rose_js_base* rose_js_base_create(rose_runtime_base* r) {
     v8::Local<v8::FunctionTemplate> circfill = FunctionTemplate::New(isolate, rose_js_graphics_circfill, r_ptr);
     global->Set(String::NewFromUtf8(isolate, "circfill", NewStringType::kNormal).ToLocalChecked(), circfill);
 
+    v8::Local<v8::FunctionTemplate> tri = FunctionTemplate::New(isolate, rose_js_graphics_tri, r_ptr);
+    global->Set(String::NewFromUtf8(isolate, "tri", NewStringType::kNormal).ToLocalChecked(), tri);
+
+    v8::Local<v8::FunctionTemplate> trifill = FunctionTemplate::New(isolate, rose_js_graphics_trifill, r_ptr);
+    global->Set(String::NewFromUtf8(isolate, "trifill", NewStringType::kNormal).ToLocalChecked(), trifill);
+
     v8::Local<v8::FunctionTemplate> cls = FunctionTemplate::New(isolate, rose_js_graphics_cls, r_ptr);
     global->Set(String::NewFromUtf8(isolate, "cls", NewStringType::kNormal).ToLocalChecked(), cls);
 
