@@ -14,6 +14,7 @@ rose_runtime_api_error rose_api_graphics_pset(rose_runtime_base* r, int16_t x, i
     coord_cam_offset(r, &x, &y);
     if (x >= 0 && x < ROSE_SCREEN_WIDTH && y >= 0 && y < ROSE_SCREEN_HEIGHT) {
         rose_memory_range* screen = r->screen;
+        uint8_t* asd = screen->begin;
         *(screen->begin + (y * ROSE_SCREEN_WIDTH) + x) = c;
         *r->pen_color_addr = c;
     }

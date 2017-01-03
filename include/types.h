@@ -7,36 +7,40 @@
 #include <string.h>
 #include <errno.h>
 #include <time.h>
-#include <lua.h>
-#include <lauxlib.h>
-#include <luaconf.h>
-#include <lualib.h>
-#include <luajit.h>
 #include <stdint.h>
+#include <string.h>
+#include <zlib.h>
+#include <archive.h>
+#include <archive_entry.h>
 
-typedef enum {
+#include "libplatform/libplatform.h"
+#include "v8.h"
+
+using namespace v8;
+
+enum rose_runtime_api_error{
     ROSE_API_ERR_NONE,
     ROSE_API_ERR_OUT_OF_BOUNDS
-} rose_runtime_api_error;
+};
 
-typedef enum { ROSE_GAMEMODE, ROSE_EDITORMODE } rose_screenmode;
+enum rose_screenmode { ROSE_GAMEMODE, ROSE_EDITORMODE };
 
-typedef struct {
+struct rose_color{
     uint8_t r;
     uint8_t g;
     uint8_t b;
-} rose_color;
+};
 
 // ***** fs_base
 
-typedef enum {
+enum rose_fs_error {
     ROSE_FS_NO_ERR,
     ROSE_FS_CRITICAL_ERR
-} rose_fs_error;
+};
 
-typedef enum { ROSE_CODE_FILE, ROSE_DATA_FILE, ROSE_DIRECTORY, ROSE_CART_DIRECTORY } rose_file_type;
+enum rose_file_type { ROSE_CODE_FILE, ROSE_DATA_FILE, ROSE_DIRECTORY, ROSE_CART_DIRECTORY };
 
-typedef struct rose_file {
+struct rose_file {
     const rose_file_type type;
     const char* name;
     const off_t size;
@@ -44,15 +48,16 @@ typedef struct rose_file {
     struct rose_file* parent;
     struct rose_file** contents;
     size_t contents_len;
-} rose_file;
+};
 
 typedef rose_fs_error (*rose_fd_hook_readfile)(rose_file* file, uint8_t** buffer, size_t* buffer_len);
 typedef rose_fs_error (*rose_fs_hook_writefile)(rose_file* file, uint8_t* buffer, size_t buffer_len);
 typedef rose_fs_error (*rose_fs_hook_update_file)(rose_file* old_file, rose_file* new_file);
 typedef rose_fs_error (*rose_fs_hook_new_file)(rose_file* parent, rose_file** res, const char* name, rose_file_type file_type);
 typedef rose_fs_error (*rose_fs_hook_shutdown)();
+typedef rose_fs_error (*rose_fs_hook_get_base_path)(char** path);
 
-typedef struct rose_fs {
+struct rose_fs {
     rose_file* cart;
     rose_file* root;
     rose_file* pwd;
@@ -61,19 +66,31 @@ typedef struct rose_fs {
     rose_fs_hook_update_file update_file;
     rose_fs_hook_new_file new_file;
     rose_fs_hook_shutdown shutdown;
-} rose_fs;
+    rose_fs_hook_get_base_path get_base_path;
+};
+
+// **** js_base
+
+
+struct rose_js_base {
+    rose_fs* fs;
+    Isolate* isolate;
+    Isolate::CreateParams create_params;
+    Global<ObjectTemplate> global_template;
+    Global<Context> context;
+};
 
 
 // **** rt_base
 
 
-typedef enum {
+enum rose_runtime_base_error{
     ROSE_RT_BASE_FUN_NOT_FOUND,
     ROSE_RT_BASE_NO_ERR,
     ROSE_RT_BASE_CRITICAL_ERR
-} rose_runtime_base_error;
+};
 
-typedef enum {
+enum rose_keycode {
     ROSE_KEYCODE_A = 0,
     ROSE_KEYCODE_B = 1,
     ROSE_KEYCODE_C = 2,
@@ -315,10 +332,10 @@ typedef enum {
     ROSE_KEYCODE_APP1 = 238,
     ROSE_KEYCODE_APP2 = 239,
     ROSE_KEYCODE_UNKNOWN = 240
-} rose_keycode;
+};
 
 
-typedef struct {
+struct rose_mousestate {
     int16_t x;
     int16_t y;
     bool left_btn_down;
@@ -329,18 +346,17 @@ typedef struct {
     int16_t wheel_x;
     int16_t wheel_y;
     bool wheel_inverted;
-} rose_mousestate;
+};
 
 typedef uint8_t* rose_memory_iterator;
 
-typedef struct {
+struct rose_memory_range {
     rose_memory_iterator begin;
     rose_memory_iterator end;
-} rose_memory_range;
+};
 
-typedef struct {
-    lua_State* lua;
-
+struct rose_runtime_base {
+    rose_js_base* js;
     uint8_t* mem;
     uint32_t mem_size;
     rose_memory_range* screen;
@@ -357,19 +373,19 @@ typedef struct {
     rose_memory_range* key_states;
 
     rose_fs* fs;
-} rose_runtime_base;
+};
 
 
 // *** rt_game
 
-typedef enum {
+enum rose_runtime_game_error {
     ROSE_RT_GAME_FUN_NOT_FOUND,
     ROSE_RT_GAME_NO_ERR,
     ROSE_RT_GAME_CRITICAL_ERR
-} rose_runtime_game_error;
+};
 
-typedef struct {
+struct rose_runtime_game {
     rose_runtime_base* base;
-} rose_runtime_game;
+};
 
 #endif

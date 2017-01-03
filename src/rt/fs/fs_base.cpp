@@ -118,7 +118,7 @@ void archive_test(const char *base_path) {
 
     const char *config_fname = "config.txt.zip";
     char *config_fpath = NULL;
-    config_fpath = malloc(strlen(base_path) + strlen(config_fname) + 1);
+    config_fpath = (char*) malloc(strlen(base_path) + strlen(config_fname) + 1);
     strcpy(config_fpath, base_path);
     strcat(config_fpath, config_fname);
     printf("%s\n", config_fpath);

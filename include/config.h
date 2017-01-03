@@ -5,19 +5,16 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#include <lua.h>
-#include <lauxlib.h>
-#include <luaconf.h>
-#include <lualib.h>
-#include <luajit.h>
-
+#include <cassert>
 #include "types.h"
 
 #define ROSE_APP_NAME ("Rosebud")
 #define ROSE_DATA_FILE_NAME ("CART_DATA")
-#define ROSE_MAIN_CODE_FILE_NAME ("main.lua")
-#define ROSE_CODE_FILE_SUFFIX (".lua")
+#define ROSE_MAIN_CODE_FILE_NAME ("main.js")
+#define ROSE_CODE_FILE_SUFFIX (".js")
 
+#define ROSE_MIN_INT16 (-32767)
+#define ROSE_MAX_INT16 (32767)
 
 
 #define ROSE_SCREEN_WIDTH 320
