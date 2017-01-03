@@ -68,8 +68,6 @@ void rect_swap(int16_t* x0, int16_t* y0, int16_t* x1, int16_t* y1) {
 }
 
 rose_runtime_api_error rose_api_graphics_line(rose_runtime_base* r, int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t c) {
-    rect_swap(&x0, &y0, &x1, &y1);
-
     int16_t dx = (int16_t) abs(x1 - x0), sx = (int16_t) (x0 < x1 ? 1 : -1);
     int16_t dy = (int16_t) abs(y1 - y0), sy = (int16_t) (y0 < y1 ? 1 : -1);
     int16_t err = (int16_t) ((dx > dy ? dx : -dy) / 2), e2;
