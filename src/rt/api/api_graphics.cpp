@@ -68,7 +68,7 @@ void rect_swap(int16_t* x0, int16_t* y0, int16_t* x1, int16_t* y1) {
 }
 
 rose_runtime_api_error rose_api_graphics_line(rose_runtime_base* r, int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t c) {
-    // rect_swap(&x0, &y0, &x1, &y1);
+    rect_swap(&x0, &y0, &x1, &y1);
 
     int16_t dx = (int16_t) abs(x1 - x0), sx = (int16_t) (x0 < x1 ? 1 : -1);
     int16_t dy = (int16_t) abs(y1 - y0), sy = (int16_t) (y0 < y1 ? 1 : -1);
@@ -146,7 +146,8 @@ rose_runtime_api_error rose_api_graphics_rectfill(rose_runtime_base* r, int16_t 
     // Draw
     int i;
     for (i = y0; i <= y1; ++i) {
-        memset(r->screen->begin + (i * ROSE_SCREEN_WIDTH) + x0, c, x1 - x0 + 1);
+        memset(r->screen->begin + (i * ROSE_SCREEN_WIDTH) + x0, c,
+               (size_t) (x1 - x0 + 1));
     }
     *r->pen_color_addr = c;
     return ROSE_API_ERR_NONE;

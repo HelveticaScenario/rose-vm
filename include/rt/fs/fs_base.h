@@ -19,7 +19,7 @@ void rose_fill_file_struct(rose_file** file, rose_file_type type, const char* na
 
 rose_file* rose_fs_fetch_cart_data_file(rose_file* cart_root);
 
-rose_file* rose_fs_fetch_cart_lua_main(rose_file* cart_root);
+rose_file* rose_fs_fetch_cart_js_main(rose_file* cart_root);
 
 rose_file* rose_fs_fetch_cart_root(rose_file* file);
 

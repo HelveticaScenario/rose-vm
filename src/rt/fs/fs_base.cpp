@@ -93,16 +93,16 @@ rose_file* rose_fs_fetch_cart_data_file(rose_file* cart_root) {
     return cart_data;
 }
 
-rose_file* rose_fs_fetch_cart_lua_main(rose_file* cart_root) {
-    rose_file* lua_main = NULL;
+rose_file* rose_fs_fetch_cart_js_main(rose_file* cart_root) {
+    rose_file* js_main = NULL;
     int i;
     for (i = 0; i < cart_root->contents_len; i++) {
         if (cart_root->contents[i]->type == ROSE_CODE_FILE && strcmp(cart_root->contents[i]->name, ROSE_MAIN_CODE_FILE_NAME) == 0) {
-            lua_main = cart_root->contents[i];
+            js_main = cart_root->contents[i];
             break;
         }
     }
-    return lua_main;
+    return js_main;
 }
 
 rose_file* rose_fs_fetch_cart_root(rose_file* file) {

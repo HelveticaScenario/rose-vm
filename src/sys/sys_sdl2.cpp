@@ -606,7 +606,8 @@ rose_file* rose_sys_recursive_file_create(const char* path, const char* name) {
 
     file->contents = arr;
     file->contents_len = file_count;
-    if (rose_fs_fetch_cart_data_file(file) != NULL && rose_fs_fetch_cart_lua_main(file) != NULL) {
+    if (rose_fs_fetch_cart_data_file(file) != NULL &&
+            rose_fs_fetch_cart_js_main(file) != NULL) {
         rose_fill_file_struct(&file, ROSE_CART_DIRECTORY, file->name, file->size, file->last_disk_modification);
     }
 

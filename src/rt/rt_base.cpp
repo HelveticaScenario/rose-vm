@@ -174,7 +174,7 @@ bool rose_runtime_base_load_run_main(rose_runtime_base* r) {
     }
     memcpy(r->mem, cart_data_buffer, cart_data_size);
     free(cart_data_buffer);
-    rose_file* main = rose_fs_fetch_cart_lua_main(r->fs->cart);
+    rose_file* main = rose_fs_fetch_cart_js_main(r->fs->cart);
     if (main == NULL) {
         fprintf(stderr, "ERROR: no main file found\n");
         return false;
