@@ -114,6 +114,24 @@ rose_file* rose_fs_fetch_cart_root(rose_file* file) {
     return file;
 }
 
+rose_file* rose_fs_fetch_neighbor(rose_file* file, const char* neighbor_name) {
+    if (file->parent == NULL) {
+        return NULL;
+    }
+
+    return rose_fs_fetch_child(file->parent, neighbor_name);
+}
+
+rose_file* rose_fs_fetch_child(rose_file* file, const char* child_name) {
+    int i;
+    for (i = 0; i < file->contents_len; i++) {
+        if (strcmp(file->contents[i]->name, child_name) == 0) {
+            return file->contents[i];
+        }
+    }
+    return NULL;
+}
+
 void archive_test(const char *base_path) {
 
     const char *config_fname = "config.txt.zip";

@@ -112,17 +112,29 @@ rose_runtime_base* rose_runtime_base_create(rose_fs* fs) {
     btn_states_range->begin = beg_btn_states;
     btn_states_range->end = end_btn_states;
 
+    rose_memory_range* prev_btn_states_range = (rose_memory_range*) malloc(sizeof(rose_memory_range));
+    rose_memory_iterator beg_prev_btn_states = end_btn_states;
+    rose_memory_iterator end_prev_btn_states = beg_prev_btn_states + 4 /* 32 bit fields */;
+    prev_btn_states_range->begin = beg_prev_btn_states;
+    prev_btn_states_range->end = end_prev_btn_states;
+
     rose_memory_range* mouse_wheel_range = (rose_memory_range*) malloc(sizeof(rose_memory_range));
-    rose_memory_iterator beg_mouse_wheel = end_btn_states;
+    rose_memory_iterator beg_mouse_wheel = end_prev_btn_states;
     rose_memory_iterator end_mouse_wheel = beg_mouse_wheel + 5 /* 2 16 bit ints and one bool */;
     mouse_wheel_range->begin = beg_mouse_wheel;
     mouse_wheel_range->end = end_mouse_wheel;
 
     rose_memory_range* key_states_range = (rose_memory_range*) malloc(sizeof(rose_memory_range));
-    rose_memory_iterator beg_key_states = end_btn_states;
+    rose_memory_iterator beg_key_states = end_mouse_wheel;
     rose_memory_iterator end_key_states = beg_key_states + 30 /* 240 bit fields */;
     key_states_range->begin = beg_key_states;
     key_states_range->end = end_key_states;
+
+    rose_memory_range* prev_key_states_range = (rose_memory_range*) malloc(sizeof(rose_memory_range));
+    rose_memory_iterator beg_prev_key_states = end_key_states;
+    rose_memory_iterator end_prev_key_states = beg_prev_key_states + 30 /* 240 bit fields */;
+    prev_key_states_range->begin = beg_prev_key_states;
+    prev_key_states_range->end = end_prev_key_states;
 
     rose_runtime_base* r = (rose_runtime_base*) malloc(sizeof(rose_runtime_base));
 
@@ -139,8 +151,10 @@ rose_runtime_base* rose_runtime_base_create(rose_fs* fs) {
     r->camera_offset = camera_offset_range;
     r->pointer_positions = pointer_positions_range;
     r->btn_states = btn_states_range;
+    r->prev_btn_states = prev_btn_states_range;
     r->mouse_wheel = mouse_wheel_range;
     r->key_states = key_states_range;
+    r->prev_key_states = prev_key_states_range;
 
     r->js = rose_js_base_create(r);
     return r;
@@ -148,6 +162,7 @@ rose_runtime_base* rose_runtime_base_create(rose_fs* fs) {
 
 bool rose_runtime_base_clear(rose_runtime_base* r) {
     memset(r->mem, 0, r->mem_size);
+    r->js->module_cache.Reset();
     r->js->context.Reset();
     return true;
 }
@@ -179,6 +194,8 @@ bool rose_runtime_base_load_run_main(rose_runtime_base* r) {
         fprintf(stderr, "ERROR: no main file found\n");
         return false;
     }
+    r->js->include_path.clear();
+    r->js->include_path.push_back(main);
 
     uint8_t* main_buffer = NULL;
     size_t main_size;
@@ -203,18 +220,29 @@ bool rose_runtime_base_load_run_main(rose_runtime_base* r) {
     }
     v8::Context::Scope context_scope(context);
 
-    v8::Local<v8::String> file_name = v8::String::NewFromUtf8(isolate, r->fs->cart->name, v8::NewStringType::kNormal).ToLocalChecked();
+    v8::Local<v8::String> file_name = v8::String::NewFromUtf8(isolate, main->name, v8::NewStringType::kNormal).ToLocalChecked();
     v8::Local<v8::String> source;
     if (!v8::String::NewFromUtf8(isolate, (const char*) main_buffer, v8::NewStringType::kNormal).ToLocal(&source)) {
         ReportException(isolate, &try_catch);
         return false;
     }
-    bool success = ExecuteString(isolate, source, file_name, true);
+
+    Local<Map> module_cache = Map::New(isolate);
+    r->js->module_cache.Reset(isolate, module_cache);
+
+    bool failed;
+    auto res = ExecuteString(isolate, source, file_name, true, &failed);
     free(main_buffer);
-    if (!success) {
+    if (failed) {
         ReportException(isolate, &try_catch);
         return false;
     }
+
+//    auto main_path = rose_construct_path(main);
+//    module_cache->Set(context, v8::String::NewFromUtf8(isolate, (const char*) main_path, v8::NewStringType::kNormal).ToLocalChecked(), res);
+//    free(main_path);
+
+//    auto thing = r->js->module_cache.Get(isolate);
     while (v8::platform::PumpMessageLoop(static_platform, isolate))
         continue;
 
@@ -237,6 +265,11 @@ void rose_runtime_base_free(rose_runtime_base* r) {
     free(r->mouse_wheel);
     free(r->key_states);
     free(r);
+}
+
+void rose_runtime_base_save_input_frame(rose_runtime_base* r) {
+    memcpy(r->prev_btn_states->begin, r->btn_states->begin, r->prev_btn_states->end - r->prev_btn_states->begin);
+    memcpy(r->prev_key_states->begin, r->key_states->begin, r->prev_key_states->end - r->prev_key_states->begin);
 }
 
 void rose_runtime_base_update_mousestate(rose_runtime_base* r, const rose_mousestate* mousestate) {

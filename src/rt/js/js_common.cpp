@@ -49,10 +49,10 @@ void ReportException(v8::Isolate* isolate, v8::TryCatch* try_catch) {
 
 
 // Executes a string within the current v8 context.
-bool ExecuteString(v8::Isolate* isolate, v8::Local<v8::String> source,
-                   v8::Local<v8::Value> name, bool report_exceptions) {
+v8::Local<v8::Value> ExecuteString(v8::Isolate* isolate, v8::Local<v8::String> source,
+                   v8::Local<v8::Value> name, bool report_exceptions, bool* failed) {
     v8::Isolate::Scope isolate_scope(isolate);
-    v8::HandleScope handle_scope(isolate);
+    v8::EscapableHandleScope handle_scope(isolate);
     v8::TryCatch try_catch(isolate);
     v8::ScriptOrigin origin(name);
     v8::Local<v8::Context> context(isolate->GetCurrentContext());
@@ -62,7 +62,8 @@ bool ExecuteString(v8::Isolate* isolate, v8::Local<v8::String> source,
         // Print errors that happened during compilation.
         if (report_exceptions)
             ReportException(isolate, &try_catch);
-        return false;
+        *failed = true;
+        return handle_scope.Escape(Null(isolate));
     } else {
         v8::Local<v8::Value> result;
         if (!script->Run(context).ToLocal(&result)) {
@@ -70,10 +71,12 @@ bool ExecuteString(v8::Isolate* isolate, v8::Local<v8::String> source,
             // Print errors that happened during execution.
             if (report_exceptions)
                 ReportException(isolate, &try_catch);
-            return false;
+            *failed = true;
+            return handle_scope.Escape(Null(isolate));
         } else {
             assert(!try_catch.HasCaught());
-            return true;
+            *failed = false;
+            return handle_scope.Escape(result);
         }
     }
 }

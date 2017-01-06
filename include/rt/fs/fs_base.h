@@ -23,6 +23,10 @@ rose_file* rose_fs_fetch_cart_js_main(rose_file* cart_root);
 
 rose_file* rose_fs_fetch_cart_root(rose_file* file);
 
+rose_file* rose_fs_fetch_neighbor(rose_file* file, const char* neighbor_name);
+
+rose_file* rose_fs_fetch_child(rose_file* file, const char* child_name);
+
 static uint8_t rose_default_palette[16 * 3] = {
         0,   0,   0,   // black
         29,  43,  83,  // dark-blue

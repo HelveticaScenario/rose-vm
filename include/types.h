@@ -1,22 +1,30 @@
 #ifndef ROSE_TYPES_H
 #define ROSE_TYPES_H
 
-#include <stdint.h>
-#include <stdbool.h>
-#include <stdlib.h>
-#include <string.h>
-#include <errno.h>
-#include <time.h>
-#include <stdint.h>
-#include <string.h>
+#include <cstdint>
+#include <cstdbool>
+#include <cstdlib>
+#include <cerrno>
+#include <ctime>
+#include <cstdint>
+#include <cstring>
+#include <cassert>
+#include <iostream>
+#include <string>
 #include <zlib.h>
 #include <archive.h>
 #include <archive_entry.h>
+#include <vector>
+#include <sstream>
+#include <algorithm>
+#include <iterator>
+#include <map>
 
 #include "libplatform/libplatform.h"
 #include "v8.h"
-
+using namespace std;
 using namespace v8;
+
 
 enum rose_runtime_api_error{
     ROSE_API_ERR_NONE,
@@ -78,8 +86,9 @@ struct rose_js_base {
     Isolate::CreateParams create_params;
     Global<ObjectTemplate> global_template;
     Global<Context> context;
+    std::vector<rose_file*> include_path;
+    Global<v8::Map> module_cache;
 };
-
 
 // **** rt_base
 
@@ -369,8 +378,10 @@ struct rose_runtime_base {
     rose_memory_range* camera_offset;
     rose_memory_range* pointer_positions;
     rose_memory_range* btn_states;
+    rose_memory_range* prev_btn_states;
     rose_memory_range* mouse_wheel;
     rose_memory_range* key_states;
+    rose_memory_range* prev_key_states;
 
     rose_fs* fs;
 };

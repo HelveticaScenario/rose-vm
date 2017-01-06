@@ -11,7 +11,7 @@ const char* ToCString(const v8::String::Utf8Value& value);
 
 void ReportException(v8::Isolate* isolate, v8::TryCatch* try_catch);
 
-bool ExecuteString(v8::Isolate* isolate, v8::Local<v8::String> source,
-                   v8::Local<v8::Value> name, bool report_exceptions);
+v8::Local<v8::Value>  ExecuteString(v8::Isolate* isolate, v8::Local<v8::String> source,
+                   v8::Local<v8::Value> name, bool report_exceptions, bool* failed);
 
 #endif //ROSEBUD_JS_COMMON_H

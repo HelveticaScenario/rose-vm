@@ -24,6 +24,8 @@ bool rose_runtime_base_load_run_main(rose_runtime_base* r);
 
 void rose_runtime_base_free(rose_runtime_base* r);
 
+void rose_runtime_base_save_input_frame(rose_runtime_base* r);
+
 void rose_runtime_base_update_mousestate(rose_runtime_base* r, const rose_mousestate* mousestate);
 
 void rose_runtime_base_update_keystate(rose_runtime_base* r, rose_keycode keycode, bool pressed);

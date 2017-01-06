@@ -9,10 +9,14 @@ rose_runtime_api_error rose_api_input_mouse(rose_runtime_base* r, int16_t* x, in
 
 rose_runtime_api_error rose_api_input_btn(rose_runtime_base* r, uint8_t idx, bool* res);
 
+rose_runtime_api_error rose_api_input_btnp(rose_runtime_base* r, uint8_t idx, bool* res);
+
 rose_runtime_api_error rose_api_input_wheel(rose_runtime_base* r, int16_t* x, int16_t* y);
 
 rose_runtime_api_error rose_api_input_wheel_inverted(rose_runtime_base* r, bool* res);
 
 rose_runtime_api_error rose_api_input_key(rose_runtime_base* r, rose_keycode keycode, bool* res);
+
+rose_runtime_api_error rose_api_input_keyp(rose_runtime_base* r, rose_keycode keycode, bool* res);
 
 #endif

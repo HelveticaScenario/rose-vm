@@ -154,6 +154,8 @@ void rose_sys_sdl2_run(rose_system_sdl2* s) {
     make_screen_rect(s, &screen_rect);
     rose_runtime_game_error err = ROSE_RT_GAME_NO_ERR;
     while (!quit) {
+        rose_runtime_base_save_input_frame(s->game->base);
+
         // Handle events on queue
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
@@ -514,6 +516,9 @@ rose_fs_error rose_sys_shutdown() {
 
 rose_file* rose_sys_recursive_file_create(const char* path, const char* name) {
 
+    if (strcmp("matter-js", name) == 0) {
+        int i = 0;
+    }
     struct stat attrib;
     stat(path, &attrib);
     rose_file* file = NULL;
@@ -547,7 +552,7 @@ rose_file* rose_sys_recursive_file_create(const char* path, const char* name) {
         {
 
             while ((ep = readdir(dp))) {
-                if (strcmp(ep->d_name,".") == 0 || strcmp(ep->d_name,"..") == 0 || strcmp(ep->d_name,".DS_Store") == 0) {
+                if (strcmp(ep->d_name,".") == 0 || strcmp(ep->d_name,"..") == 0 || strcmp(ep->d_name,".DS_Store") == 0 || strcmp(ep->d_name,".git") == 0) {
                     continue;
                 }
                 if (ep->d_type == DT_REG || ep->d_type == DT_DIR) { /* If the entry is a regular file or directory*/
