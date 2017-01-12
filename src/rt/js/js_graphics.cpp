@@ -1,4 +1,4 @@
-#include "rt/js/js_graphics.h"
+#include "js_graphics.h"
 
 int16_t clamp(int32_t v) {
     if (v > ROSE_MAX_INT16) {

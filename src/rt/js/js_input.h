@@ -1,8 +1,8 @@
 #ifndef ROSEBUD_JS_INPUT_H
 #define ROSEBUD_JS_INPUT_H
 
-#include "config.h"
-#include "rt/api/api_input.h"
+#include "../../config.h"
+#include "../api/api_input.h"
 
 void rose_js_input_mouse(const v8::FunctionCallbackInfo<v8::Value>& args);
 

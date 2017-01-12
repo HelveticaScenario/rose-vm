@@ -1,8 +1,8 @@
 #ifndef ROSE_API_MEMORY_H
 #define ROSE_API_MEMORY_H
 
-#include "config.h"
-#include "rt/rt.h"
+#include "../../config.h"
+#include "../rt.h"
 
 rose_api_error rose_api_memory_poke(rose_rt* r, uint32_t idx, uint8_t val);
 

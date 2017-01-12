@@ -1,5 +1,5 @@
 #include <cassert>
-#include "rt/rt.h"
+#include "rt.h"
 
 static v8::Platform* static_platform;
 

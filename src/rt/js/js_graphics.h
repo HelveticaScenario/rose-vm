@@ -5,8 +5,8 @@
 #ifndef ROSEBUD_JS_GRAPHICS_H
 #define ROSEBUD_JS_GRAPHICS_H
 
-#include "config.h"
-#include "rt/api/api_graphics.h"
+#include "../../config.h"
+#include "../api/api_graphics.h"
 
 void rose_js_graphics_pset(const v8::FunctionCallbackInfo<v8::Value>& args);
 

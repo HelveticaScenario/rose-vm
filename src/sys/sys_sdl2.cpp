@@ -1,4 +1,4 @@
-#include "sys/sys_sdl2.h"
+#include "sys_sdl2.h"
 
 // Renders screen
 void render(rose_system_sdl2* s);

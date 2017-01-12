@@ -5,7 +5,7 @@
 #ifndef ROSEBUD_JS_COMMON_H
 #define ROSEBUD_JS_COMMON_H
 
-#include "config.h"
+#include "../../config.h"
 
 const char* ToCString(const v8::String::Utf8Value& value);
 

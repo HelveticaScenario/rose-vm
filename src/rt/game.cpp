@@ -1,4 +1,4 @@
-#include "rt/game.h"
+#include "game.h"
 
 rose_game* rose_game_create(rose_fs* fs) {
     if (fs == NULL) {

@@ -1,9 +1,9 @@
 #ifndef ROSE_API_INPUT_H
 #define ROSE_API_INPUT_H
 
-#include "config.h"
-#include "rt/api/api_memory.h"
-#include "rt/rt.h"
+#include "../../config.h"
+#include "api_memory.h"
+#include "../rt.h"
 
 rose_api_error rose_api_input_mouse(rose_rt* r, int16_t* x, int16_t* y);
 

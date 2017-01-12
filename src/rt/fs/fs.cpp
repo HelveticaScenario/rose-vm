@@ -1,4 +1,4 @@
-#include "rt/fs/fs.h"
+#include "fs.h"
 
 void rose_file_free_recurse(rose_file* info) {
     if (info->buffer != NULL) {

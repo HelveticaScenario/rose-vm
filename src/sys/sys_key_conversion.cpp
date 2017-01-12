@@ -1,4 +1,4 @@
-#include "sys/sys_key_conversion.h"
+#include "sys_key_conversion.h"
 
 SDL_Scancode rose_keycode_to_sdl_scancode(rose_keycode key) {
     switch (key) {

@@ -1,4 +1,4 @@
-#include "rt/api/api_input.h"
+#include "api_input.h"
 
 rose_api_error rose_api_input_mouse(rose_rt* r, int16_t* x, int16_t* y) {
     int16_t* pointer = (int16_t*) r->pointer_positions->begin;

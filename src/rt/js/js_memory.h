@@ -1,8 +1,8 @@
 #ifndef ROSEBUD_JS_MEMORY_H
 #define ROSEBUD_JS_MEMORY_H
 
-#include "config.h"
-#include "rt/api/api_memory.h"
+#include "../../config.h"
+#include "../api/api_memory.h"
 
 void rose_js_memory_poke(const v8::FunctionCallbackInfo<v8::Value>& args);
 

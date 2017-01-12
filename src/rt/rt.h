@@ -1,10 +1,10 @@
 #ifndef ROSE_RT_BASE_H
 #define ROSE_RT_BASE_H
 
-#include "config.h"
-#include "rt/fs/fs.h"
-#include "rt/js/js_common.h"
-#include "rt/js/js.h"
+#include "../config.h"
+#include "fs/fs.h"
+#include "js/js_common.h"
+#include "js/js.h"
 
 const char* rose_keycode_to_string(rose_keycode key);
 

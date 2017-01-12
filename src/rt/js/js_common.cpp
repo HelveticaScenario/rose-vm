@@ -1,4 +1,4 @@
-#include "rt/js/js_common.h"
+#include "js_common.h"
 
 const char* ToCString(const v8::String::Utf8Value& value) {
     return *value ? *value : "<string conversion failed>";

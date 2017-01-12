@@ -1,4 +1,4 @@
-#include "rt/js/js.h"
+#include "js.h"
 
 
 void js_print(const v8::FunctionCallbackInfo<v8::Value>& args) {

@@ -1,7 +1,7 @@
 #ifndef ROSE_FS_BASE_H
 #define ROSE_FS_BASE_H
 
-#include "config.h"
+#include "../../config.h"
 #include <string.h>
 #include <zlib.h>
 #include <archive.h>

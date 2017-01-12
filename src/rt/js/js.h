@@ -1,11 +1,11 @@
 #ifndef ROSEBUD_JS_BASE_H
 #define ROSEBUD_JS_BASE_H
 
-#include "config.h"
-#include "rt/js/js_common.h"
-#include "rt/js/js_graphics.h"
-#include "rt/js/js_input.h"
-#include "rt/js/js_memory.h"
+#include "../../config.h"
+#include "js_common.h"
+#include "js_graphics.h"
+#include "js_input.h"
+#include "js_memory.h"
 
 
 rose_js* rose_js_create(rose_rt* r);

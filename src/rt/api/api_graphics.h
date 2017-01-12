@@ -1,9 +1,9 @@
 #ifndef ROSE_API_GRAPHICS_H
 #define ROSE_API_GRAPHICS_H
 
-#include "config.h"
-#include "rt/api/api_memory.h"
-#include "rt/rt.h"
+#include "../../config.h"
+#include "api_memory.h"
+#include "../rt.h"
 #include <algorithm>
 #include <cassert>
 #include <functional>

@@ -1,4 +1,4 @@
-#include "rt/js/js_memory.h"
+#include "js_memory.h"
 
 void rose_js_memory_poke(const v8::FunctionCallbackInfo<v8::Value>& args) {
     HandleScope scope(args.GetIsolate());

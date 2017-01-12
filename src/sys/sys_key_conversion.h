@@ -3,7 +3,7 @@
 
 
 #include <SDL_scancode.h>
-#include "config.h"
+#include "../config.h"
 
 SDL_Scancode rose_keycode_to_sdl_scancode(rose_keycode key);
 

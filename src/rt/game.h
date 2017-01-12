@@ -1,8 +1,8 @@
 #ifndef ROSE_RT_GAME_H
 #define ROSE_RT_GAME_H
 
-#include "config.h"
-#include "rt/rt.h"
+#include "../config.h"
+#include "rt.h"
 
 rose_game* rose_game_create(rose_fs* fs);
 

@@ -1,4 +1,4 @@
-#include "rt/api/api_graphics.h"
+#include "api_graphics.h"
 
 void coord_cam_offset(rose_rt* r, int16_t* x, int16_t* y) {
     int16_t* camera_offset = (int16_t*) r->camera_offset->begin;

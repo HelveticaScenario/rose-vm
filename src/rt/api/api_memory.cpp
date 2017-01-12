@@ -1,4 +1,4 @@
-#include "rt/api/api_memory.h"
+#include "api_memory.h"
 
 rose_api_error rose_api_memory_poke(rose_rt* r, uint32_t idx, uint8_t val) {
     if (idx >= r->mem_size) {

@@ -6,11 +6,11 @@
 #include <sys/types.h>
 #include <dirent.h>
 #include <sys/stat.h>
-#include "config.h"
-#include "rt/rt.h"
-#include "rt/game.h"
-#include "rt/fs/fs.h"
-#include "sys/sys_key_conversion.h"
+#include "../config.h"
+#include "../rt/rt.h"
+#include "../rt/game.h"
+#include "../rt/fs/fs.h"
+#include "sys_key_conversion.h"
 
 struct rose_system_sdl2 {
     // The window we'll be rendering to
