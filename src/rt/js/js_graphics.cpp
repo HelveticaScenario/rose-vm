@@ -14,9 +14,9 @@ int16_t clamp(int32_t v) {
 void rose_js_graphics_pset(const v8::FunctionCallbackInfo<v8::Value>& args) {
     if (args.Length() < 2) return;
     HandleScope scope(args.GetIsolate());
-    rose_runtime_base* r = static_cast<rose_runtime_base*>(Local<External>::Cast(args.Data())->Value());
+    rose_rt* r = static_cast<rose_rt*>(Local<External>::Cast(args.Data())->Value());
 
-    rose_runtime_api_error err = ROSE_API_ERR_NONE;
+    rose_api_error err = ROSE_API_ERR_NONE;
     if (args.Length() == 2) {
 
         int16_t x = clamp(args[0]->Int32Value());
@@ -44,9 +44,9 @@ void rose_js_graphics_pset(const v8::FunctionCallbackInfo<v8::Value>& args) {
 void rose_js_graphics_pget(const v8::FunctionCallbackInfo<v8::Value>& args) {
     if (args.Length() < 2) return;
     HandleScope scope(args.GetIsolate());
-    rose_runtime_base* r = static_cast<rose_runtime_base*>(Local<External>::Cast(args.Data())->Value());
+    rose_rt* r = static_cast<rose_rt*>(Local<External>::Cast(args.Data())->Value());
 
-    rose_runtime_api_error err = ROSE_API_ERR_NONE;
+    rose_api_error err = ROSE_API_ERR_NONE;
     uint8_t res = 0;
     int16_t x = clamp(args[0]->Int32Value());
     int16_t y = clamp(args[1]->Int32Value());
@@ -72,9 +72,9 @@ void rose_js_graphics_pget(const v8::FunctionCallbackInfo<v8::Value>& args) {
 void rose_js_graphics_palset(const v8::FunctionCallbackInfo<v8::Value>& args) {
     if (args.Length() < 4) return;
     HandleScope scope(args.GetIsolate());
-    rose_runtime_base* r = static_cast<rose_runtime_base*>(Local<External>::Cast(args.Data())->Value());
+    rose_rt* r = static_cast<rose_rt*>(Local<External>::Cast(args.Data())->Value());
 
-    rose_runtime_api_error err = ROSE_API_ERR_NONE;
+    rose_api_error err = ROSE_API_ERR_NONE;
     uint8_t idx = (uint8_t) args[0]->Int32Value();
     uint8_t red = (uint8_t) args[1]->Int32Value();
     uint8_t green = (uint8_t) args[2]->Int32Value();
@@ -98,9 +98,9 @@ void rose_js_graphics_palset(const v8::FunctionCallbackInfo<v8::Value>& args) {
 void rose_js_graphics_palget(const v8::FunctionCallbackInfo<v8::Value>& args) {
     if (args.Length() < 1) return;
     HandleScope scope(args.GetIsolate());
-    rose_runtime_base* r = static_cast<rose_runtime_base*>(Local<External>::Cast(args.Data())->Value());
+    rose_rt* r = static_cast<rose_rt*>(Local<External>::Cast(args.Data())->Value());
 
-    rose_runtime_api_error err = ROSE_API_ERR_NONE;
+    rose_api_error err = ROSE_API_ERR_NONE;
     uint8_t idx = (uint8_t) args[0]->Int32Value();
     rose_color res;
     err = rose_api_graphics_palget(r, idx, &res);
@@ -133,9 +133,9 @@ void rose_js_graphics_palget(const v8::FunctionCallbackInfo<v8::Value>& args) {
 void rose_js_graphics_line(const v8::FunctionCallbackInfo<v8::Value>& args) {
     if (args.Length() < 4) return;
     HandleScope scope(args.GetIsolate());
-    rose_runtime_base* r = static_cast<rose_runtime_base*>(Local<External>::Cast(args.Data())->Value());
+    rose_rt* r = static_cast<rose_rt*>(Local<External>::Cast(args.Data())->Value());
 
-    rose_runtime_api_error err = ROSE_API_ERR_NONE;
+    rose_api_error err = ROSE_API_ERR_NONE;
     int16_t x0 = (int16_t) args[0]->Int32Value();
     int16_t y0 = (int16_t) args[1]->Int32Value();
     int16_t x1 = (int16_t) args[2]->Int32Value();
@@ -160,15 +160,15 @@ void rose_js_graphics_line(const v8::FunctionCallbackInfo<v8::Value>& args) {
     }
 }
 
-typedef rose_runtime_api_error (*rect_fp)(rose_runtime_base* r, int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t col);
-typedef rose_runtime_api_error (*rect_default_fp)(rose_runtime_base* r, int16_t x0, int16_t y0, int16_t x1, int16_t y1);
+typedef rose_api_error (*rect_fp)(rose_rt* r, int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t col);
+typedef rose_api_error (*rect_default_fp)(rose_rt* r, int16_t x0, int16_t y0, int16_t x1, int16_t y1);
 
 void rect_js_common(const v8::FunctionCallbackInfo<v8::Value>& args, rect_fp rect, rect_default_fp rect_default) {
     if (args.Length() < 4) return;
     HandleScope scope(args.GetIsolate());
-    rose_runtime_base* r = static_cast<rose_runtime_base*>(Local<External>::Cast(args.Data())->Value());
+    rose_rt* r = static_cast<rose_rt*>(Local<External>::Cast(args.Data())->Value());
 
-    rose_runtime_api_error err = ROSE_API_ERR_NONE;
+    rose_api_error err = ROSE_API_ERR_NONE;
     if (args.Length() >= 4) {
         int16_t x0 = (int16_t) args[0]->Int32Value();
         int16_t y0 = (int16_t) args[1]->Int32Value();
@@ -216,15 +216,15 @@ void rose_js_graphics_rectfill(const v8::FunctionCallbackInfo<v8::Value>& args) 
     return rect_js_common(args, &rose_api_graphics_rectfill, &rose_api_graphics_rectfill_default);
 }
 
-typedef rose_runtime_api_error (*circ_fp)(rose_runtime_base* r, int16_t x0, int16_t y0, uint16_t radius, uint8_t col);
-typedef rose_runtime_api_error (*circ_default_fp)(rose_runtime_base* r, int16_t x0, int16_t y0, uint16_t radius);
+typedef rose_api_error (*circ_fp)(rose_rt* r, int16_t x0, int16_t y0, uint16_t radius, uint8_t col);
+typedef rose_api_error (*circ_default_fp)(rose_rt* r, int16_t x0, int16_t y0, uint16_t radius);
 
 void circ_js_common(const v8::FunctionCallbackInfo<v8::Value>& args, circ_fp circ, circ_default_fp circ_default) {
     if (args.Length() < 4) return;
     HandleScope scope(args.GetIsolate());
-    rose_runtime_base* r = static_cast<rose_runtime_base*>(Local<External>::Cast(args.Data())->Value());
+    rose_rt* r = static_cast<rose_rt*>(Local<External>::Cast(args.Data())->Value());
 
-    rose_runtime_api_error err = ROSE_API_ERR_NONE;
+    rose_api_error err = ROSE_API_ERR_NONE;
     if (args.Length() >= 2) {
         int16_t x0 = (int16_t) args[0]->Int32Value();
         int16_t y0 = (int16_t) args[1]->Int32Value();
@@ -266,9 +266,9 @@ void rose_js_graphics_circfill(const v8::FunctionCallbackInfo<v8::Value>& args) 
 void rose_js_graphics_tri(const v8::FunctionCallbackInfo<v8::Value>& args) {
     if (args.Length() < 6) return;
     HandleScope scope(args.GetIsolate());
-    rose_runtime_base* r = static_cast<rose_runtime_base*>(Local<External>::Cast(args.Data())->Value());
+    rose_rt* r = static_cast<rose_rt*>(Local<External>::Cast(args.Data())->Value());
 
-    rose_runtime_api_error err = ROSE_API_ERR_NONE;
+    rose_api_error err = ROSE_API_ERR_NONE;
     int16_t x0 = (int16_t) args[0]->Int32Value();
     int16_t y0 = (int16_t) args[1]->Int32Value();
     int16_t x1 = (int16_t) args[2]->Int32Value();
@@ -298,9 +298,9 @@ void rose_js_graphics_tri(const v8::FunctionCallbackInfo<v8::Value>& args) {
 void rose_js_graphics_trifill(const v8::FunctionCallbackInfo<v8::Value>& args) {
     if (args.Length() < 6) return;
     HandleScope scope(args.GetIsolate());
-    rose_runtime_base* r = static_cast<rose_runtime_base*>(Local<External>::Cast(args.Data())->Value());
+    rose_rt* r = static_cast<rose_rt*>(Local<External>::Cast(args.Data())->Value());
 
-    rose_runtime_api_error err = ROSE_API_ERR_NONE;
+    rose_api_error err = ROSE_API_ERR_NONE;
     int16_t x0 = (int16_t) args[0]->Int32Value();
     int16_t y0 = (int16_t) args[1]->Int32Value();
     int16_t x1 = (int16_t) args[2]->Int32Value();
@@ -329,9 +329,9 @@ void rose_js_graphics_trifill(const v8::FunctionCallbackInfo<v8::Value>& args) {
 
 void rose_js_graphics_cls(const v8::FunctionCallbackInfo<v8::Value>& args) {
     HandleScope scope(args.GetIsolate());
-    rose_runtime_base* r = static_cast<rose_runtime_base*>(Local<External>::Cast(args.Data())->Value());
+    rose_rt* r = static_cast<rose_rt*>(Local<External>::Cast(args.Data())->Value());
 
-    rose_runtime_api_error err = ROSE_API_ERR_NONE;
+    rose_api_error err = ROSE_API_ERR_NONE;
 
     err = rose_api_graphics_cls(r);
     switch (err) {

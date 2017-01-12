@@ -1,5 +1,5 @@
 #include <cassert>
-#include "rt/rt_base.h"
+#include "rt/rt.h"
 
 static v8::Platform* static_platform;
 
@@ -23,7 +23,7 @@ rose_memory_iterator rose_memory_iterator_end(uint8_t m[], uint32_t len) { retur
 
 rose_memory_iterator rose_memory_iterator_next(rose_memory_iterator i) { return ++i; }
 
-rose_runtime_base* rose_runtime_base_create(rose_fs* fs) {
+rose_rt* rose_rt_create(rose_fs* fs) {
     if (fs == NULL) {
         fprintf(stderr, "tried to create runtime base with null fs\n");
         exit(1);
@@ -142,7 +142,7 @@ rose_runtime_base* rose_runtime_base_create(rose_fs* fs) {
     prev_key_states_range->begin = beg_prev_key_states;
     prev_key_states_range->end = end_prev_key_states;
 
-    rose_runtime_base* r = (rose_runtime_base*) malloc(sizeof(rose_runtime_base));
+    rose_rt* r = (rose_rt*) malloc(sizeof(rose_rt));
 
     r->fs = fs;
     r->mem = mem;
@@ -163,11 +163,11 @@ rose_runtime_base* rose_runtime_base_create(rose_fs* fs) {
     r->key_states = key_states_range;
     r->prev_key_states = prev_key_states_range;
 
-    r->js = rose_js_base_create(r);
+    r->js = rose_js_create(r);
     return r;
 }
 
-bool rose_runtime_base_clear(rose_runtime_base* r) {
+bool rose_rt_clear(rose_rt* r) {
     memset(r->mem, 0, r->mem_size);
     r->js->module_cache.Reset();
     r->js->context.Reset();
@@ -175,7 +175,7 @@ bool rose_runtime_base_clear(rose_runtime_base* r) {
 }
 
 
-bool rose_runtime_base_load_run_main(rose_runtime_base* r) {
+bool rose_rt_load_run_main(rose_rt* r) {
     if (r->fs->cart == NULL) {
         return false;
     }
@@ -259,8 +259,8 @@ bool rose_runtime_base_load_run_main(rose_runtime_base* r) {
     return true;
 }
 
-void rose_runtime_base_free(rose_runtime_base* r) {
-    rose_js_base_free(r->js);
+void rose_rt_free(rose_rt* r) {
+    rose_js_free(r->js);
     // dont free fs, managed by system layer
     free(r->mem);
     free(r->screen);
@@ -278,12 +278,12 @@ void rose_runtime_base_free(rose_runtime_base* r) {
     free(r);
 }
 
-void rose_runtime_base_save_input_frame(rose_runtime_base* r) {
+void rose_rt_save_input_frame(rose_rt* r) {
     memcpy(r->prev_btn_states->begin, r->btn_states->begin, r->prev_btn_states->end - r->prev_btn_states->begin);
     memcpy(r->prev_key_states->begin, r->key_states->begin, r->prev_key_states->end - r->prev_key_states->begin);
 }
 
-void rose_runtime_base_update_mousestate(rose_runtime_base* r, const rose_mousestate* mousestate) {
+void rose_rt_update_mousestate(rose_rt* r, const rose_mousestate* mousestate) {
     int16_t* pointer = (int16_t*) r->pointer_positions->begin;
     pointer[20] = mousestate->x;
     pointer[21] = mousestate->y;
@@ -302,13 +302,13 @@ void rose_runtime_base_update_mousestate(rose_runtime_base* r, const rose_mouses
     *wheel_inverted = mousestate->wheel_inverted;
 }
 
-void rose_runtime_base_update_keystate(rose_runtime_base* r, rose_keycode keycode, bool pressed) {
+void rose_rt_update_keystate(rose_rt* r, rose_keycode keycode, bool pressed) {
     if (keycode < ROSE_KEYCODE_UNKNOWN) {
         rose_set_bit(r->key_states->begin, keycode, pressed);
     }
 }
 
-void rose_runtime_base_reset_input(rose_runtime_base* r, rose_mousestate* mousestate) {
+void rose_rt_reset_input(rose_rt* r, rose_mousestate* mousestate) {
     mousestate->left_btn_down = false;
     mousestate->right_btn_down = false;
     mousestate->middle_btn_down = false;
@@ -317,11 +317,11 @@ void rose_runtime_base_reset_input(rose_runtime_base* r, rose_mousestate* mouses
     mousestate->wheel_x = 0;
     mousestate->wheel_y = 0;
 
-    rose_runtime_base_update_mousestate(r, mousestate);
+    rose_rt_update_mousestate(r, mousestate);
     for (int keycode = ROSE_KEYCODE_A; keycode < ROSE_KEYCODE_UNKNOWN; ++keycode) {
-        rose_runtime_base_update_keystate(r, (rose_keycode) keycode, false);
+        rose_rt_update_keystate(r, (rose_keycode) keycode, false);
     }
-    rose_runtime_base_save_input_frame(r);
+    rose_rt_save_input_frame(r);
 }
 
 void rose_set_bit(uint8_t* arr, uint8_t addr, bool val) {

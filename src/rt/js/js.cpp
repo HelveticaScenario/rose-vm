@@ -1,10 +1,10 @@
-#include "rt/js/js_base.h"
+#include "rt/js/js.h"
 
 
 void js_print(const v8::FunctionCallbackInfo<v8::Value>& args) {
     if (args.Length() < 1) return;
     HandleScope scope(args.GetIsolate());
-    rose_runtime_base* r = static_cast<rose_runtime_base*>(Local<External>::Cast(args.Data())->Value());
+    rose_rt* r = static_cast<rose_rt*>(Local<External>::Cast(args.Data())->Value());
     for (int i = 0; i < args.Length(); i++){
         const v8::String::Utf8Value value(args[i]);
         printf("%s", *value);
@@ -20,7 +20,7 @@ void js_require(const v8::FunctionCallbackInfo<v8::Value>& args) {
         isolate->ThrowException(String::NewFromUtf8(isolate, "missing path"));
         return;
     }
-    rose_runtime_base* r = static_cast<rose_runtime_base*>(Local<External>::Cast(args.Data())->Value());
+    rose_rt* r = static_cast<rose_rt*>(Local<External>::Cast(args.Data())->Value());
 
     HandleScope scope(args.GetIsolate());
     v8::Isolate::Scope isolate_scope(isolate);
@@ -144,8 +144,8 @@ void js_require(const v8::FunctionCallbackInfo<v8::Value>& args) {
 
 }
 
-rose_js_base* rose_js_base_create(rose_runtime_base* r) {
-    rose_js_base* js = new rose_js_base();
+rose_js* rose_js_create(rose_rt* r) {
+    rose_js* js = new rose_js();
 
     js->fs = r->fs;
 
@@ -275,7 +275,7 @@ rose_js_base* rose_js_base_create(rose_runtime_base* r) {
     return js;
 }
 
-void rose_js_base_free(rose_js_base* js) {
+void rose_js_free(rose_js* js) {
     js->module_cache.Reset();
     js->context.Reset();
     js->global_template.Reset();

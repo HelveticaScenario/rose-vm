@@ -2,10 +2,10 @@
 
 void rose_js_input_mouse(const v8::FunctionCallbackInfo<v8::Value>& args){
     HandleScope scope(args.GetIsolate());
-    rose_runtime_base* r = static_cast<rose_runtime_base*>(Local<External>::Cast(args.Data())->Value());
+    rose_rt* r = static_cast<rose_rt*>(Local<External>::Cast(args.Data())->Value());
     int16_t x = 0;
     int16_t y = 0;
-    rose_runtime_api_error err = rose_api_input_mouse(r, &x, &y);
+    rose_api_error err = rose_api_input_mouse(r, &x, &y);
     switch (err) {
         case ROSE_API_ERR_OUT_OF_BOUNDS: {
             Isolate* isolate = Isolate::GetCurrent();
@@ -34,7 +34,7 @@ void rose_js_input_mouse(const v8::FunctionCallbackInfo<v8::Value>& args){
 void rose_js_input_btn(const v8::FunctionCallbackInfo<v8::Value>& args){
     if (args.Length() < 1) return;
     HandleScope scope(args.GetIsolate());
-    rose_runtime_base* r = static_cast<rose_runtime_base*>(Local<External>::Cast(args.Data())->Value());
+    rose_rt* r = static_cast<rose_rt*>(Local<External>::Cast(args.Data())->Value());
     uint32_t i;
     for (i = 0; i < args.Length(); i++) {
         uint8_t idx = (uint8_t) args[i]->Int32Value();
@@ -62,7 +62,7 @@ void rose_js_input_btn(const v8::FunctionCallbackInfo<v8::Value>& args){
 void rose_js_input_btnp(const v8::FunctionCallbackInfo<v8::Value>& args){
     if (args.Length() < 1) return;
     HandleScope scope(args.GetIsolate());
-    rose_runtime_base* r = static_cast<rose_runtime_base*>(Local<External>::Cast(args.Data())->Value());
+    rose_rt* r = static_cast<rose_rt*>(Local<External>::Cast(args.Data())->Value());
     uint32_t i;
     for (i = 0; i < args.Length(); i++) {
         uint8_t idx = (uint8_t) args[i]->Int32Value();
@@ -89,7 +89,7 @@ void rose_js_input_btnp(const v8::FunctionCallbackInfo<v8::Value>& args){
 
 void rose_js_input_wheel(const v8::FunctionCallbackInfo<v8::Value>& args){
     HandleScope scope(args.GetIsolate());
-    rose_runtime_base* r = static_cast<rose_runtime_base*>(Local<External>::Cast(args.Data())->Value());
+    rose_rt* r = static_cast<rose_rt*>(Local<External>::Cast(args.Data())->Value());
     bool to_invert;
     rose_api_input_wheel_inverted(r, &to_invert);
     int nargs = args.Length();
@@ -130,7 +130,7 @@ void rose_js_input_wheel(const v8::FunctionCallbackInfo<v8::Value>& args){
 
 void rose_js_input_key(const v8::FunctionCallbackInfo<v8::Value>& args){
     HandleScope scope(args.GetIsolate());
-    rose_runtime_base* r = static_cast<rose_runtime_base*>(Local<External>::Cast(args.Data())->Value());
+    rose_rt* r = static_cast<rose_rt*>(Local<External>::Cast(args.Data())->Value());
     uint32_t i;
     for (i = 0; i < args.Length(); i++) {
         uint8_t idx = (uint8_t) args[i]->Int32Value();
@@ -157,7 +157,7 @@ void rose_js_input_key(const v8::FunctionCallbackInfo<v8::Value>& args){
 
 void rose_js_input_keyp(const v8::FunctionCallbackInfo<v8::Value>& args){
     HandleScope scope(args.GetIsolate());
-    rose_runtime_base* r = static_cast<rose_runtime_base*>(Local<External>::Cast(args.Data())->Value());
+    rose_rt* r = static_cast<rose_rt*>(Local<External>::Cast(args.Data())->Value());
     uint32_t i;
     for (i = 0; i < args.Length(); i++) {
         uint8_t idx = (uint8_t) args[i]->Int32Value();

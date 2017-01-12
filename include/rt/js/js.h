@@ -8,9 +8,9 @@
 #include "rt/js/js_memory.h"
 
 
-rose_js_base* rose_js_base_create(rose_runtime_base* r);
+rose_js* rose_js_create(rose_rt* r);
 
-void rose_js_base_free(rose_js_base* js);
+void rose_js_free(rose_js* js);
 
 
 #endif //ROSEBUD_JS_BASE_H

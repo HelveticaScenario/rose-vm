@@ -7,9 +7,9 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include "config.h"
-#include "rt/rt_base.h"
-#include "rt/rt_game.h"
-#include "rt/fs/fs_base.h"
+#include "rt/rt.h"
+#include "rt/game.h"
+#include "rt/fs/fs.h"
 #include "sys/sys_key_conversion.h"
 
 struct rose_system_sdl2 {
@@ -32,9 +32,9 @@ struct rose_system_sdl2 {
 
     rose_fs* fs;
 
-    rose_runtime_game* editor;
+    rose_editor* editor;
 
-    rose_runtime_game* game;
+    rose_game* game;
 
     rose_screenmode screen_mode;
 };

@@ -26,7 +26,7 @@ using namespace std;
 using namespace v8;
 
 
-enum rose_runtime_api_error{
+enum rose_api_error{
     ROSE_API_ERR_NONE,
     ROSE_API_ERR_OUT_OF_BOUNDS
 };
@@ -39,7 +39,7 @@ struct rose_color{
     uint8_t b;
 };
 
-// ***** fs_base
+// ***** fs
 
 enum rose_fs_error {
     ROSE_FS_NO_ERR,
@@ -64,7 +64,7 @@ struct rose_file {
     bool removed;
 };
 
-typedef rose_fs_error (*rose_fd_hook_read_file)(rose_file* file);
+typedef rose_fs_error (*rose_fs_hook_read_file)(rose_file* file);
 typedef rose_fs_error (*rose_fs_hook_write_file)(rose_file* file);
 typedef rose_fs_error (*rose_fs_hook_shutdown)();
 typedef rose_fs_error (*rose_fs_hook_get_base_path)(char** path);
@@ -73,16 +73,16 @@ struct rose_fs {
     rose_file* cart;
     rose_file* root;
     rose_file* pwd;
-    rose_fd_hook_read_file read_file;
+    rose_fs_hook_read_file read_file;
     rose_fs_hook_write_file write_file;
     rose_fs_hook_shutdown shutdown;
     rose_fs_hook_get_base_path get_base_path;
 };
 
-// **** js_base
+// **** js
 
 
-struct rose_js_base {
+struct rose_js {
     rose_fs* fs;
     Isolate* isolate;
     Isolate::CreateParams create_params;
@@ -92,13 +92,13 @@ struct rose_js_base {
     Global<v8::Map> module_cache;
 };
 
-// **** rt_base
+// **** rt
 
 
-enum rose_runtime_base_error{
-    ROSE_RT_BASE_FUN_NOT_FOUND,
-    ROSE_RT_BASE_NO_ERR,
-    ROSE_RT_BASE_CRITICAL_ERR
+enum rose_rt_error{
+    ROSE_RT_FUN_NOT_FOUND,
+    ROSE_RT_NO_ERR,
+    ROSE_RT_CRITICAL_ERR
 };
 
 enum rose_keycode {
@@ -366,8 +366,8 @@ struct rose_memory_range {
     rose_memory_iterator end;
 };
 
-struct rose_runtime_base {
-    rose_js_base* js;
+struct rose_rt {
+    rose_js* js;
     uint8_t* mem;
     uint32_t mem_size;
     rose_memory_range* screen;
@@ -389,24 +389,24 @@ struct rose_runtime_base {
 };
 
 
-// *** rt_game
+// *** game
 
-enum rose_runtime_game_error {
-    ROSE_RT_GAME_FUN_NOT_FOUND,
-    ROSE_RT_GAME_NO_ERR,
-    ROSE_RT_GAME_CRITICAL_ERR
+enum rose_game_error {
+    ROSE_GAME_FUN_NOT_FOUND,
+    ROSE_GAME_NO_ERR,
+    ROSE_GAME_CRITICAL_ERR
 };
 
-struct rose_runtime_game {
-    rose_runtime_base* base;
+struct rose_game {
+    rose_rt* rt;
 };
 
-struct rose_runtime_editor_instance {
-    rose_runtime_base* base;
+struct rose_editor_instance {
+    rose_rt* rt;
 };
 
-struct rose_runtime_editor {
-    rose_runtime_editor_instance** base;
+struct rose_editor {
+    vector<rose_editor_instance*> editors;
 
 };
 

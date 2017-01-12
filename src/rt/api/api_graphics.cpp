@@ -1,6 +1,6 @@
 #include "rt/api/api_graphics.h"
 
-void coord_cam_offset(rose_runtime_base* r, int16_t* x, int16_t* y) {
+void coord_cam_offset(rose_rt* r, int16_t* x, int16_t* y) {
     int16_t* camera_offset = (int16_t*) r->camera_offset->begin;
     int16_t x_cam = camera_offset[0];
     int16_t y_cam = camera_offset[1];
@@ -10,22 +10,21 @@ void coord_cam_offset(rose_runtime_base* r, int16_t* x, int16_t* y) {
     *y -= y_cam;
 }
 
-rose_runtime_api_error rose_api_graphics_pset(rose_runtime_base* r, int16_t x, int16_t y, uint8_t c) {
+rose_api_error rose_api_graphics_pset(rose_rt* r, int16_t x, int16_t y, uint8_t c) {
     coord_cam_offset(r, &x, &y);
     if (x >= 0 && x < ROSE_SCREEN_WIDTH && y >= 0 && y < ROSE_SCREEN_HEIGHT) {
         rose_memory_range* screen = r->screen;
-        uint8_t* asd = screen->begin;
         *(screen->begin + (y * ROSE_SCREEN_WIDTH) + x) = c;
         *r->pen_color_addr = c;
     }
     return ROSE_API_ERR_NONE;
 }
 
-rose_runtime_api_error rose_api_graphics_pset_default(rose_runtime_base* r, int16_t x, int16_t y) {
+rose_api_error rose_api_graphics_pset_default(rose_rt* r, int16_t x, int16_t y) {
     return rose_api_graphics_pset(r, x, y, *r->pen_color_addr);
 }
 
-rose_runtime_api_error rose_api_graphics_pget(rose_runtime_base* r, int16_t x, int16_t y, uint8_t* res) {
+rose_api_error rose_api_graphics_pget(rose_rt* r, int16_t x, int16_t y, uint8_t* res) {
     coord_cam_offset(r, &x, &y);
     if (x >= 0 && x < ROSE_SCREEN_WIDTH && y >= 0 && y < ROSE_SCREEN_HEIGHT) {
         rose_memory_range* screen = r->screen;
@@ -36,7 +35,7 @@ rose_runtime_api_error rose_api_graphics_pget(rose_runtime_base* r, int16_t x, i
     return ROSE_API_ERR_NONE;
 }
 
-rose_runtime_api_error rose_api_graphics_palset(rose_runtime_base* r, uint8_t idx, rose_color c) {
+rose_api_error rose_api_graphics_palset(rose_rt* r, uint8_t idx, rose_color c) {
     rose_memory_iterator slot = r->palette->begin + (idx * 3);
     *slot = c.r;
     *(slot + 1) = c.g;
@@ -44,7 +43,7 @@ rose_runtime_api_error rose_api_graphics_palset(rose_runtime_base* r, uint8_t id
     return ROSE_API_ERR_NONE;
 }
 
-rose_runtime_api_error rose_api_graphics_palget(rose_runtime_base* r, uint8_t idx, rose_color* res) {
+rose_api_error rose_api_graphics_palget(rose_rt* r, uint8_t idx, rose_color* res) {
     rose_memory_iterator slot = r->palette->begin + (idx * 3);
     res->r = *slot;
     res->g = *(slot + 1);
@@ -67,7 +66,7 @@ void rect_swap(int16_t* x0, int16_t* y0, int16_t* x1, int16_t* y1) {
     }
 }
 
-rose_runtime_api_error rose_api_graphics_line(rose_runtime_base* r, int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t c) {
+rose_api_error rose_api_graphics_line(rose_rt* r, int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t c) {
     if (y0 == y1) {
         return rose_api_graphics_rectfill(r, x0, y0, x1, y1, c);
     }
@@ -93,11 +92,11 @@ rose_runtime_api_error rose_api_graphics_line(rose_runtime_base* r, int16_t x0, 
     return ROSE_API_ERR_NONE;
 }
 
-rose_runtime_api_error rose_api_graphics_line_default(rose_runtime_base* r, int16_t x0, int16_t y0, int16_t x1, int16_t y1) {
+rose_api_error rose_api_graphics_line_default(rose_rt* r, int16_t x0, int16_t y0, int16_t x1, int16_t y1) {
     return rose_api_graphics_line(r, x0, y0, x1, y1, *r->pen_color_addr);
 }
 
-rose_runtime_api_error rose_api_graphics_rect(rose_runtime_base* r, int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t c) {
+rose_api_error rose_api_graphics_rect(rose_rt* r, int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t c) {
     rect_swap(&x0, &y0, &x1, &y1);
     // Draw
     int i;
@@ -114,7 +113,7 @@ rose_runtime_api_error rose_api_graphics_rect(rose_runtime_base* r, int16_t x0, 
     return ROSE_API_ERR_NONE;
 }
 
-rose_runtime_api_error rose_api_graphics_rect_default(rose_runtime_base* r, int16_t x0, int16_t y0, int16_t x1, int16_t y1) {
+rose_api_error rose_api_graphics_rect_default(rose_rt* r, int16_t x0, int16_t y0, int16_t x1, int16_t y1) {
     return rose_api_graphics_rect(r, x0, y0, x1, y1, *r->pen_color_addr);
 }
 
@@ -138,7 +137,7 @@ int rect_clip(int16_t* x0, int16_t* y0, int16_t* x1, int16_t* y1) {
     return 0;
 }
 
-rose_runtime_api_error rose_api_graphics_rectfill(rose_runtime_base* r, int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t c) {
+rose_api_error rose_api_graphics_rectfill(rose_rt* r, int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t c) {
     rect_swap(&x0, &y0, &x1, &y1);
     coord_cam_offset(r, &x0, &y0);
     coord_cam_offset(r, &x1, &y1);
@@ -155,11 +154,11 @@ rose_runtime_api_error rose_api_graphics_rectfill(rose_runtime_base* r, int16_t 
     return ROSE_API_ERR_NONE;
 }
 
-rose_runtime_api_error rose_api_graphics_rectfill_default(rose_runtime_base* r, int16_t x0, int16_t y0, int16_t x1, int16_t y1) {
+rose_api_error rose_api_graphics_rectfill_default(rose_rt* r, int16_t x0, int16_t y0, int16_t x1, int16_t y1) {
     return rose_api_graphics_rectfill(r, x0, y0, x1, y1, *r->pen_color_addr);
 }
 
-rose_runtime_api_error rose_api_graphics_circ(rose_runtime_base* r, int16_t x, int16_t y, uint16_t radius, uint8_t c) {
+rose_api_error rose_api_graphics_circ(rose_rt* r, int16_t x, int16_t y, uint16_t radius, uint8_t c) {
     int16_t offx = radius;
     int16_t offy = 0;
     int16_t decisionOver2 = (int16_t) (1 - offx);   // Decision criterion divided by 2 evaluated at x=r, y=0
@@ -184,11 +183,11 @@ rose_runtime_api_error rose_api_graphics_circ(rose_runtime_base* r, int16_t x, i
     return ROSE_API_ERR_NONE;
 }
 
-rose_runtime_api_error rose_api_graphics_circ_default(rose_runtime_base* r, int16_t x0, int16_t y0, uint16_t radius) {
+rose_api_error rose_api_graphics_circ_default(rose_rt* r, int16_t x0, int16_t y0, uint16_t radius) {
     return rose_api_graphics_circ(r, x0, y0, radius, *r->pen_color_addr);
 }
 
-rose_runtime_api_error rose_api_graphics_circfill(rose_runtime_base* r, int16_t x, int16_t y, uint16_t radius, uint8_t c) {
+rose_api_error rose_api_graphics_circfill(rose_rt* r, int16_t x, int16_t y, uint16_t radius, uint8_t c) {
     int16_t offx = radius;
     int16_t offy = 0;
     int16_t decisionOver2 = (int16_t) (1 - offx);   // Decision criterion divided by 2 evaluated at x=r, y=0
@@ -210,11 +209,11 @@ rose_runtime_api_error rose_api_graphics_circfill(rose_runtime_base* r, int16_t 
     return ROSE_API_ERR_NONE;
 }
 
-rose_runtime_api_error rose_api_graphics_circfill_default(rose_runtime_base* r, int16_t x0, int16_t y0, uint16_t radius) {
+rose_api_error rose_api_graphics_circfill_default(rose_rt* r, int16_t x0, int16_t y0, uint16_t radius) {
     return rose_api_graphics_circfill(r, x0, y0, radius, *r->pen_color_addr);
 }
 
-rose_runtime_api_error fill_bottom_flat_triangle(rose_runtime_base* r,int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint8_t c, bool fill)
+rose_api_error fill_bottom_flat_triangle(rose_rt* r,int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint8_t c, bool fill)
 {
 
     int16_t dx1 = (int16_t) abs(x0 - x1), sx1 = (int16_t) (x1 < x0 ? 1 : -1);
@@ -275,7 +274,7 @@ rose_runtime_api_error fill_bottom_flat_triangle(rose_runtime_base* r,int16_t x0
     return ROSE_API_ERR_NONE;
 }
 
-rose_runtime_api_error fill_top_flat_triangle(rose_runtime_base* r, int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint8_t c, bool fill)
+rose_api_error fill_top_flat_triangle(rose_rt* r, int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint8_t c, bool fill)
 {
 
 
@@ -354,7 +353,7 @@ void sortVerticesAscendingByY(int16_t* v0_x, int16_t* v0_y, int16_t* v1_x, int16
 }
 
 
-rose_runtime_api_error rose_api_graphics_tricommon(rose_runtime_base* r, int16_t v0_x, int16_t v0_y, int16_t v1_x, int16_t v1_y, int16_t v2_x, int16_t v2_y, uint8_t c, bool fill)
+rose_api_error rose_api_graphics_tricommon(rose_rt* r, int16_t v0_x, int16_t v0_y, int16_t v1_x, int16_t v1_y, int16_t v2_x, int16_t v2_y, uint8_t c, bool fill)
 {
     /* at first sort the three vertices by y-coordinate ascending so v1 is the topmost vertice */
     sortVerticesAscendingByY(&v0_x, &v0_y, &v1_x, &v1_y, &v2_x, &v2_y);
@@ -381,7 +380,7 @@ rose_runtime_api_error rose_api_graphics_tricommon(rose_runtime_base* r, int16_t
     return ROSE_API_ERR_NONE;
 }
 
-rose_runtime_api_error rose_api_graphics_tri(rose_runtime_base* r, int16_t v0_x, int16_t v0_y, int16_t v1_x, int16_t v1_y, int16_t v2_x, int16_t v2_y, uint8_t c)
+rose_api_error rose_api_graphics_tri(rose_rt* r, int16_t v0_x, int16_t v0_y, int16_t v1_x, int16_t v1_y, int16_t v2_x, int16_t v2_y, uint8_t c)
 {
 //    rose_api_graphics_line(r, v0_x, v0_y, v1_x, v1_y, c);
 //    rose_api_graphics_line(r, v1_x, v1_y, v2_x, v2_y, c);
@@ -390,25 +389,25 @@ rose_runtime_api_error rose_api_graphics_tri(rose_runtime_base* r, int16_t v0_x,
     return rose_api_graphics_tricommon(r, v0_x, v0_y, v1_x, v1_y, v2_x, v2_y, c, false);
 }
 
-rose_runtime_api_error rose_api_graphics_tri_default(rose_runtime_base* r, int16_t v0_x, int16_t v0_y, int16_t v1_x, int16_t v1_y, int16_t v2_x, int16_t v2_y) {
+rose_api_error rose_api_graphics_tri_default(rose_rt* r, int16_t v0_x, int16_t v0_y, int16_t v1_x, int16_t v1_y, int16_t v2_x, int16_t v2_y) {
     return rose_api_graphics_tri(r, v0_x, v0_y, v1_x, v1_y, v2_x, v2_y, *r->pen_color_addr);
 }
 
 
-rose_runtime_api_error rose_api_graphics_trifill(rose_runtime_base* r, int16_t v0_x, int16_t v0_y, int16_t v1_x, int16_t v1_y, int16_t v2_x, int16_t v2_y, uint8_t c) {
+rose_api_error rose_api_graphics_trifill(rose_rt* r, int16_t v0_x, int16_t v0_y, int16_t v1_x, int16_t v1_y, int16_t v2_x, int16_t v2_y, uint8_t c) {
     return rose_api_graphics_tricommon(r, v0_x, v0_y, v1_x, v1_y, v2_x, v2_y, c, true);
 }
 
-rose_runtime_api_error rose_api_graphics_trifill_default(rose_runtime_base* r, int16_t v0_x, int16_t v0_y, int16_t v1_x, int16_t v1_y, int16_t v2_x, int16_t v2_y) {
+rose_api_error rose_api_graphics_trifill_default(rose_rt* r, int16_t v0_x, int16_t v0_y, int16_t v1_x, int16_t v1_y, int16_t v2_x, int16_t v2_y) {
     return rose_api_graphics_trifill(r, v0_x, v0_y, v1_x, v1_y, v2_x, v2_y, *r->pen_color_addr);
 }
 
-rose_runtime_api_error rose_api_graphics_cls(rose_runtime_base* r) {
+rose_api_error rose_api_graphics_cls(rose_rt* r) {
     memset(r->screen->begin, 0, r->screen->end - r->screen->begin);
     return ROSE_API_ERR_NONE;
 }
 
-rose_runtime_api_error rose_api_graphics_get_spritesheet_meta(rose_runtime_base* r, uint32_t* addr, uint16_t* sheet_width, uint16_t* sheet_height, uint8_t* sprite_width_mult, uint8_t* sprite_height_mult) {
+rose_api_error rose_api_graphics_get_spritesheet_meta(rose_rt* r, uint32_t* addr, uint16_t* sheet_width, uint16_t* sheet_height, uint8_t* sprite_width_mult, uint8_t* sprite_height_mult) {
     uint8_t* sprite_schema = r->schema->end - ROSE_MEMORY_SPRITE_SCHEMA_SIZE;
     *addr = *((uint32_t*)sprite_schema);
     sprite_schema += 4;
@@ -422,7 +421,7 @@ rose_runtime_api_error rose_api_graphics_get_spritesheet_meta(rose_runtime_base*
     return ROSE_API_ERR_NONE;
 }
 
-rose_runtime_api_error rose_api_graphics_set_spritesheet_meta(rose_runtime_base* r, uint32_t addr, uint16_t sheet_width, uint16_t sheet_height, uint8_t sprite_width_mult, uint8_t sprite_height_mult) {
+rose_api_error rose_api_graphics_set_spritesheet_meta(rose_rt* r, uint32_t addr, uint16_t sheet_width, uint16_t sheet_height, uint8_t sprite_width_mult, uint8_t sprite_height_mult) {
     uint8_t* sprite_schema = r->schema->end - ROSE_MEMORY_SPRITE_SCHEMA_SIZE;
     *((uint32_t*)sprite_schema) = addr;
     sprite_schema += 4;
@@ -436,7 +435,7 @@ rose_runtime_api_error rose_api_graphics_set_spritesheet_meta(rose_runtime_base*
     return ROSE_API_ERR_NONE;
 }
 
-rose_runtime_api_error rose_api_graphics_spr(rose_runtime_base* r, uint32_t n, int16_t x, int16_t y, uint8_t w, uint8_t h, bool flip_x, bool flip_y) {
+rose_api_error rose_api_graphics_spr(rose_rt* r, uint32_t n, int16_t x, int16_t y, uint8_t w, uint8_t h, bool flip_x, bool flip_y) {
     uint32_t addr;
     uint16_t sheet_width;
     uint16_t sheet_height;

@@ -1,6 +1,6 @@
 #include "rt/api/api_memory.h"
 
-rose_runtime_api_error rose_api_memory_poke(rose_runtime_base* r, uint32_t idx, uint8_t val) {
+rose_api_error rose_api_memory_poke(rose_rt* r, uint32_t idx, uint8_t val) {
     if (idx >= r->mem_size) {
         return ROSE_API_ERR_OUT_OF_BOUNDS;
     }
@@ -8,7 +8,7 @@ rose_runtime_api_error rose_api_memory_poke(rose_runtime_base* r, uint32_t idx, 
     return ROSE_API_ERR_NONE;
 }
 
-rose_runtime_api_error rose_api_memory_peek(rose_runtime_base* r, uint32_t idx, uint8_t* res) {
+rose_api_error rose_api_memory_peek(rose_rt* r, uint32_t idx, uint8_t* res) {
     if (idx >= r->mem_size) {
         return ROSE_API_ERR_OUT_OF_BOUNDS;
     }
@@ -17,7 +17,7 @@ rose_runtime_api_error rose_api_memory_peek(rose_runtime_base* r, uint32_t idx, 
 }
 
 
-rose_runtime_api_error rose_api_memory_memcpy(rose_runtime_base* r, uint32_t dest_addr, uint32_t source_addr, uint32_t len) {
+rose_api_error rose_api_memory_memcpy(rose_rt* r, uint32_t dest_addr, uint32_t source_addr, uint32_t len) {
     if (dest_addr >= r->mem_size || source_addr >= r->mem_size || (dest_addr + len) >= r->mem_size || (source_addr + len) >= r->mem_size) {
         return ROSE_API_ERR_OUT_OF_BOUNDS;
     }
@@ -25,7 +25,7 @@ rose_runtime_api_error rose_api_memory_memcpy(rose_runtime_base* r, uint32_t des
     return ROSE_API_ERR_NONE;
 }
 
-rose_runtime_api_error rose_api_memory_memset(rose_runtime_base* r, uint32_t dest_addr, uint8_t val, uint32_t len) {
+rose_api_error rose_api_memory_memset(rose_rt* r, uint32_t dest_addr, uint8_t val, uint32_t len) {
     if (dest_addr >= r->mem_size || (dest_addr + len) >= r->mem_size) {
         return ROSE_API_ERR_OUT_OF_BOUNDS;
     }
@@ -33,7 +33,7 @@ rose_runtime_api_error rose_api_memory_memset(rose_runtime_base* r, uint32_t des
     return ROSE_API_ERR_NONE;
 }
 
-rose_runtime_api_error rose_api_memory_cstore(rose_runtime_base* r, uint32_t dest_addr, uint32_t source_addr, uint32_t len) {
+rose_api_error rose_api_memory_cstore(rose_rt* r, uint32_t dest_addr, uint32_t source_addr, uint32_t len) {
     if ((source_addr + len) > ROSE_MEMORY_SIZE) {
         return ROSE_API_ERR_OUT_OF_BOUNDS;
     }
@@ -45,7 +45,7 @@ rose_runtime_api_error rose_api_memory_cstore(rose_runtime_base* r, uint32_t des
     return ROSE_API_ERR_NONE;
 }
 
-rose_runtime_api_error rose_api_memory_reload(rose_runtime_base* r, uint32_t dest_addr, uint32_t source_addr, uint32_t len) {
+rose_api_error rose_api_memory_reload(rose_rt* r, uint32_t dest_addr, uint32_t source_addr, uint32_t len) {
     rose_file* data_file = rose_fs_fetch_cart_data_file(r->fs->cart);
     if ((source_addr + len) > data_file->buffer_len) {
         return ROSE_API_ERR_OUT_OF_BOUNDS;

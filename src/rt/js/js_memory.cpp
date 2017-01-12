@@ -2,7 +2,7 @@
 
 void rose_js_memory_poke(const v8::FunctionCallbackInfo<v8::Value>& args) {
     HandleScope scope(args.GetIsolate());
-    rose_runtime_base* r = static_cast<rose_runtime_base*>(Local<External>::Cast(args.Data())->Value());
+    rose_rt* r = static_cast<rose_rt*>(Local<External>::Cast(args.Data())->Value());
     uint32_t idx = (uint32_t) args[0]->Uint32Value();
     uint8_t val = (uint8_t) args[1]->Int32Value();
     int err = rose_api_memory_poke(r, idx, val);
@@ -21,7 +21,7 @@ void rose_js_memory_poke(const v8::FunctionCallbackInfo<v8::Value>& args) {
 
 void rose_js_memory_peek(const v8::FunctionCallbackInfo<v8::Value>& args) {
     HandleScope scope(args.GetIsolate());
-    rose_runtime_base* r = static_cast<rose_runtime_base*>(Local<External>::Cast(args.Data())->Value());
+    rose_rt* r = static_cast<rose_rt*>(Local<External>::Cast(args.Data())->Value());
     if (args.Length() >= 1) {
         uint32_t idx = (uint32_t) args[0]->Uint32Value();
         uint8_t res;
@@ -45,7 +45,7 @@ void rose_js_memory_peek(const v8::FunctionCallbackInfo<v8::Value>& args) {
 
 void rose_js_memory_memcpy(const v8::FunctionCallbackInfo<v8::Value>& args) {
     HandleScope scope(args.GetIsolate());
-    rose_runtime_base* r = static_cast<rose_runtime_base*>(Local<External>::Cast(args.Data())->Value());
+    rose_rt* r = static_cast<rose_rt*>(Local<External>::Cast(args.Data())->Value());
     if (args.Length() >= 3) {
         uint32_t dest_addr = (uint32_t) args[0]->Uint32Value();
         uint32_t source_addr = (uint32_t) args[1]->Uint32Value();
@@ -67,7 +67,7 @@ void rose_js_memory_memcpy(const v8::FunctionCallbackInfo<v8::Value>& args) {
 
 void rose_js_memory_memset(const v8::FunctionCallbackInfo<v8::Value>& args) {
     HandleScope scope(args.GetIsolate());
-    rose_runtime_base* r = static_cast<rose_runtime_base*>(Local<External>::Cast(args.Data())->Value());
+    rose_rt* r = static_cast<rose_rt*>(Local<External>::Cast(args.Data())->Value());
     if (args.Length() >= 3) {
         uint32_t dest_addr = (uint32_t) args[0]->Uint32Value();
         uint8_t val = (uint8_t) args[1]->Uint32Value();
@@ -90,7 +90,7 @@ void rose_js_memory_memset(const v8::FunctionCallbackInfo<v8::Value>& args) {
 void rose_js_memory_cstore(const v8::FunctionCallbackInfo<v8::Value>& args) {
     printf("cstore probably works, but it is untested.\n");
     HandleScope scope(args.GetIsolate());
-    rose_runtime_base* r = static_cast<rose_runtime_base*>(Local<External>::Cast(args.Data())->Value());
+    rose_rt* r = static_cast<rose_rt*>(Local<External>::Cast(args.Data())->Value());
     if (args.Length() >= 3) {
         uint32_t dest_addr = (uint32_t) args[0]->Uint32Value();
         uint32_t source_addr = (uint32_t) args[1]->Uint32Value();
@@ -114,7 +114,7 @@ void rose_js_memory_cstore(const v8::FunctionCallbackInfo<v8::Value>& args) {
 void rose_js_memory_reload(const v8::FunctionCallbackInfo<v8::Value>& args) {
     printf("reload probably works, but it is untested.\n");
     HandleScope scope(args.GetIsolate());
-    rose_runtime_base* r = static_cast<rose_runtime_base*>(Local<External>::Cast(args.Data())->Value());
+    rose_rt* r = static_cast<rose_rt*>(Local<External>::Cast(args.Data())->Value());
     if (args.Length() >= 3) {
         uint32_t dest_addr = (uint32_t) args[0]->Uint32Value();
         uint32_t source_addr = (uint32_t) args[1]->Uint32Value();
@@ -142,7 +142,7 @@ void rose_js_memory__writestr(const v8::FunctionCallbackInfo<v8::Value>& args) {
         isolate->ThrowException(String::NewFromUtf8(isolate, "missing path"));
         return;
     }
-    rose_runtime_base* r = static_cast<rose_runtime_base*>(Local<External>::Cast(args.Data())->Value());
+    rose_rt* r = static_cast<rose_rt*>(Local<External>::Cast(args.Data())->Value());
 
     HandleScope scope(args.GetIsolate());
     v8::Isolate::Scope isolate_scope(isolate);
@@ -208,7 +208,7 @@ void rose_js_memory__readstr(const v8::FunctionCallbackInfo<v8::Value>& args) {
         isolate->ThrowException(String::NewFromUtf8(isolate, "missing path"));
         return;
     }
-    rose_runtime_base* r = static_cast<rose_runtime_base*>(Local<External>::Cast(args.Data())->Value());
+    rose_rt* r = static_cast<rose_rt*>(Local<External>::Cast(args.Data())->Value());
 
     HandleScope scope(args.GetIsolate());
     v8::Isolate::Scope isolate_scope(isolate);
@@ -268,7 +268,7 @@ void rose_js_memory__savefile(const v8::FunctionCallbackInfo<v8::Value>& args) {
         isolate->ThrowException(String::NewFromUtf8(isolate, "missing path"));
         return;
     }
-    rose_runtime_base* r = static_cast<rose_runtime_base*>(Local<External>::Cast(args.Data())->Value());
+    rose_rt* r = static_cast<rose_rt*>(Local<External>::Cast(args.Data())->Value());
 
     HandleScope scope(args.GetIsolate());
     v8::Isolate::Scope isolate_scope(isolate);
@@ -317,7 +317,7 @@ void rose_js_memory__mkfile(const v8::FunctionCallbackInfo<v8::Value>& args) {
         isolate->ThrowException(String::NewFromUtf8(isolate, "missing path"));
         return;
     }
-    rose_runtime_base* r = static_cast<rose_runtime_base*>(Local<External>::Cast(args.Data())->Value());
+    rose_rt* r = static_cast<rose_rt*>(Local<External>::Cast(args.Data())->Value());
 
     HandleScope scope(args.GetIsolate());
     v8::Isolate::Scope isolate_scope(isolate);
@@ -388,7 +388,7 @@ void rose_js_memory__rmfile(const v8::FunctionCallbackInfo<v8::Value>& args) {
         isolate->ThrowException(String::NewFromUtf8(isolate, "missing path"));
         return;
     }
-    rose_runtime_base* r = static_cast<rose_runtime_base*>(Local<External>::Cast(args.Data())->Value());
+    rose_rt* r = static_cast<rose_rt*>(Local<External>::Cast(args.Data())->Value());
 
     HandleScope scope(args.GetIsolate());
     v8::Isolate::Scope isolate_scope(isolate);
