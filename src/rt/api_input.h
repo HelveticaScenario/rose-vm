@@ -1,9 +1,6 @@
-#ifndef ROSE_API_INPUT_H
-#define ROSE_API_INPUT_H
+#pragma once
 
-#include "../../config.h"
-#include "api_memory.h"
-#include "../rt.h"
+#include "enums.h"
 
 rose_api_error rose_api_input_mouse(rose_rt* r, int16_t* x, int16_t* y);
 
@@ -18,5 +15,3 @@ rose_api_error rose_api_input_wheel_inverted(rose_rt* r, bool* res);
 rose_api_error rose_api_input_key(rose_rt* r, rose_keycode keycode, bool* res);
 
 rose_api_error rose_api_input_keyp(rose_rt* r, rose_keycode keycode, bool* res);
-
-#endif

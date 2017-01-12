@@ -1,4 +1,4 @@
-#include "js_input.h"
+#include "rose.h"
 
 void rose_js_input_mouse(const v8::FunctionCallbackInfo<v8::Value>& args){
     HandleScope scope(args.GetIsolate());

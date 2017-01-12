@@ -1,14 +1,6 @@
-#ifndef ROSE_API_GRAPHICS_H
-#define ROSE_API_GRAPHICS_H
+#pragma once
 
-#include "../../config.h"
-#include "api_memory.h"
-#include "../rt.h"
-#include <algorithm>
-#include <cassert>
-#include <functional>
-#include <iterator>
-#include <array>
+#include "enums.h"
 
 rose_api_error rose_api_graphics_pset(rose_rt* r, int16_t x, int16_t y, uint8_t val);
 
@@ -55,7 +47,3 @@ rose_api_error rose_api_graphics_get_spritesheet_meta(rose_rt* r, uint32_t* addr
 rose_api_error rose_api_graphics_set_spritesheet_meta(rose_rt* r, uint32_t addr, uint16_t sheet_width, uint16_t sheet_height, uint16_t sprite_width_mult, uint16_t sprite_height_mult);
 
 rose_api_error rose_api_graphics_spr(rose_rt* r, uint32_t n, int16_t x, int16_t y, uint16_t w, uint16_t h, bool flip_x, bool flip_y);
-
-
-
-#endif

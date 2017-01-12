@@ -1,28 +1,4 @@
-#include "game.h"
-
-rose_game* rose_game_create(rose_fs* fs) {
-    if (fs == NULL) {
-        fprintf(stderr, "tried to create runtime game with null fs\n");
-        exit(1);
-    }
-    rose_game* r = (rose_game*) malloc(sizeof(rose_game));
-    r->rt = rose_rt_create(fs);
-    if (!rose_game_reload(r)) {
-        fprintf(stderr, "reload could not finish\n");
-    }
-    return r;
-}
-
-void rose_game_free(rose_game* r) {
-    rose_rt_free(r->rt);
-    free(r);
-}
-
-bool rose_game_reload(rose_game* r) {
-    rose_rt_clear(r->rt);
-    // insert any game runtime specific init code here
-    return rose_rt_load_run_main(r->rt);
-}
+#include "rose.h"
 
 rose_game_error rose_call(rose_game* r, const char* name, uint8_t nargs, Local<Value>* args) {
     auto isolate = r->rt->js->isolate;
@@ -94,4 +70,25 @@ rose_game_error rose_game_onkey(rose_game* r, rose_keycode keycode, bool pressed
 rose_game_error rose_game_ontouch(rose_game* r) {
     // TODO: make this actually do something
     return rose_call(r, "_ontouch", 0, NULL);
+}
+
+rose_game::rose_game(rose_fs* fs) {
+    if (fs == NULL) {
+        fprintf(stderr, "tried to create runtime game with null fs\n");
+        exit(1);
+    }
+    this->rt = new rose_rt(fs);
+    if (!this->reload()) {
+        fprintf(stderr, "reload could not finish\n");
+    }
+}
+
+rose_game::~rose_game() {
+    delete this->rt;
+}
+
+bool rose_game::reload() {
+    this->rt->clear();
+    // insert any game runtime specific init code here
+    return this->rt->load_run_main();
 }

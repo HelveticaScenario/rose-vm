@@ -1,4 +1,4 @@
-#include "api_graphics.h"
+#include "rose.h"
 
 void coord_cam_offset(rose_rt* r, int16_t* x, int16_t* y) {
     int16_t* camera_offset = (int16_t*) r->camera_offset->begin;
@@ -36,7 +36,7 @@ rose_api_error rose_api_graphics_pget(rose_rt* r, int16_t x, int16_t y, uint8_t*
 }
 
 rose_api_error rose_api_graphics_palset(rose_rt* r, uint8_t idx, rose_color c) {
-    rose_memory_iterator slot = r->palette->begin + (idx * 3);
+    auto slot = r->palette->begin + (idx * 3);
     *slot = c.r;
     *(slot + 1) = c.g;
     *(slot + 2) = c.b;
@@ -44,7 +44,7 @@ rose_api_error rose_api_graphics_palset(rose_rt* r, uint8_t idx, rose_color c) {
 }
 
 rose_api_error rose_api_graphics_palget(rose_rt* r, uint8_t idx, rose_color* res) {
-    rose_memory_iterator slot = r->palette->begin + (idx * 3);
+    auto slot = r->palette->begin + (idx * 3);
     res->r = *slot;
     res->g = *(slot + 1);
     res->b = *(slot + 2);
@@ -453,7 +453,7 @@ rose_api_error rose_api_graphics_spr(rose_rt* r, uint32_t n, int16_t x, int16_t 
     uint16_t blit_width = (uint16_t) (sprite_width_mult * w * 8);
     uint16_t blit_height = (uint16_t) (sprite_height_mult * h * 8);
 
-    uint8_t* sheet = r->mem + addr;
+    uint8_t* sheet = r->mem->data() + addr;
     for (uint16_t y_ = 0; y_ < blit_height; y_++) {
         for (uint16_t x_ = 0; x_ < blit_width; x_++) {
             uint16_t x__ = x_;

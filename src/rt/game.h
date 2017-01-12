@@ -1,14 +1,15 @@
-#ifndef ROSE_RT_GAME_H
-#define ROSE_RT_GAME_H
+#pragma once
 
-#include "../config.h"
-#include "rt.h"
+#include "enums.h"
+#include "rt.fwd.h"
 
-rose_game* rose_game_create(rose_fs* fs);
+struct rose_game {
+    rose_rt* rt;
+    rose_game(rose_fs* fs);
+    ~rose_game();
+    bool reload();
+};
 
-void rose_game_free(rose_game* r);
-
-bool rose_game_reload(rose_game* r);
 
 rose_game_error rose_game_init(rose_game* r);
 
@@ -26,4 +27,3 @@ rose_game_error rose_game_onkey(rose_game* r, rose_keycode keycode, bool pressed
 
 rose_game_error rose_game_ontouch(rose_game* r);
 
-#endif

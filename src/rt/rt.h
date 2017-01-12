@@ -1,36 +1,59 @@
-#ifndef ROSE_RT_BASE_H
-#define ROSE_RT_BASE_H
+#pragma once
 
-#include "../config.h"
-#include "fs/fs.h"
-#include "js/js_common.h"
-#include "js/js.h"
+#include "config.h"
+#include <array>
+#include "common.fwd.h"
+#include "fs.fwd.h"
+#include "js.fwd.h"
+#include "enums.h"
 
-const char* rose_keycode_to_string(rose_keycode key);
+struct rose_mousestate {
+    int16_t x;
+    int16_t y;
+    bool left_btn_down;
+    bool middle_btn_down;
+    bool right_btn_down;
+    bool x1_btn_down;
+    bool x2_btn_down;
+    int16_t wheel_x;
+    int16_t wheel_y;
+    bool wheel_inverted;
+};
 
-rose_memory_range* rose_memory_range_create(uint8_t begin[], uint32_t len);
+struct rose_memory_range {
+    std::array<uint8_t, ROSE_MEMORY_SIZE>::iterator begin;
+    std::array<uint8_t, ROSE_MEMORY_SIZE>::iterator end;
+};
 
-rose_memory_iterator rose_memory_iterator_begin(uint8_t m[]);
+struct rose_rt {
+    rose_js* js;
+    rose_fs* fs;
+    std::array<uint8_t, ROSE_MEMORY_SIZE>* mem;
+    rose_memory_range* screen;
+    rose_memory_range* schema;
+    rose_memory_range* palette;
+    rose_memory_range* palette_filter; // TODO: rename this to something not shit
+    rose_memory_range* palette_transparency;
+    rose_memory_range* clipping_region;
+    std::array<uint8_t, ROSE_MEMORY_SIZE>::iterator pen_color_addr;
+    rose_memory_range* print_cursor;
+    rose_memory_range* camera_offset;
+    rose_memory_range* pointer_positions;
+    rose_memory_range* btn_states;
+    rose_memory_range* prev_btn_states;
+    rose_memory_range* mouse_wheel;
+    rose_memory_range* key_states;
+    rose_memory_range* prev_key_states;
 
-rose_memory_iterator rose_memory_iterator_end(uint8_t m[], uint32_t len);
-
-rose_memory_iterator rose_memory_iterator_next(rose_memory_iterator i);
-
-rose_rt* rose_rt_create(rose_fs* fs);
-
-bool rose_rt_clear(rose_rt* r);
-
-bool rose_rt_load_run_main(rose_rt* r);
-
-void rose_rt_free(rose_rt* r);
-
-void rose_rt_save_input_frame(rose_rt* r);
-
-void rose_rt_update_mousestate(rose_rt* r, const rose_mousestate* mousestate);
-
-void rose_rt_update_keystate(rose_rt* r, rose_keycode keycode, bool pressed);
-
-void rose_rt_reset_input(rose_rt* r, rose_mousestate* mousestate);
+    rose_rt(rose_fs* fs);
+    ~rose_rt();
+    bool clear();
+    bool load_run_main();
+    void save_input_frame();
+    void update_mousestate(const rose_mousestate* mousestate);
+    void update_keystate(rose_keycode keycode, bool pressed);
+    void reset_input(rose_mousestate* mousestate);
+};
 
 rose_rt_error rose_rt_init(rose_rt* r);
 
@@ -55,5 +78,3 @@ bool rose_get_bit(uint8_t* trans, uint8_t addr);
 void rose_init(const char* base_path);
 
 void rose_deinit();
-
-#endif

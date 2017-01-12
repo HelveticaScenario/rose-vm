@@ -1,45 +1,16 @@
-#ifndef ROSE_TYPES_H
-#define ROSE_TYPES_H
+#pragma once
 
-#include <cstdint>
-#include <cstdbool>
-#include <cstdlib>
-#include <cerrno>
-#include <ctime>
-#include <cstdint>
-#include <cstring>
-#include <cassert>
-#include <iostream>
-#include <string>
-#include <zlib.h>
-#include <archive.h>
-#include <archive_entry.h>
-#include <vector>
-#include <sstream>
-#include <algorithm>
-#include <iterator>
-#include <map>
-
-#include "libplatform/libplatform.h"
-#include "v8.h"
-using namespace std;
-using namespace v8;
-
-
-enum rose_api_error{
-    ROSE_API_ERR_NONE,
-    ROSE_API_ERR_OUT_OF_BOUNDS
+enum rose_rt_error {
+    ROSE_RT_FUN_NOT_FOUND,
+    ROSE_RT_NO_ERR,
+    ROSE_RT_CRITICAL_ERR
 };
 
-enum rose_screenmode { ROSE_GAMEMODE, ROSE_EDITORMODE };
-
-struct rose_color{
-    uint8_t r;
-    uint8_t g;
-    uint8_t b;
+enum rose_game_error {
+    ROSE_GAME_FUN_NOT_FOUND,
+    ROSE_GAME_NO_ERR,
+    ROSE_GAME_CRITICAL_ERR
 };
-
-// ***** fs
 
 enum rose_fs_error {
     ROSE_FS_NO_ERR,
@@ -49,56 +20,12 @@ enum rose_fs_error {
     ROSE_FS_CRITICAL_ERR
 };
 
-enum rose_file_type { ROSE_INVALID_FILE, ROSE_CODE_FILE, ROSE_DATA_FILE, ROSE_DIRECTORY, ROSE_CART_DIRECTORY };
-
-struct rose_file {
-    rose_file_type type;
-    string name;
-    bool on_disk;
-    struct rose_file* parent;
-    vector<rose_file*> contents;
-    bool in_mem;
-    uint8_t* buffer;
-    size_t buffer_len;
-    time_t last_modification;
-    bool removed;
-};
-
-typedef rose_fs_error (*rose_fs_hook_read_file)(rose_file* file);
-typedef rose_fs_error (*rose_fs_hook_write_file)(rose_file* file);
-typedef rose_fs_error (*rose_fs_hook_shutdown)();
-typedef rose_fs_error (*rose_fs_hook_get_base_path)(char** path);
-
-struct rose_fs {
-    rose_file* cart;
-    rose_file* root;
-    rose_file* pwd;
-    rose_fs_hook_read_file read_file;
-    rose_fs_hook_write_file write_file;
-    rose_fs_hook_shutdown shutdown;
-    rose_fs_hook_get_base_path get_base_path;
-};
-
-// **** js
-
-
-struct rose_js {
-    rose_fs* fs;
-    Isolate* isolate;
-    Isolate::CreateParams create_params;
-    Global<ObjectTemplate> global_template;
-    Global<Context> context;
-    vector<rose_file*> include_path;
-    Global<v8::Map> module_cache;
-};
-
-// **** rt
-
-
-enum rose_rt_error{
-    ROSE_RT_FUN_NOT_FOUND,
-    ROSE_RT_NO_ERR,
-    ROSE_RT_CRITICAL_ERR
+enum rose_file_type {
+    ROSE_INVALID_FILE,
+    ROSE_CODE_FILE,
+    ROSE_DATA_FILE,
+    ROSE_DIRECTORY,
+    ROSE_CART_DIRECTORY
 };
 
 enum rose_keycode {
@@ -345,69 +272,7 @@ enum rose_keycode {
     ROSE_KEYCODE_UNKNOWN = 240
 };
 
-
-struct rose_mousestate {
-    int16_t x;
-    int16_t y;
-    bool left_btn_down;
-    bool middle_btn_down;
-    bool right_btn_down;
-    bool x1_btn_down;
-    bool x2_btn_down;
-    int16_t wheel_x;
-    int16_t wheel_y;
-    bool wheel_inverted;
+enum rose_api_error {
+    ROSE_API_ERR_NONE,
+    ROSE_API_ERR_OUT_OF_BOUNDS
 };
-
-typedef uint8_t* rose_memory_iterator;
-
-struct rose_memory_range {
-    rose_memory_iterator begin;
-    rose_memory_iterator end;
-};
-
-struct rose_rt {
-    rose_js* js;
-    uint8_t* mem;
-    uint32_t mem_size;
-    rose_memory_range* screen;
-    rose_memory_range* schema;
-    rose_memory_range* palette;
-    rose_memory_range* palette_filter; // TODO: rename this to something not shit
-    rose_memory_range* palette_transparency;
-    rose_memory_range* clipping_region;
-    rose_memory_iterator pen_color_addr;
-    rose_memory_range* print_cursor;
-    rose_memory_range* camera_offset;
-    rose_memory_range* pointer_positions;
-    rose_memory_range* btn_states;
-    rose_memory_range* prev_btn_states;
-    rose_memory_range* mouse_wheel;
-    rose_memory_range* key_states;
-    rose_memory_range* prev_key_states;
-    rose_fs* fs;
-};
-
-
-// *** game
-
-enum rose_game_error {
-    ROSE_GAME_FUN_NOT_FOUND,
-    ROSE_GAME_NO_ERR,
-    ROSE_GAME_CRITICAL_ERR
-};
-
-struct rose_game {
-    rose_rt* rt;
-};
-
-struct rose_editor_instance {
-    rose_rt* rt;
-};
-
-struct rose_editor {
-    vector<rose_editor_instance*> editors;
-
-};
-
-#endif

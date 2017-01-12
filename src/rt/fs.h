@@ -1,11 +1,21 @@
-#ifndef ROSE_FS_BASE_H
-#define ROSE_FS_BASE_H
+#pragma once
 
-#include "../../config.h"
-#include <string.h>
-#include <zlib.h>
-#include <archive.h>
-#include <archive_entry.h>
+#include "enums.h"
+
+typedef rose_fs_error (*rose_fs_hook_read_file)(rose_file* file);
+typedef rose_fs_error (*rose_fs_hook_write_file)(rose_file* file);
+typedef rose_fs_error (*rose_fs_hook_shutdown)();
+typedef rose_fs_error (*rose_fs_hook_get_base_path)(char** path);
+
+struct rose_fs {
+    rose_file* cart;
+    rose_file* root;
+    rose_file* pwd;
+    rose_fs_hook_read_file read_file;
+    rose_fs_hook_write_file write_file;
+    rose_fs_hook_shutdown shutdown;
+    rose_fs_hook_get_base_path get_base_path;
+};
 
 void rose_file_free_recurse(rose_file* info);
 
@@ -49,5 +59,3 @@ static uint8_t rose_default_palette[16 * 3] = {
         255, 119, 168, // pink
         255, 204, 170  // peach
 };
-
-#endif

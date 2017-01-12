@@ -1,15 +1,11 @@
-#ifndef ROSE_SYS_SDL2_H
-#define ROSE_SYS_SDL2_H
+#pragma once
 
 #include <SDL.h>
 #include <stdio.h>
 #include <sys/types.h>
 #include <dirent.h>
 #include <sys/stat.h>
-#include "../config.h"
-#include "../rt/rt.h"
-#include "../rt/game.h"
-#include "../rt/fs/fs.h"
+#include "rt/rose.h"
 #include "sys_key_conversion.h"
 
 struct rose_system_sdl2 {
@@ -44,5 +40,3 @@ bool rose_sys_sdl2_init(rose_system_sdl2* s, int argc, char* argv[]);
 void rose_sys_sdl2_run(rose_system_sdl2* s);
 
 void rose_sys_sdl2_free(rose_system_sdl2* s);
-
-#endif

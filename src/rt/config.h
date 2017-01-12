@@ -1,6 +1,4 @@
-#ifndef ROSE_CONFIG_H
-#define ROSE_CONFIG_H
-#include "types.h"
+#pragma once
 
 #define ROSE_APP_NAME ("Rosebud")
 #define ROSE_DATA_FILE_NAME ("CART_DATA")
@@ -26,13 +24,10 @@
 #define ROSE_RUNTIME_RESERVED_MEMORY_SIZE ((1024 * 64) - ROSE_PALETTE_SIZE - ROSE_MEMORY_SCHEMA_SIZE)
 
 #define ROSE_MAX_TOUCH (10)
-#define ROSE_LEFT_MOUSE_IDX (10) 
+#define ROSE_LEFT_MOUSE_IDX (10)
 #define ROSE_RIGHT_MOUSE_IDX (11)
 #define ROSE_MIDDLE_MOUSE_IDX (12)
 #define ROSE_X1_MOUSE_IDX (13)
 #define ROSE_X2_MOUSE_IDX (14)
 
 #define ROSE_MOUSE_POS_IDX (10) // for the pointer position struct
-
-
-#endif
