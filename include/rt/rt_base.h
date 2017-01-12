@@ -30,6 +30,8 @@ void rose_runtime_base_update_mousestate(rose_runtime_base* r, const rose_mouses
 
 void rose_runtime_base_update_keystate(rose_runtime_base* r, rose_keycode keycode, bool pressed);
 
+void rose_runtime_base_reset_input(rose_runtime_base* r, rose_mousestate* mousestate);
+
 rose_runtime_base_error rose_runtime_base_init(rose_runtime_base* r);
 
 rose_runtime_base_error rose_runtime_base_update(rose_runtime_base* r);

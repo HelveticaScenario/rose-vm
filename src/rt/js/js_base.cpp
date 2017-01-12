@@ -14,19 +14,7 @@ void js_print(const v8::FunctionCallbackInfo<v8::Value>& args) {
     printf("\n");
 }
 
-void split(const std::string &s, char delim, std::vector<std::string> &elems) {
-    std::stringstream ss;
-    ss.str(s);
-    std::string item;
-    while (std::getline(ss, item, delim)) {
-        elems.push_back(item);
-    }
-}
-
-static int num_require = 0;
-
 void js_require(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    num_require++;
     Isolate* isolate = args.GetIsolate();
     if (args.Length() < 1) {
         isolate->ThrowException(String::NewFromUtf8(isolate, "missing path"));
@@ -91,8 +79,7 @@ void js_require(const v8::FunctionCallbackInfo<v8::Value>& args) {
     auto exports_str = v8::String::NewFromUtf8(isolate, "exports", v8::NewStringType::kNormal).ToLocalChecked();
 
     auto file_full_path_str = rose_construct_path(file);
-    auto file_full_path = v8::String::NewFromUtf8(isolate, (const char*) file_full_path_str, v8::NewStringType::kNormal).ToLocalChecked();
-    free(file_full_path_str);
+    auto file_full_path = v8::String::NewFromUtf8(isolate, file_full_path_str.c_str(), v8::NewStringType::kNormal).ToLocalChecked();
     auto module_cache = r->js->module_cache.Get(isolate);
     auto maybe_cached = module_cache->Get(context, file_full_path);
     Local<Value> cached;
@@ -101,22 +88,25 @@ void js_require(const v8::FunctionCallbackInfo<v8::Value>& args) {
         return;
     }
 
-    uint8_t* file_buffer = NULL;
-    size_t file_size;
-    r->fs->read_file(file, &file_buffer, &file_size);
-
-    if (file_buffer[file_size-1] != '\0') {
-        file_size++;
-        file_buffer = (uint8_t*) realloc(file_buffer, file_size);
-        file_buffer[file_size-1] = '\0';
+    if (!file->in_mem) {
+        r->fs->read_file(file);
     }
-    string main_buffer_string((const char*) file_buffer);
+
+
+    if (file->buffer[file->buffer_len-1] != '\0') {
+        file->buffer_len++;
+        file->buffer = (uint8_t*) realloc(file->buffer, file->buffer_len);
+        file->buffer[file->buffer_len-1] = '\0';
+        file->last_modification = time(NULL);
+    }
+
+    string file_buffer_string((const char*) file->buffer);
     const char* header = "(function (exports, module, __filename) { ";
     const char* footer = "\n})";
-    string wrapped_string = header + main_buffer_string + footer;
+    string wrapped_string = header + file_buffer_string + footer;
 
     r->js->include_path.push_back(file);
-    v8::Local<v8::String> file_name = v8::String::NewFromUtf8(isolate, file->name, v8::NewStringType::kNormal).ToLocalChecked();
+    v8::Local<v8::String> file_name = v8::String::NewFromUtf8(isolate, file->name.c_str(), v8::NewStringType::kNormal).ToLocalChecked();
     v8::Local<v8::String> source;
     if (!v8::String::NewFromUtf8(isolate, wrapped_string.c_str(), v8::NewStringType::kNormal).ToLocal(&source)) {
         ReportException(isolate, &try_catch);
@@ -124,7 +114,6 @@ void js_require(const v8::FunctionCallbackInfo<v8::Value>& args) {
     }
     bool failed;
     auto res = ExecuteString(isolate, source, file_name, true, &failed);
-    free(file_buffer);
     if (failed) {
         ReportException(isolate, &try_catch);
         isolate->ThrowException(try_catch.Exception());
@@ -225,6 +214,27 @@ rose_js_base* rose_js_base_create(rose_runtime_base* r) {
 
     v8::Local<v8::FunctionTemplate> memset = FunctionTemplate::New(isolate, rose_js_memory_memset, r_ptr);
     global->Set(String::NewFromUtf8(isolate, "memset", NewStringType::kNormal).ToLocalChecked(), memset);
+
+    v8::Local<v8::FunctionTemplate> cstore = FunctionTemplate::New(isolate, rose_js_memory_cstore, r_ptr);
+    global->Set(String::NewFromUtf8(isolate, "cstore", NewStringType::kNormal).ToLocalChecked(), cstore);
+
+    v8::Local<v8::FunctionTemplate> reload = FunctionTemplate::New(isolate, rose_js_memory_reload, r_ptr);
+    global->Set(String::NewFromUtf8(isolate, "reload", NewStringType::kNormal).ToLocalChecked(), reload);
+
+    v8::Local<v8::FunctionTemplate> _readstr = FunctionTemplate::New(isolate, rose_js_memory__readstr, r_ptr);
+    global->Set(String::NewFromUtf8(isolate, "_readstr", NewStringType::kNormal).ToLocalChecked(), _readstr);
+
+    v8::Local<v8::FunctionTemplate> _writestr = FunctionTemplate::New(isolate, rose_js_memory__writestr, r_ptr);
+    global->Set(String::NewFromUtf8(isolate, "_writestr", NewStringType::kNormal).ToLocalChecked(), _writestr);
+
+    v8::Local<v8::FunctionTemplate> _mkfile = FunctionTemplate::New(isolate, rose_js_memory__mkfile, r_ptr);
+    global->Set(String::NewFromUtf8(isolate, "_mkfile", NewStringType::kNormal).ToLocalChecked(), _mkfile);
+
+    v8::Local<v8::FunctionTemplate> _rmfile = FunctionTemplate::New(isolate, rose_js_memory__rmfile, r_ptr);
+    global->Set(String::NewFromUtf8(isolate, "_rmfile", NewStringType::kNormal).ToLocalChecked(), _rmfile);
+
+    v8::Local<v8::FunctionTemplate> _savefile = FunctionTemplate::New(isolate, rose_js_memory__savefile, r_ptr);
+    global->Set(String::NewFromUtf8(isolate, "_savefile", NewStringType::kNormal).ToLocalChecked(), _savefile);
 
 
 

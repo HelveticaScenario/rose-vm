@@ -43,25 +43,29 @@ struct rose_color{
 
 enum rose_fs_error {
     ROSE_FS_NO_ERR,
+    ROSE_FS_CANT_READ_DIR_ERR,
+    ROSE_FS_FILE_NOT_ON_DISK,
+    ROSE_FS_FILE_REMOVED,
     ROSE_FS_CRITICAL_ERR
 };
 
-enum rose_file_type { ROSE_CODE_FILE, ROSE_DATA_FILE, ROSE_DIRECTORY, ROSE_CART_DIRECTORY };
+enum rose_file_type { ROSE_INVALID_FILE, ROSE_CODE_FILE, ROSE_DATA_FILE, ROSE_DIRECTORY, ROSE_CART_DIRECTORY };
 
 struct rose_file {
-    const rose_file_type type;
-    const char* name;
-    const off_t size;
-    const time_t last_disk_modification;
+    rose_file_type type;
+    string name;
+    bool on_disk;
     struct rose_file* parent;
-    struct rose_file** contents;
-    size_t contents_len;
+    vector<rose_file*> contents;
+    bool in_mem;
+    uint8_t* buffer;
+    size_t buffer_len;
+    time_t last_modification;
+    bool removed;
 };
 
-typedef rose_fs_error (*rose_fd_hook_readfile)(rose_file* file, uint8_t** buffer, size_t* buffer_len);
-typedef rose_fs_error (*rose_fs_hook_writefile)(rose_file* file, uint8_t* buffer, size_t buffer_len);
-typedef rose_fs_error (*rose_fs_hook_update_file)(rose_file* old_file, rose_file* new_file);
-typedef rose_fs_error (*rose_fs_hook_new_file)(rose_file* parent, rose_file** res, const char* name, rose_file_type file_type);
+typedef rose_fs_error (*rose_fd_hook_read_file)(rose_file* file);
+typedef rose_fs_error (*rose_fs_hook_write_file)(rose_file* file);
 typedef rose_fs_error (*rose_fs_hook_shutdown)();
 typedef rose_fs_error (*rose_fs_hook_get_base_path)(char** path);
 
@@ -69,10 +73,8 @@ struct rose_fs {
     rose_file* cart;
     rose_file* root;
     rose_file* pwd;
-    rose_fd_hook_readfile read_file;
-    rose_fs_hook_writefile write_file;
-    rose_fs_hook_update_file update_file;
-    rose_fs_hook_new_file new_file;
+    rose_fd_hook_read_file read_file;
+    rose_fs_hook_write_file write_file;
     rose_fs_hook_shutdown shutdown;
     rose_fs_hook_get_base_path get_base_path;
 };
@@ -86,7 +88,7 @@ struct rose_js_base {
     Isolate::CreateParams create_params;
     Global<ObjectTemplate> global_template;
     Global<Context> context;
-    std::vector<rose_file*> include_path;
+    vector<rose_file*> include_path;
     Global<v8::Map> module_cache;
 };
 
@@ -369,6 +371,7 @@ struct rose_runtime_base {
     uint8_t* mem;
     uint32_t mem_size;
     rose_memory_range* screen;
+    rose_memory_range* schema;
     rose_memory_range* palette;
     rose_memory_range* palette_filter; // TODO: rename this to something not shit
     rose_memory_range* palette_transparency;
@@ -382,7 +385,6 @@ struct rose_runtime_base {
     rose_memory_range* mouse_wheel;
     rose_memory_range* key_states;
     rose_memory_range* prev_key_states;
-
     rose_fs* fs;
 };
 
@@ -397,6 +399,15 @@ enum rose_runtime_game_error {
 
 struct rose_runtime_game {
     rose_runtime_base* base;
+};
+
+struct rose_runtime_editor_instance {
+    rose_runtime_base* base;
+};
+
+struct rose_runtime_editor {
+    rose_runtime_editor_instance** base;
+
 };
 
 #endif

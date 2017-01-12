@@ -38,8 +38,14 @@ rose_runtime_base* rose_runtime_base_create(rose_fs* fs) {
     screen_range->begin = beg_screen;
     screen_range->end = end;
 
+    rose_memory_range* schema_range = (rose_memory_range*) malloc(sizeof(rose_memory_range));
+    rose_memory_iterator beg_schema = end - ROSE_RUNTIME_RESERVED_MEMORY_SIZE - ROSE_PALETTE_SIZE - ROSE_MEMORY_SCHEMA_SIZE;
+    rose_memory_iterator end_schema = beg_schema + ROSE_MEMORY_SCHEMA_SIZE;
+    schema_range->begin = beg_schema;
+    schema_range->end = end_schema;
+
     rose_memory_range* palette_range = (rose_memory_range*) malloc(sizeof(rose_memory_range));
-    rose_memory_iterator beg_palette = end - ROSE_RUNTIME_RESERVED_MEMORY_SIZE - ROSE_PALETTE_SIZE;
+    rose_memory_iterator beg_palette = end_schema;
     rose_memory_iterator end_palette = beg_palette + ROSE_PALETTE_SIZE;
     palette_range->begin = beg_palette;
     palette_range->end = end_palette;
@@ -142,6 +148,7 @@ rose_runtime_base* rose_runtime_base_create(rose_fs* fs) {
     r->mem = mem;
     r->mem_size = ROSE_MEMORY_SIZE;
     r->screen = screen_range;
+    r->schema = schema_range;
     r->palette = palette_range;
     r->palette_filter = palette_filter_range;
     r->palette_transparency = palette_transparency_range;
@@ -179,16 +186,18 @@ bool rose_runtime_base_load_run_main(rose_runtime_base* r) {
         return false;
     }
 
-    uint8_t* cart_data_buffer = NULL;
-    size_t cart_data_size = 0;
-    r->fs->read_file(cart_data, &cart_data_buffer, &cart_data_size);
-    if (cart_data_size > (r->mem_size - ROSE_RUNTIME_RESERVED_MEMORY_SIZE)) {
+    if (!cart_data->in_mem) {
+        auto err = r->fs->read_file(cart_data);
+        if (err == ROSE_FS_CRITICAL_ERR) {
+            return false;
+        }
+    }
+
+    if (cart_data->buffer_len > (r->mem_size - ROSE_RUNTIME_RESERVED_MEMORY_SIZE)) {
         fprintf(stderr, "ERROR: tried to reload runtime and cartridge memory size was bigger than available memory size\n");
-        free(cart_data_buffer);
         return false;
     }
-    memcpy(r->mem, cart_data_buffer, cart_data_size);
-    free(cart_data_buffer);
+    memcpy(r->mem, cart_data->buffer, cart_data->buffer_len);
     rose_file* main = rose_fs_fetch_cart_js_main(r->fs->cart);
     if (main == NULL) {
         fprintf(stderr, "ERROR: no main file found\n");
@@ -197,14 +206,16 @@ bool rose_runtime_base_load_run_main(rose_runtime_base* r) {
     r->js->include_path.clear();
     r->js->include_path.push_back(main);
 
-    uint8_t* main_buffer = NULL;
-    size_t main_size;
-    r->fs->read_file(main, &main_buffer, &main_size);
+    if (!main->in_mem) {
+        r->fs->read_file(main);
+    }
 
-    if (main_buffer[main_size-1] != '\0') {
-        main_size++;
-        main_buffer = (uint8_t*) realloc(main_buffer, main_size);
-        main_buffer[main_size-1] = '\0';
+
+    if (main->buffer[main->buffer_len-1] != '\0') {
+        main->buffer_len++;
+        main->buffer = (uint8_t*) realloc(main->buffer, main->buffer_len);
+        main->buffer[main->buffer_len-1] = '\0';
+        main->last_modification = time(NULL);
     }
 
     auto isolate = r->js->isolate;
@@ -220,9 +231,9 @@ bool rose_runtime_base_load_run_main(rose_runtime_base* r) {
     }
     v8::Context::Scope context_scope(context);
 
-    v8::Local<v8::String> file_name = v8::String::NewFromUtf8(isolate, main->name, v8::NewStringType::kNormal).ToLocalChecked();
+    v8::Local<v8::String> file_name = v8::String::NewFromUtf8(isolate, main->name.c_str(), v8::NewStringType::kNormal).ToLocalChecked();
     v8::Local<v8::String> source;
-    if (!v8::String::NewFromUtf8(isolate, (const char*) main_buffer, v8::NewStringType::kNormal).ToLocal(&source)) {
+    if (!v8::String::NewFromUtf8(isolate, (const char*) main->buffer, v8::NewStringType::kNormal).ToLocal(&source)) {
         ReportException(isolate, &try_catch);
         return false;
     }
@@ -232,7 +243,6 @@ bool rose_runtime_base_load_run_main(rose_runtime_base* r) {
 
     bool failed;
     auto res = ExecuteString(isolate, source, file_name, true, &failed);
-    free(main_buffer);
     if (failed) {
         ReportException(isolate, &try_catch);
         return false;
@@ -254,6 +264,7 @@ void rose_runtime_base_free(rose_runtime_base* r) {
     // dont free fs, managed by system layer
     free(r->mem);
     free(r->screen);
+    free(r->schema);
     free(r->palette);
     free(r->palette_filter);
     free(r->palette_transparency);
@@ -295,6 +306,22 @@ void rose_runtime_base_update_keystate(rose_runtime_base* r, rose_keycode keycod
     if (keycode < ROSE_KEYCODE_UNKNOWN) {
         rose_set_bit(r->key_states->begin, keycode, pressed);
     }
+}
+
+void rose_runtime_base_reset_input(rose_runtime_base* r, rose_mousestate* mousestate) {
+    mousestate->left_btn_down = false;
+    mousestate->right_btn_down = false;
+    mousestate->middle_btn_down = false;
+    mousestate->x1_btn_down = false;
+    mousestate->x2_btn_down = false;
+    mousestate->wheel_x = 0;
+    mousestate->wheel_y = 0;
+
+    rose_runtime_base_update_mousestate(r, mousestate);
+    for (int keycode = ROSE_KEYCODE_A; keycode < ROSE_KEYCODE_UNKNOWN; ++keycode) {
+        rose_runtime_base_update_keystate(r, (rose_keycode) keycode, false);
+    }
+    rose_runtime_base_save_input_frame(r);
 }
 
 void rose_set_bit(uint8_t* arr, uint8_t addr, bool val) {

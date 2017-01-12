@@ -9,13 +9,11 @@
 
 void rose_file_free_recurse(rose_file* info);
 
-char* rose_construct_path(rose_file* file);
+string rose_construct_path(rose_file* file);
 
 rose_fs* rose_fs_create();
 
 void rose_fs_free(rose_fs* fs);
-
-void rose_fill_file_struct(rose_file** file, rose_file_type type, const char* name, off_t size, time_t last_disk_modification);
 
 rose_file* rose_fs_fetch_cart_data_file(rose_file* cart_root);
 
@@ -23,9 +21,15 @@ rose_file* rose_fs_fetch_cart_js_main(rose_file* cart_root);
 
 rose_file* rose_fs_fetch_cart_root(rose_file* file);
 
-rose_file* rose_fs_fetch_neighbor(rose_file* file, const char* neighbor_name);
+rose_file* rose_fs_fetch_neighbor(rose_file* file, const string& neighbor_name);
 
-rose_file* rose_fs_fetch_child(rose_file* file, const char* child_name);
+rose_file* rose_fs_fetch_child(rose_file* file, const string& child_name);
+
+rose_file* rose_fs_fetch_child_and_index(rose_file* file, const string& child_name, size_t& index);
+
+void rose_fs_add_child(rose_file* parent, rose_file* child);
+
+void rose_fs_remove_child(rose_file* parent, rose_file* child);
 
 static uint8_t rose_default_palette[16 * 3] = {
         0,   0,   0,   // black

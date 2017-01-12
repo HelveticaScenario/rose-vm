@@ -1,12 +1,13 @@
 #include "rt/fs/fs_base.h"
 
 void rose_file_free_recurse(rose_file* info) {
-    if (info->name != NULL) {
-        free((void*) info->name);
+    if (info->buffer != NULL) {
+        free(info->buffer);
     }
-    int i;
-    for (i = 0; i < info->contents_len; i++ ) {
-        rose_file_free_recurse(info->contents[i]);
+    if (info->contents.size() != 0) {
+        for (auto it = info->contents.begin(); it != info->contents.end(); ++it) {
+            rose_file_free_recurse(*it);
+        }
     }
     free(info);
 }
@@ -17,88 +18,72 @@ void rose_fs_free(rose_fs* fs) {
 }
 
 rose_fs* rose_fs_create() {
-    rose_fs *fs = (rose_fs *)malloc(sizeof(rose_fs));
+    rose_fs *fs = new rose_fs();
     fs->root = NULL;
     fs->cart = NULL;
+    fs->pwd = NULL;
     return fs;
 }
 
-char* rose_construct_path(rose_file* file) {
-    size_t file_count = 0;
-    size_t arr_size = 64;
-    rose_file** arr = (rose_file**)malloc(sizeof(*arr) * arr_size);
-    size_t path_len = 1;
+string rose_construct_path(rose_file* file) {
+    vector<rose_file*> arr = {};
+
     while (file != NULL && file->parent != NULL) {
-        arr[file_count] = file;
-        path_len += strlen(file->name);
-        file_count++;
+        arr.push_back(file);
         file = file->parent;
     }
-    size_t num_path_separator = file_count < 1 ? 0 : (file_count - 1);
-    char* path = (char*)malloc(sizeof(char) * (path_len + num_path_separator));
-    memset(path, '\0', sizeof(char) * (path_len + num_path_separator));
-    size_t i;
-    for (i = file_count; i > 0; i--) {
-        strcat(path, arr[i - 1]->name);
+    string path = "";
+    auto i = arr.size();
+    for (auto rit = arr.rbegin(); rit != arr.rend(); ++rit) {
+        path += (*rit)->name;
         if (i > 1) {
             #ifdef _WIN32
-                strcat(path, "\\");
+                path += '\\';
             #else
-                strcat(path, "/");
+                path += '/';
             #endif
         }
+        --i;
     }
-    free(arr);
 
     return path;
 }
 
-void rose_fill_file_struct(rose_file** file, rose_file_type type, const char* name, off_t size, time_t last_disk_modification) {
-    if (*file == NULL) {
-        *file = (rose_file*)malloc(sizeof(**file));
-        memset(*file, 0, sizeof(**file));
-    }
-    if (name != (*file)->name && (*file)->name != NULL) {
-        free((void*) (*file)->name);
-    }
-    char* name_cpy = NULL;
-    if (name == (*file)->name) {
-        name_cpy = (char*) name;
-    } else if (name != NULL) {
-        name_cpy = (char*)malloc(strlen(name));
-        strcpy(name_cpy, name);
-    }
-    rose_file file_stack = {
-            .type = type,
-            .name = name_cpy,
-            .size = size,
-            .last_disk_modification = last_disk_modification,
-            .parent = (*file)->parent,
-            .contents = (*file)->contents,
-            .contents_len = (*file)->contents_len
-    };
+void rose_fs_add_child(rose_file* parent, rose_file* child) {
+    parent->contents.push_back(child);
+}
 
-    memcpy(*file, &file_stack, sizeof(**file));
+void rose_fs_remove_child(rose_file* parent, rose_file* child) {
+    size_t index;
+    if (rose_fs_fetch_child_and_index(parent, child->name, index) != NULL) {
+        parent->contents.erase(parent->contents.begin()+index);
+    }
 }
 
 rose_file* rose_fs_fetch_cart_data_file(rose_file* cart_root) {
-    rose_file* cart_data = NULL;
-    int i;
-    for (i = 0; i < cart_root->contents_len; i++) {
-        if (cart_root->contents[i]->type == ROSE_DATA_FILE) {
-            cart_data = cart_root->contents[i];
+    if (cart_root->contents.size() == 0) {
+        return NULL;
+    }
+    rose_file* data = NULL;
+    for (auto it = cart_root->contents.begin(); it != cart_root->contents.end(); ++it) {
+        auto file = *it;
+        if (file->type == ROSE_DATA_FILE) {
+            data = file;
             break;
         }
     }
-    return cart_data;
+    return data;
 }
 
 rose_file* rose_fs_fetch_cart_js_main(rose_file* cart_root) {
+    if (cart_root->contents.size() == 0) {
+        return NULL;
+    }
     rose_file* js_main = NULL;
-    int i;
-    for (i = 0; i < cart_root->contents_len; i++) {
-        if (cart_root->contents[i]->type == ROSE_CODE_FILE && strcmp(cart_root->contents[i]->name, ROSE_MAIN_CODE_FILE_NAME) == 0) {
-            js_main = cart_root->contents[i];
+    for (auto it = cart_root->contents.begin(); it != cart_root->contents.end(); ++it) {
+        auto file = *it;
+        if (file->type == ROSE_CODE_FILE && file->name == ROSE_MAIN_CODE_FILE_NAME) {
+            js_main = file;
             break;
         }
     }
@@ -114,7 +99,7 @@ rose_file* rose_fs_fetch_cart_root(rose_file* file) {
     return file;
 }
 
-rose_file* rose_fs_fetch_neighbor(rose_file* file, const char* neighbor_name) {
+rose_file* rose_fs_fetch_neighbor(rose_file* file, const string& neighbor_name) {
     if (file->parent == NULL) {
         return NULL;
     }
@@ -122,52 +107,61 @@ rose_file* rose_fs_fetch_neighbor(rose_file* file, const char* neighbor_name) {
     return rose_fs_fetch_child(file->parent, neighbor_name);
 }
 
-rose_file* rose_fs_fetch_child(rose_file* file, const char* child_name) {
-    int i;
-    for (i = 0; i < file->contents_len; i++) {
-        if (strcmp(file->contents[i]->name, child_name) == 0) {
-            return file->contents[i];
+rose_file* rose_fs_fetch_child(rose_file* file, const string& child_name) {
+    size_t _;
+    return rose_fs_fetch_child_and_index(file, child_name, _);
+}
+
+rose_file* rose_fs_fetch_child_and_index(rose_file* file, const string& child_name, size_t& index) {
+    if (file->contents.size() == 0) {
+        return NULL;
+    }
+    for (auto it = file->contents.begin(); it != file->contents.end(); ++it) {
+        auto selected = *it;
+        if (selected->name == child_name) {
+            index = (size_t) (it - file->contents.begin());
+            return selected;
         }
     }
     return NULL;
 }
-
-void archive_test(const char *base_path) {
-
-    const char *config_fname = "config.txt.zip";
-    char *config_fpath = NULL;
-    config_fpath = (char*) malloc(strlen(base_path) + strlen(config_fname) + 1);
-    strcpy(config_fpath, base_path);
-    strcat(config_fpath, config_fname);
-    printf("%s\n", config_fpath);
-    struct stat file_stat;
-    int res;
-    res = stat(config_fpath, &file_stat);
-    printf("%d\n", res);
-    printf("%d\n", S_ISDIR(file_stat.st_mode));
-    res = stat(base_path, &file_stat);
-    printf("%d\n", S_ISDIR(file_stat.st_mode));
-    printf("%d\n", res);
-    printf("%s\n", base_path);
-
-    struct archive *a;
-    struct archive_entry *entry;
-    int r;
-
-    a = archive_read_new();
-    archive_read_support_filter_all(a);
-    archive_read_support_format_all(a);
-    r = archive_read_open_filename(
-        a,
-        "/Users/contrarian/Library/Application Support/Rosebud/config.txt.zip",
-        10240); // Note 1
-    if (r != ARCHIVE_OK)
-        exit(1);
-    while (archive_read_next_header(a, &entry) == ARCHIVE_OK) {
-        printf("%s\\n", archive_entry_pathname(entry));
-        archive_read_data_skip(a); // Note 2
-    }
-    r = archive_read_free(a); // Note 3
-    if (r != ARCHIVE_OK)
-        exit(1);
-}
+//
+//void archive_test(const char *base_path) {
+//
+//    const char *config_fname = "config.txt.zip";
+//    char *config_fpath = NULL;
+//    config_fpath = (char*) malloc(strlen(base_path) + strlen(config_fname) + 1);
+//    strcpy(config_fpath, base_path);
+//    strcat(config_fpath, config_fname);
+//    printf("%s\n", config_fpath);
+//    struct stat file_stat;
+//    int res;
+//    res = stat(config_fpath, &file_stat);
+//    printf("%d\n", res);
+//    printf("%d\n", S_ISDIR(file_stat.st_mode));
+//    res = stat(base_path, &file_stat);
+//    printf("%d\n", S_ISDIR(file_stat.st_mode));
+//    printf("%d\n", res);
+//    printf("%s\n", base_path);
+//
+//    struct archive *a;
+//    struct archive_entry *entry;
+//    int r;
+//
+//    a = archive_read_new();
+//    archive_read_support_filter_all(a);
+//    archive_read_support_format_all(a);
+//    r = archive_read_open_filename(
+//        a,
+//        "/Users/contrarian/Library/Application Support/Rosebud/config.txt.zip",
+//        10240); // Note 1
+//    if (r != ARCHIVE_OK)
+//        exit(1);
+//    while (archive_read_next_header(a, &entry) == ARCHIVE_OK) {
+//        printf("%s\\n", archive_entry_pathname(entry));
+//        archive_read_data_skip(a); // Note 2
+//    }
+//    r = archive_read_free(a); // Note 3
+//    if (r != ARCHIVE_OK)
+//        exit(1);
+//}

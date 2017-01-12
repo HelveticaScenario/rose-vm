@@ -32,7 +32,7 @@ struct rose_system_sdl2 {
 
     rose_fs* fs;
 
-    // RuntimeEditor *editor;
+    rose_runtime_game* editor;
 
     rose_runtime_game* game;
 

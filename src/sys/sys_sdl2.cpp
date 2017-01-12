@@ -12,31 +12,23 @@ uint32_t get_screen_mult(rose_system_sdl2* s);
 
 void make_screen_rect(rose_system_sdl2* s, SDL_Rect* rect);
 
-char* rose_sys_construct_full_path(rose_file* file);
+string rose_sys_construct_full_path(rose_file* file);
 
-rose_fs_error rose_sys_readfile(rose_file* file, uint8_t** buffer, size_t* buffer_len);
-rose_fs_error rose_sys_writefile(rose_file* file, uint8_t* buffer, size_t buffer_len);
-rose_fs_error rose_sys_update_file(rose_file* old_file, rose_file* new_file);
-rose_fs_error rose_sys_new_file(rose_file* parent, rose_file** res, const char* name, const rose_file_type file_type);
+rose_fs_error rose_sys_readfile(rose_file* file);
+rose_fs_error rose_sys_writefile(rose_file* file);
 rose_fs_error rose_sys_shutdown();
 
-rose_file* rose_sys_recursive_file_create(const char* path, const char* name);
+rose_file* rose_sys_recursive_file_create(const string& path, const string& name);
 
-static char* PERF_PATH = NULL;
+static string PERF_PATH = "";
 
-char* get_perf_path() {
-    if (PERF_PATH == NULL) {
-        char* path = SDL_GetPrefPath(ROSE_APP_NAME, "");
-        size_t len = strlen(path);
-        if (len == 1) {
-            PERF_PATH = (char *)malloc(len+1);
-            memcpy(PERF_PATH, path, len+1);
-        } else if (path[len-2] == '/' || path[len-2] == '\\') {
-            PERF_PATH = (char *)malloc(len);
-            memcpy(PERF_PATH, path, len-1);
-            PERF_PATH[len-1] = '\0';
+string get_perf_path() {
+    if (PERF_PATH == "") {
+        PERF_PATH = SDL_GetPrefPath(ROSE_APP_NAME, "");
+        auto len = PERF_PATH.length();
+        if (PERF_PATH[len-2] == '/' || PERF_PATH[len-2] == '\\') {
+            PERF_PATH.pop_back();
         }
-        SDL_free(path);
     }
     return PERF_PATH;
 }
@@ -44,13 +36,14 @@ char* get_perf_path() {
 
 bool rose_sys_sdl2_init(rose_system_sdl2* s, int argc, char* argv[]) {
 
+
     rose_init(SDL_GetBasePath());
 
     s->window = NULL;
     s->renderer = NULL;
     s->texture = NULL;
     s->fs = NULL;
-    // s->editor = NULL;
+    s->editor = NULL;
     s->game = NULL;
     s->screen_mode = ROSE_GAMEMODE;
     s->pixels = NULL;
@@ -108,24 +101,59 @@ bool rose_sys_sdl2_init(rose_system_sdl2* s, int argc, char* argv[]) {
     rose_fs* fs = rose_fs_create();
     fs->read_file = &rose_sys_readfile;
     fs->write_file = &rose_sys_writefile;
-    fs->update_file = &rose_sys_update_file;
-    fs->new_file = &rose_sys_new_file;
     fs->shutdown = &rose_sys_shutdown;
 
-    char* root_path = rose_sys_construct_full_path(NULL);
+    string root_path = rose_sys_construct_full_path(NULL);
     rose_file* root = rose_sys_recursive_file_create(root_path, "");
     fs->root = root;
     fs->pwd = root;
     fs->cart = NULL;
 
+    if (argc>1) {
+        fs->cart = rose_fs_fetch_child(fs->root, argv[1]);
+        if (fs->cart == NULL) {
+            fs->cart = fs->root->contents[0];
+        }
+    } else {
+        // TODO: Remove this
+        fs->cart = fs->root->contents[0];
+    }
 
-    // TODO: Remove this
-    fs->cart = fs->root->contents[0];
 
     s->game = rose_runtime_game_create(fs);
     rose_runtime_game_error err = rose_runtime_game_init(s->game);
+
+//    fs->cart = fs->root->contents[1];
+//
+//    s->editor = rose_runtime_game_create(fs);
+//    rose_runtime_game_error err2 = rose_runtime_game_init(s->editor);
+//    fs->cart = fs->root->contents[0];
     SDL_ShowCursor(SDL_DISABLE);
     return true;
+}
+
+rose_runtime_base* get_present_base(rose_system_sdl2* s) {
+    if (s->screen_mode == ROSE_GAMEMODE) {
+        return s->game->base;
+    } else {
+        return s->editor->base;
+    }
+}
+
+rose_runtime_game* get_present_game(rose_system_sdl2* s) {
+    if (s->screen_mode == ROSE_GAMEMODE) {
+        return s->game;
+    } else {
+        return s->editor;
+    }
+}
+
+rose_screenmode get_other_mode(rose_system_sdl2* s) {
+    if (s->screen_mode == ROSE_GAMEMODE) {
+        return ROSE_EDITORMODE;
+    } else {
+        return ROSE_GAMEMODE;
+    }
 }
 
 void rose_sys_sdl2_run(rose_system_sdl2* s) {
@@ -154,7 +182,7 @@ void rose_sys_sdl2_run(rose_system_sdl2* s) {
     make_screen_rect(s, &screen_rect);
     rose_runtime_game_error err = ROSE_RT_GAME_NO_ERR;
     while (!quit) {
-        rose_runtime_base_save_input_frame(s->game->base);
+        rose_runtime_base_save_input_frame(get_present_base(s));
 
         // Handle events on queue
         while (SDL_PollEvent(&event)) {
@@ -188,8 +216,13 @@ void rose_sys_sdl2_run(rose_system_sdl2* s) {
                 case SDL_KEYUP:
                 case SDL_KEYDOWN: {
                     rose_keycode code = sdl_scancode_to_rose_keycode(event.key.keysym.scancode);
-                    rose_runtime_base_update_keystate(s->game->base, code, event.key.state == SDL_PRESSED);
-                    err = rose_runtime_game_onkey(s->game, code, event.key.state == SDL_PRESSED, event.key.repeat != 0);
+//                    if (code == ROSE_KEYCODE_ESCAPE && event.key.state == SDL_PRESSED) {
+//                        s->screen_mode = get_other_mode(s);
+//                        rose_runtime_base_reset_input(get_present_base(s), &mousestate);
+//                        break;
+//                    }
+                    rose_runtime_base_update_keystate(get_present_base(s), code, event.key.state == SDL_PRESSED);
+                    err = rose_runtime_game_onkey(get_present_game(s), code, event.key.state == SDL_PRESSED, event.key.repeat != 0);
                     switch (err) {
                         case ROSE_RT_GAME_CRITICAL_ERR:
                             quit = true;
@@ -205,8 +238,8 @@ void rose_sys_sdl2_run(rose_system_sdl2* s) {
                         break;
                     mousestate.x = (int16_t) ((event.motion.x - ((int32_t) screen_rect.x)) / mult);
                     mousestate.y = (int16_t) ((event.motion.y - ((int32_t) screen_rect.y)) / mult);
-                    rose_runtime_base_update_mousestate(s->game->base, &mousestate);
-                    err = rose_runtime_game_onmouse(s->game, mousestate.x, mousestate.y);
+                    rose_runtime_base_update_mousestate(get_present_base(s), &mousestate);
+                    err = rose_runtime_game_onmouse(get_present_game(s), mousestate.x, mousestate.y);
                     switch (err) {
                         case ROSE_RT_GAME_CRITICAL_ERR:
                             quit = true;
@@ -220,28 +253,28 @@ void rose_sys_sdl2_run(rose_system_sdl2* s) {
                     switch (event.button.button) {
                         case SDL_BUTTON_LEFT:
                             mousestate.left_btn_down = true;
-                            rose_runtime_base_update_mousestate(s->game->base, &mousestate);
-                            err = rose_runtime_game_onbtn(s->game, ROSE_LEFT_MOUSE_IDX, true);
+                            rose_runtime_base_update_mousestate(get_present_base(s), &mousestate);
+                            err = rose_runtime_game_onbtn(get_present_game(s), ROSE_LEFT_MOUSE_IDX, true);
                             break;
                         case SDL_BUTTON_RIGHT:
                             mousestate.right_btn_down = true;
-                            rose_runtime_base_update_mousestate(s->game->base, &mousestate);
-                            err = rose_runtime_game_onbtn(s->game, ROSE_RIGHT_MOUSE_IDX, true);
+                            rose_runtime_base_update_mousestate(get_present_base(s), &mousestate);
+                            err = rose_runtime_game_onbtn(get_present_game(s), ROSE_RIGHT_MOUSE_IDX, true);
                             break;
                         case SDL_BUTTON_MIDDLE:
                             mousestate.middle_btn_down = true;
-                            rose_runtime_base_update_mousestate(s->game->base, &mousestate);
-                            err = rose_runtime_game_onbtn(s->game, ROSE_MIDDLE_MOUSE_IDX, true);
+                            rose_runtime_base_update_mousestate(get_present_base(s), &mousestate);
+                            err = rose_runtime_game_onbtn(get_present_game(s), ROSE_MIDDLE_MOUSE_IDX, true);
                             break;
                         case SDL_BUTTON_X1:
                             mousestate.x1_btn_down = true;
-                            rose_runtime_base_update_mousestate(s->game->base, &mousestate);
-                            err = rose_runtime_game_onbtn(s->game, ROSE_X1_MOUSE_IDX, true);
+                            rose_runtime_base_update_mousestate(get_present_base(s), &mousestate);
+                            err = rose_runtime_game_onbtn(get_present_game(s), ROSE_X1_MOUSE_IDX, true);
                             break;
                         case SDL_BUTTON_X2:
                             mousestate.x2_btn_down = true;
-                            rose_runtime_base_update_mousestate(s->game->base, &mousestate);
-                            err = rose_runtime_game_onbtn(s->game, ROSE_X2_MOUSE_IDX, true);
+                            rose_runtime_base_update_mousestate(get_present_base(s), &mousestate);
+                            err = rose_runtime_game_onbtn(get_present_game(s), ROSE_X2_MOUSE_IDX, true);
                             break;
                         default:
                             break;
@@ -259,28 +292,28 @@ void rose_sys_sdl2_run(rose_system_sdl2* s) {
                     switch (event.button.button) {
                         case SDL_BUTTON_LEFT:
                             mousestate.left_btn_down = false;
-                            rose_runtime_base_update_mousestate(s->game->base, &mousestate);
-                            err = rose_runtime_game_onbtn(s->game, ROSE_LEFT_MOUSE_IDX, false);
+                            rose_runtime_base_update_mousestate(get_present_base(s), &mousestate);
+                            err = rose_runtime_game_onbtn(get_present_game(s), ROSE_LEFT_MOUSE_IDX, false);
                             break;
                         case SDL_BUTTON_RIGHT:
                             mousestate.right_btn_down = false;
-                            rose_runtime_base_update_mousestate(s->game->base, &mousestate);
-                            err = rose_runtime_game_onbtn(s->game, ROSE_RIGHT_MOUSE_IDX, false);
+                            rose_runtime_base_update_mousestate(get_present_base(s), &mousestate);
+                            err = rose_runtime_game_onbtn(get_present_game(s), ROSE_RIGHT_MOUSE_IDX, false);
                             break;
                         case SDL_BUTTON_MIDDLE:
                             mousestate.middle_btn_down = false;
-                            rose_runtime_base_update_mousestate(s->game->base, &mousestate);
-                            err = rose_runtime_game_onbtn(s->game, ROSE_MIDDLE_MOUSE_IDX, false);
+                            rose_runtime_base_update_mousestate(get_present_base(s), &mousestate);
+                            err = rose_runtime_game_onbtn(get_present_game(s), ROSE_MIDDLE_MOUSE_IDX, false);
                             break;
                         case SDL_BUTTON_X1:
                             mousestate.x1_btn_down = false;
-                            rose_runtime_base_update_mousestate(s->game->base, &mousestate);
-                            err = rose_runtime_game_onbtn(s->game, ROSE_X1_MOUSE_IDX, false);
+                            rose_runtime_base_update_mousestate(get_present_base(s), &mousestate);
+                            err = rose_runtime_game_onbtn(get_present_game(s), ROSE_X1_MOUSE_IDX, false);
                             break;
                         case SDL_BUTTON_X2:
                             mousestate.x2_btn_down = false;
-                            rose_runtime_base_update_mousestate(s->game->base, &mousestate);
-                            err = rose_runtime_game_onbtn(s->game, ROSE_X2_MOUSE_IDX, false);
+                            rose_runtime_base_update_mousestate(get_present_base(s), &mousestate);
+                            err = rose_runtime_game_onbtn(get_present_game(s), ROSE_X2_MOUSE_IDX, false);
                             break;
                         default:
                             break;
@@ -316,8 +349,8 @@ void rose_sys_sdl2_run(rose_system_sdl2* s) {
             }
         }
         if (wheel_changed) {
-            rose_runtime_base_update_mousestate(s->game->base, &mousestate);
-            err = rose_runtime_game_onwheel(s->game, mousestate.wheel_x, mousestate.wheel_x, mousestate.wheel_inverted);
+            rose_runtime_base_update_mousestate(get_present_base(s), &mousestate);
+            err = rose_runtime_game_onwheel(get_present_game(s), mousestate.wheel_x, mousestate.wheel_x, mousestate.wheel_inverted);
             switch (err) {
                 case ROSE_RT_GAME_CRITICAL_ERR:
                     quit = true;
@@ -327,7 +360,7 @@ void rose_sys_sdl2_run(rose_system_sdl2* s) {
             }
             wheel_changed = false;
         }
-        err = rose_runtime_game_update(s->game);
+        err = rose_runtime_game_update(get_present_game(s));
         switch (err) {
             case ROSE_RT_GAME_CRITICAL_ERR:
                 quit = true;
@@ -336,7 +369,7 @@ void rose_sys_sdl2_run(rose_system_sdl2* s) {
                 break;
         }
 
-        err = rose_runtime_game_draw(s->game);
+        err = rose_runtime_game_draw(get_present_game(s));
         switch (err) {
             case ROSE_RT_GAME_CRITICAL_ERR:
                 quit = true;
@@ -354,8 +387,8 @@ void rose_sys_sdl2_run(rose_system_sdl2* s) {
 
             int pixel_count = (pitch) * ROSE_SCREEN_HEIGHT;
 
-            rose_memory_range* palette = s->game->base->palette;
-            rose_memory_range* screen = s->game->base->screen;
+            rose_memory_range* palette = get_present_base(s)->palette;
+            rose_memory_range* screen = get_present_base(s)->screen;
             rose_memory_iterator it = screen->begin;
             for (; it < screen->end; it = rose_memory_iterator_next(it)) {
                 uint16_t i = (uint16_t) (it - screen->begin);
@@ -451,34 +484,38 @@ bool unlock_texture(rose_system_sdl2* s) {
     return true;
 }
 
-char* rose_sys_construct_full_path(rose_file* file) {
+string rose_sys_construct_full_path(rose_file* file) {
     if (file == NULL) {
         return get_perf_path();
     }
-    char* path = rose_construct_path(file);
-    char* base_path = get_perf_path();
-    size_t base_path_len = strlen(base_path);
-    size_t abs_path_len = strlen(path);
-    char* full_path = (char*)malloc(base_path_len + abs_path_len + 1);
-    memset(full_path, '\0', base_path_len + abs_path_len + 1);
-    strcpy(full_path, base_path);
-    strcat(full_path, path);
-    free(path);
-    return full_path;
+    return get_perf_path() + rose_construct_path(file);
 }
 
-rose_fs_error rose_sys_readfile(rose_file* file, uint8_t** buffer, size_t* buffer_len) {
-    char* full_path = rose_sys_construct_full_path(file);
-    SDL_RWops *rw = SDL_RWFromFile(full_path, "rb");
-    free(full_path);
+rose_fs_error rose_sys_readfile(rose_file* file) {
+    if (file->removed) {
+        return ROSE_FS_FILE_REMOVED;
+    }
+    if (!file->on_disk) {
+        return ROSE_FS_FILE_NOT_ON_DISK;
+    }
+    if (file->type == ROSE_DIRECTORY || file->type == ROSE_CART_DIRECTORY ) {
+        return ROSE_FS_CANT_READ_DIR_ERR;
+    }
+    string full_path = rose_sys_construct_full_path(file);
+    SDL_RWops *rw = SDL_RWFromFile(full_path.c_str(), "rb");
     if (rw == NULL)
         return ROSE_FS_CRITICAL_ERR;
 
     Sint64 res_size = SDL_RWsize(rw);
-    uint8_t* res = (uint8_t*)malloc((size_t) (res_size + 1));
+    if (file->in_mem) {
+        file->buffer = (uint8_t*)realloc(file->buffer, (size_t)res_size);
+    } else {
+        file->buffer = (uint8_t*)malloc((size_t)res_size);
+    }
+
 
     Sint64 nb_read_total = 0, nb_read = 1;
-    uint8_t* buf = res;
+    uint8_t* buf = file->buffer;
     while (nb_read_total < res_size && nb_read != 0) {
         nb_read = (Sint64) SDL_RWread(rw, buf, sizeof(uint8_t), res_size - nb_read_total);
         nb_read_total += nb_read;
@@ -486,27 +523,124 @@ rose_fs_error rose_sys_readfile(rose_file* file, uint8_t** buffer, size_t* buffe
     }
     SDL_RWclose(rw);
     if (nb_read_total != res_size) {
-        free(res);
         return ROSE_FS_CRITICAL_ERR;
     }
-    *buffer = res;
-    *buffer_len = (size_t) nb_read_total;
+    file->buffer_len = (size_t) nb_read_total;
+    file->in_mem = true;
+    file->last_modification = time(NULL);
+    if(file->last_modification == -1) {
+        fprintf(stderr, "err when getting current time");
+        exit(1);
+    }
     return ROSE_FS_NO_ERR;
 }
 
-rose_fs_error rose_sys_writefile(rose_file* file, uint8_t* buffer, size_t buffer_len) {
-    fprintf(stderr, "rose_sys_writefile unimplemented\n");
-    exit(1);
+// http://stackoverflow.com/questions/2256945/removing-a-non-empty-directory-programmatically-in-c-or-c
+int remove_directory(const string& path)
+{
+    DIR *d = opendir(path.c_str());
+    size_t path_len = path.size();
+    int r = -1;
+
+    if (d)
+    {
+        struct dirent *p;
+
+        r = 0;
+
+        while (!r && (p=readdir(d)))
+        {
+            int r2 = -1;
+            char *buf;
+            size_t len;
+
+            /* Skip the names "." and ".." as we don't want to recurse on them. */
+            if (!strcmp(p->d_name, ".") || !strcmp(p->d_name, ".."))
+            {
+                continue;
+            }
+
+            len = path_len + strlen(p->d_name) + 2;
+            buf = (char*) malloc(len);
+
+            if (buf)
+            {
+                struct stat statbuf;
+
+                snprintf(buf, len, "%s/%s", path.c_str(), p->d_name);
+
+                if (!stat(buf, &statbuf))
+                {
+                    if (S_ISDIR(statbuf.st_mode))
+                    {
+                        r2 = remove_directory(buf);
+                    }
+                    else
+                    {
+                        r2 = unlink(buf);
+                    }
+                }
+
+                free(buf);
+            }
+
+            r = r2;
+        }
+
+        closedir(d);
+    }
+
+    if (!r)
+    {
+        r = rmdir(path.c_str());
+    }
+
+    return r;
 }
 
-rose_fs_error rose_sys_update_file(rose_file* old_file, rose_file* new_file) {
-    fprintf(stderr, "rose_sys_update_file unimplemented\n");
-    exit(1);
-}
+rose_fs_error rose_sys_writefile(rose_file* file) {
+    string full_path = rose_sys_construct_full_path(file);
+    if (file->removed) {
+        if (file->type == ROSE_DIRECTORY || file->type == ROSE_CART_DIRECTORY ) {
+            int err = remove_directory(full_path);
+            if (err != 0) {
+                fprintf(stderr, "remove_directory error %s %d\n", full_path.c_str(), errno);
+                return ROSE_FS_CRITICAL_ERR;
+            }
+            return ROSE_FS_NO_ERR;
+        } else {
+            int err = unlink(full_path.c_str());
+            if (err != 0) {
+                fprintf(stderr, "remove error %s %d\n", full_path.c_str(), errno);
+                return ROSE_FS_CRITICAL_ERR;
+            }
+            return ROSE_FS_NO_ERR;
+        }
+    }
+    if (file->type == ROSE_DIRECTORY || file->type == ROSE_CART_DIRECTORY ) {
+        if (file->on_disk) {
+            return ROSE_FS_NO_ERR;
+        }
+        int status = mkdir(full_path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+        if (status == 0 || errno == EEXIST) {
+            file->on_disk = true;
+            return ROSE_FS_NO_ERR;
+        } else {
+            return ROSE_FS_CRITICAL_ERR;
+        }
+    }
+    SDL_RWops *rw = SDL_RWFromFile(full_path.c_str(), "wb");
+    if (rw == NULL) {
+        return ROSE_FS_CRITICAL_ERR;
+    }
 
-rose_fs_error rose_sys_new_file(rose_file* parent, rose_file** res, const char* name, rose_file_type file_type) {
-    fprintf(stderr, "rose_sys_new_file unimplemented\n");
-    exit(1);
+    size_t write_len = SDL_RWwrite(rw, file->buffer, sizeof(uint8_t), file->buffer_len);
+    SDL_RWclose(rw);
+    if (write_len != (sizeof(uint8_t) * file->buffer_len)) {
+        return ROSE_FS_CRITICAL_ERR;
+    }
+
+    return ROSE_FS_NO_ERR;
 }
 
 rose_fs_error rose_sys_shutdown() {
@@ -514,22 +648,17 @@ rose_fs_error rose_sys_shutdown() {
     exit(1);
 }
 
-rose_file* rose_sys_recursive_file_create(const char* path, const char* name) {
-
-    if (strcmp("matter-js", name) == 0) {
-        int i = 0;
-    }
+rose_file* rose_sys_recursive_file_create(const string& path, const string& name) {
     struct stat attrib;
-    stat(path, &attrib);
-    rose_file* file = NULL;
+    stat(path.c_str(), &attrib);
 
     rose_file_type type;
     if ((attrib.st_mode & S_IFMT) == S_IFDIR) {
         type = ROSE_DIRECTORY;
     } else if((attrib.st_mode & S_IFMT) == S_IFREG) {
-        if (strcmp(name, ROSE_DATA_FILE_NAME) == 0) {
+        if (name == ROSE_DATA_FILE_NAME) {
             type = ROSE_DATA_FILE;
-        } else if (strcmp(name + (strlen(name) - strlen(ROSE_CODE_FILE_SUFFIX)), ROSE_CODE_FILE_SUFFIX) == 0) {
+        } else if (name.substr(name.size() - 3) == ROSE_CODE_FILE_SUFFIX) {
             type = ROSE_CODE_FILE;
         } else {
             return NULL;
@@ -538,56 +667,49 @@ rose_file* rose_sys_recursive_file_create(const char* path, const char* name) {
         return NULL;
     }
 
-    rose_fill_file_struct(&file, type, name, attrib.st_size, attrib.st_mtime);
+    rose_file* file = new rose_file();
+    file->type = type;
+    file->name = name;
+    file->on_disk = true;
+    file->last_modification = attrib.st_mtime;
+    file->in_mem = false;
+    file->buffer_len = 0;
+    file->buffer = NULL;
+    file->parent = NULL;
+    file->contents = {};
+    file->removed = false;
 
-    size_t file_count = 0;
-    size_t arr_size = 64;
-    rose_file** arr = (rose_file**)malloc(sizeof(*arr) * arr_size);
+    vector<rose_file*> arr = {};
 
     if (type == ROSE_DIRECTORY) {
         DIR *dp;
         struct dirent *ep;
-        dp = opendir (path);
+        dp = opendir (path.c_str());
         if (dp != NULL)
         {
 
             while ((ep = readdir(dp))) {
-                if (strcmp(ep->d_name,".") == 0 || strcmp(ep->d_name,"..") == 0 || strcmp(ep->d_name,".DS_Store") == 0 || strcmp(ep->d_name,".git") == 0) {
+                if (strcmp(ep->d_name,".") == 0
+                    || strcmp(ep->d_name,"..") == 0
+                    || strcmp(ep->d_name,".DS_Store") == 0
+                    || strcmp(ep->d_name,".git") == 0) {
                     continue;
                 }
                 if (ep->d_type == DT_REG || ep->d_type == DT_DIR) { /* If the entry is a regular file or directory*/
-                    file_count++;
-                    if (file_count > arr_size) {
-                        arr_size *= 2;
-                        arr = (rose_file**) realloc(arr, sizeof(*arr) * arr_size);
-                    }
-                    char* new_name = (char*) malloc(sizeof(char) * (ep->d_namlen + 1));
-                    memset(new_name, '\0', sizeof(char) * (ep->d_namlen + 1));
-                    strcpy(new_name, ep->d_name);
+                    string new_name = ep->d_name;
 
-                    char* new_path = (char*) malloc(sizeof(char) * (strlen(path) + ep->d_namlen + 1));
-                    memset(new_path, '\0', sizeof(char) * (strlen(path) + ep->d_namlen + 2));
-                    strcpy(new_path, path);
+                    string new_path = path;
 
                     #ifdef _WIN32
-                        if (path[strlen(path) - 1] != '\\') {
-                            strcat(new_path, "\\");
-                        }
+                        new_path += '\\';
                     #else
-                        if (path[strlen(path) - 1] != '/') {
-                            strcat(new_path, "/");
-                        }
+                        new_path += '/';
                     #endif
-                    strcat(new_path, ep->d_name);
+                    new_path += new_name;
                     rose_file* new_file = rose_sys_recursive_file_create(new_path, new_name);
-                    free(new_name);
-                    free(new_path);
-                    if (new_file == NULL) {
-                        file_count--;
-                        continue;
-                    } else {
+                    if (new_file != NULL) {
                         new_file->parent = file;
-                        arr[file_count-1] = new_file;
+                        arr.push_back(new_file);
                     }
 
                 }
@@ -597,23 +719,16 @@ rose_file* rose_sys_recursive_file_create(const char* path, const char* name) {
         }
         else {
             perror ("Couldn't open the directory");
-            free(arr);
             exit(1);
         }
     }
 
-    if (file_count == 0) {
-        free(arr);
-        arr = NULL;
-    } else {
-        arr = (rose_file**) realloc(arr, sizeof(*arr) * file_count);
-    }
+
 
     file->contents = arr;
-    file->contents_len = file_count;
     if (rose_fs_fetch_cart_data_file(file) != NULL &&
             rose_fs_fetch_cart_js_main(file) != NULL) {
-        rose_fill_file_struct(&file, ROSE_CART_DIRECTORY, file->name, file->size, file->last_disk_modification);
+        file->type = ROSE_CART_DIRECTORY;
     }
 
     return file;

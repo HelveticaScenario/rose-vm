@@ -12,5 +12,9 @@ rose_runtime_api_error rose_api_memory_memcpy(rose_runtime_base* r, uint32_t des
 
 rose_runtime_api_error rose_api_memory_memset(rose_runtime_base* r, uint32_t dest_addr, uint8_t val, uint32_t len);
 
+rose_runtime_api_error rose_api_memory_cstore(rose_runtime_base* r, uint32_t dest_addr, uint32_t source_addr, uint32_t len);
+
+rose_runtime_api_error rose_api_memory_reload(rose_runtime_base* r, uint32_t dest_addr, uint32_t source_addr, uint32_t len);
+
 
 #endif
