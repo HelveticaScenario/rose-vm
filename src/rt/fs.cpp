@@ -20,8 +20,6 @@ void rose_fs_free(rose_fs* fs) {
 rose_fs* rose_fs_create() {
     rose_fs *fs = new rose_fs();
     fs->root = NULL;
-    fs->cart = NULL;
-    fs->pwd = NULL;
     return fs;
 }
 
@@ -68,6 +66,21 @@ rose_file* rose_fs_fetch_cart_data_file(rose_file* cart_root) {
     for (auto it = cart_root->contents.begin(); it != cart_root->contents.end(); ++it) {
         auto file = *it;
         if (file->type == ROSE_DATA_FILE) {
+            data = file;
+            break;
+        }
+    }
+    return data;
+}
+
+rose_file* rose_fs_fetch_cart_info_file(rose_file* cart_root) {
+    if (cart_root->contents.size() == 0) {
+        return NULL;
+    }
+    rose_file* data = NULL;
+    for (auto it = cart_root->contents.begin(); it != cart_root->contents.end(); ++it) {
+        auto file = *it;
+        if (file->type == ROSE_INFO_FILE) {
             data = file;
             break;
         }

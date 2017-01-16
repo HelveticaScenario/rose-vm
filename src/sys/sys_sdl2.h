@@ -17,6 +17,7 @@ struct rose_system_sdl2 {
 
     // The actual hardware texture
     SDL_Texture* texture;
+    SDL_Texture* hd_texture;
 
     void* pixels;
     int32_t pitch;
@@ -28,11 +29,7 @@ struct rose_system_sdl2 {
 
     rose_fs* fs;
 
-    rose_editor* editor;
-
-    rose_game* game;
-
-    rose_screenmode screen_mode;
+    rose_desktop_player* player;
 };
 
 bool rose_sys_sdl2_init(rose_system_sdl2* s, int argc, char* argv[]);

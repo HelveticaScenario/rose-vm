@@ -6,12 +6,6 @@ enum rose_rt_error {
     ROSE_RT_CRITICAL_ERR
 };
 
-enum rose_game_error {
-    ROSE_GAME_FUN_NOT_FOUND,
-    ROSE_GAME_NO_ERR,
-    ROSE_GAME_CRITICAL_ERR
-};
-
 enum rose_fs_error {
     ROSE_FS_NO_ERR,
     ROSE_FS_CANT_READ_DIR_ERR,
@@ -22,6 +16,7 @@ enum rose_fs_error {
 
 enum rose_file_type {
     ROSE_INVALID_FILE,
+    ROSE_INFO_FILE,
     ROSE_CODE_FILE,
     ROSE_DATA_FILE,
     ROSE_DIRECTORY,
@@ -275,4 +270,9 @@ enum rose_keycode {
 enum rose_api_error {
     ROSE_API_ERR_NONE,
     ROSE_API_ERR_OUT_OF_BOUNDS
+};
+
+enum rose_screenmode {
+    ROSE_GAMEMODE,
+    ROSE_EDITORMODE
 };

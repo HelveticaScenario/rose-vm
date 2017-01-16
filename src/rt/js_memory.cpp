@@ -177,7 +177,7 @@ void rose_js_memory__writestr(const v8::FunctionCallbackInfo<v8::Value>& args) {
 
     std::vector<std::string> elems;
     split(path, '/', elems);
-    rose_file* file =  r->fs->cart;
+    rose_file* file =  r->target_cart;
     for (int i = 0; i < elems.size(); i++) {
         file = rose_fs_fetch_child(file, elems[i].c_str());
         if (file == NULL){
@@ -238,7 +238,7 @@ void rose_js_memory__readstr(const v8::FunctionCallbackInfo<v8::Value>& args) {
 
     std::vector<std::string> elems;
     split(path, '/', elems);
-    rose_file* file =  r->fs->cart;
+    rose_file* file =  r->target_cart;
     for (int i = 0; i < elems.size(); i++) {
         file = rose_fs_fetch_child(file, elems[i].c_str());
         if (file == NULL){
@@ -298,7 +298,7 @@ void rose_js_memory__savefile(const v8::FunctionCallbackInfo<v8::Value>& args) {
 
     std::vector<std::string> elems;
     split(path, '/', elems);
-    rose_file* file =  r->fs->cart;
+    rose_file* file =  r->target_cart;
     for (int i = 0; i < elems.size(); i++) {
         file = rose_fs_fetch_child(file, elems[i].c_str());
         if (file == NULL){
@@ -347,7 +347,7 @@ void rose_js_memory__mkfile(const v8::FunctionCallbackInfo<v8::Value>& args) {
 
     std::vector<std::string> elems;
     split(path, '/', elems);
-    rose_file* file =  r->fs->cart;
+    rose_file* file =  r->target_cart;
     for (int i = 0; i < elems.size(); i++) {
         auto new_file = rose_fs_fetch_child(file, elems[i].c_str());
         if (new_file != NULL && new_file->type == ROSE_CART_DIRECTORY) {
@@ -418,7 +418,7 @@ void rose_js_memory__rmfile(const v8::FunctionCallbackInfo<v8::Value>& args) {
 
     std::vector<std::string> elems;
     split(path, '/', elems);
-    rose_file* file =  r->fs->cart;
+    rose_file* file =  r->target_cart;
     for (int i = 0; i < elems.size(); i++) {
         file = rose_fs_fetch_child(file, elems[i].c_str());
         if (file == NULL){
@@ -426,7 +426,7 @@ void rose_js_memory__rmfile(const v8::FunctionCallbackInfo<v8::Value>& args) {
             return;
         }
     }
-    if (file == r->fs->cart) {
+    if (file == r->target_cart) {
         isolate->ThrowException(String::NewFromUtf8(isolate, "cannot remove loaded cart"));
         return;
     }

@@ -37,7 +37,7 @@ rose_api_error rose_api_memory_cstore(rose_rt* r, uint32_t dest_addr, uint32_t s
     if ((source_addr + len) > ROSE_MEMORY_SIZE) {
         return ROSE_API_ERR_OUT_OF_BOUNDS;
     }
-    rose_file* data_file = rose_fs_fetch_cart_data_file(r->fs->cart);
+    rose_file* data_file = rose_fs_fetch_cart_data_file(r->target_cart);
     if ((dest_addr + len) > data_file->buffer_len) {
         return ROSE_API_ERR_OUT_OF_BOUNDS;
     }
@@ -46,7 +46,7 @@ rose_api_error rose_api_memory_cstore(rose_rt* r, uint32_t dest_addr, uint32_t s
 }
 
 rose_api_error rose_api_memory_reload(rose_rt* r, uint32_t dest_addr, uint32_t source_addr, uint32_t len) {
-    rose_file* data_file = rose_fs_fetch_cart_data_file(r->fs->cart);
+    rose_file* data_file = rose_fs_fetch_cart_data_file(r->target_cart);
     if ((source_addr + len) > data_file->buffer_len) {
         return ROSE_API_ERR_OUT_OF_BOUNDS;
     }

@@ -25,9 +25,19 @@ struct rose_memory_range {
     std::array<uint8_t, ROSE_MEMORY_SIZE>::iterator end;
 };
 
+struct rose_rt_meta {
+    bool hd;
+    string name;
+    string author;
+};
+
 struct rose_rt {
+    rose_rt_meta meta;
+
     rose_js* js;
     rose_fs* fs;
+    rose_file* self_cart;
+    rose_file* target_cart;
     std::array<uint8_t, ROSE_MEMORY_SIZE>* mem;
     rose_memory_range* screen;
     rose_memory_range* schema;
@@ -47,29 +57,36 @@ struct rose_rt {
 
     rose_rt(rose_fs* fs);
     ~rose_rt();
+    void make_mem_ranges();
+
+    void retarget(rose_file* self, rose_file* target);
     bool clear();
     bool load_run_main();
     void save_input_frame();
     void update_mousestate(const rose_mousestate* mousestate);
     void update_keystate(rose_keycode keycode, bool pressed);
     void reset_input(rose_mousestate* mousestate);
+
+    rose_rt_error call_init();
+
+    rose_rt_error call_update();
+
+    rose_rt_error call_draw();
+
+    rose_rt_error call_onmouse(int16_t x, int16_t y);
+
+    rose_rt_error call_onwheel(int16_t x, int16_t y, bool inverted);
+
+    rose_rt_error call_onbtn(uint8_t code, bool pressed);
+
+    rose_rt_error call_onkey(rose_keycode keycode, bool pressed, bool repeat);
+
+    rose_rt_error call_ontouch();
+
+private:
+    rose_rt_error rose_call( const char* name, uint8_t nargs, Local<Value>* args);
+
 };
-
-rose_rt_error rose_rt_init(rose_rt* r);
-
-rose_rt_error rose_rt_update(rose_rt* r);
-
-rose_rt_error rose_rt_draw(rose_rt* r);
-
-rose_rt_error rose_rt_onmouse(rose_rt* r, int16_t x, int16_t y);
-
-rose_rt_error rose_rt_onwheel(rose_rt* r, int16_t x, int16_t y, bool inverted);
-
-rose_rt_error rose_rt_onbtn(rose_rt* r, uint8_t code, bool pressed);
-
-rose_rt_error rose_rt_onkey(rose_rt* r, rose_keycode keycode, bool pressed, bool repeat);
-
-rose_rt_error rose_rt_ontouch(rose_rt* r);
 
 void rose_set_bit(uint8_t* trans, uint8_t addr, bool val);
 

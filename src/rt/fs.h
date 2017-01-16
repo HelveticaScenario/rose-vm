@@ -8,9 +8,7 @@ typedef rose_fs_error (*rose_fs_hook_shutdown)();
 typedef rose_fs_error (*rose_fs_hook_get_base_path)(char** path);
 
 struct rose_fs {
-    rose_file* cart;
     rose_file* root;
-    rose_file* pwd;
     rose_fs_hook_read_file read_file;
     rose_fs_hook_write_file write_file;
     rose_fs_hook_shutdown shutdown;
@@ -26,6 +24,8 @@ rose_fs* rose_fs_create();
 void rose_fs_free(rose_fs* fs);
 
 rose_file* rose_fs_fetch_cart_data_file(rose_file* cart_root);
+
+rose_file* rose_fs_fetch_cart_info_file(rose_file* cart_root);
 
 rose_file* rose_fs_fetch_cart_js_main(rose_file* cart_root);
 

@@ -49,7 +49,7 @@ void js_require(const v8::FunctionCallbackInfo<v8::Value>& args) {
 
     std::vector<std::string> elems;
     split(path, '/', elems);
-    rose_file* file = elems[0].compare("") == 0 ? r->fs->cart : r->js->include_path.back()->parent;
+    rose_file* file = elems[0].compare("") == 0 ? r->self_cart : r->js->include_path.back()->parent;
     for (int i = 0; i < elems.size(); i++) {
         if (elems[i].compare("") == 0) {
             continue;

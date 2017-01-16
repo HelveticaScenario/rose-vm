@@ -25,7 +25,6 @@
 using namespace std;
 using namespace v8;
 
-enum rose_screenmode { ROSE_GAMEMODE, ROSE_EDITORMODE };
 
 #include "enums.h"
 #include "common.h"
@@ -41,9 +40,7 @@ enum rose_screenmode { ROSE_GAMEMODE, ROSE_EDITORMODE };
 
 #include "rt.h"
 
-#include "game.h"
-
-#include "editor.h"
+#include "desktop_player.h"
 
 #include "api_graphics.h"
 #include "api_input.h"

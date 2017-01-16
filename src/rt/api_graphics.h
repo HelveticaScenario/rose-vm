@@ -42,8 +42,8 @@ rose_api_error rose_api_graphics_trifill_default(rose_rt* r, int16_t v0_x, int16
 
 rose_api_error rose_api_graphics_cls(rose_rt* r);
 
-rose_api_error rose_api_graphics_get_spritesheet_meta(rose_rt* r, uint32_t* addr, uint16_t* sheet_width, uint16_t* sheet_height, uint16_t* sprite_width_mult, uint16_t* sprite_height_mult);
+rose_api_error rose_api_graphics_get_spritesheet_meta(rose_rt* r, uint32_t* addr, uint16_t* sheet_width, uint16_t* sheet_height, uint8_t* sprite_width_mult, uint8_t* sprite_height_mult);
 
-rose_api_error rose_api_graphics_set_spritesheet_meta(rose_rt* r, uint32_t addr, uint16_t sheet_width, uint16_t sheet_height, uint16_t sprite_width_mult, uint16_t sprite_height_mult);
+rose_api_error rose_api_graphics_set_spritesheet_meta(rose_rt* r, uint32_t addr, uint16_t sheet_width, uint16_t sheet_height, uint8_t sprite_width_mult, uint8_t sprite_height_mult);
 
-rose_api_error rose_api_graphics_spr(rose_rt* r, uint32_t n, int16_t x, int16_t y, uint16_t w, uint16_t h, bool flip_x, bool flip_y);
+rose_api_error rose_api_graphics_spr(rose_rt* r, uint32_t n, int16_t x, int16_t y, uint8_t w, uint8_t h, bool flip_x, bool flip_y);
