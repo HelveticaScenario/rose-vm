@@ -108,13 +108,13 @@ void js_require(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::Local<v8::String> file_name = v8::String::NewFromUtf8(isolate, file->name.c_str(), v8::NewStringType::kNormal).ToLocalChecked();
     v8::Local<v8::String> source;
     if (!v8::String::NewFromUtf8(isolate, wrapped_string.c_str(), v8::NewStringType::kNormal).ToLocal(&source)) {
-        ReportException(isolate, &try_catch);
+        ReportException(isolate, &try_catch, r->error_cb);
         return;
     }
     bool failed;
-    auto res = ExecuteString(isolate, source, file_name, true, &failed);
+    auto res = ExecuteString(isolate, source, file_name, true, &failed, r->error_cb);
     if (failed) {
-        ReportException(isolate, &try_catch);
+        ReportException(isolate, &try_catch, r->error_cb);
         isolate->ThrowException(try_catch.Exception());
         return;
     }
@@ -133,7 +133,7 @@ void js_require(const v8::FunctionCallbackInfo<v8::Value>& args) {
     Local<Value> func_args[3] = {exports, module, file_name};
     func->Call(context->Global(), 3, func_args);
     if (try_catch.HasCaught()) {
-        ReportException(isolate, &try_catch);
+        ReportException(isolate, &try_catch, r->error_cb);
         isolate->ThrowException(try_catch.Exception());
         return;
     }

@@ -16,125 +16,183 @@ void rose_deinit() {
     delete static_platform;
 }
 
+void rose_rt::reset_palette_filter() {
+    for (int i = 0; i < ROSE_PALETTE_INDEX_NUM; ++i) {
+        palette_filter.begin[i] = (uint8_t) i;
+    }
+}
+
+void rose_rt::reset_palette_transparency() {
+    for (auto it = palette_transparency.begin; it != palette_transparency.end; it++) {
+        *it = 0;
+    }
+    rose_set_bit(palette_transparency.begin, 0, true);
+}
+
+void rose_rt::reset_clipping_region() {
+    int16_t* ptr = (int16_t*) clipping_region.begin;
+    ptr[0] = 0;                      // x0
+    ptr[1] = 0;                      // y0
+    ptr[2] = (int16_t) ((meta.hd ? ROSE_HD_SCREEN_WIDTH : ROSE_SCREEN_WIDTH) - 1);  // x1
+    ptr[3] = (int16_t) ((meta.hd ? ROSE_HD_SCREEN_HEIGHT : ROSE_SCREEN_HEIGHT) - 1); // y1
+}
+
+void rose_rt::reset_pen_color() {
+    *pen_color_addr = 6;
+}
+
+void rose_rt::reset_print_cursor() {
+    int16_t* ptr = (int16_t*) print_cursor.begin;
+    ptr[0] = 0; // x0
+    ptr[1] = 0; // y0 // TODO: replace with actual starting position
+    // once font size is finalized
+}
+
+void rose_rt::reset_camera_offset() {
+    int16_t* ptr = (int16_t*) camera_offset.begin;
+    ptr[0] = 0; // x0
+    ptr[1] = 0; // y0 // TODO: replace with actual starting position
+    // once font size is finalized
+}
+
+void rose_rt::reset_pointer_positions() {
+    int16_t* ptr = (int16_t*) pointer_positions.begin;
+    ptr[0] = 0; // x0
+    ptr[1] = 0; // y0 // TODO: replace with actual starting position
+
+}
+
+void rose_rt::reset_btn_states() {
+    for (auto it = btn_states.begin; it != btn_states.end; it++) {
+        *it = 0;
+    }
+    for (auto it = prev_btn_states.begin; it != prev_btn_states.end; it++) {
+        *it = 0;
+    }
+}
+
+void rose_rt::reset_mouse_wheel() {
+    for (auto it = mouse_wheel.begin; it != mouse_wheel.end; it++) {
+        *it = 0;
+    }
+}
+
+void rose_rt::reset_key_states() {
+    for (auto it = key_states.begin; it != key_states.end; it++) {
+        *it = 0;
+    }
+    for (auto it = prev_key_states.begin; it != prev_key_states.end; it++) {
+        *it = 0;
+    }
+}
+
+void rose_rt::reset_palette() {
+    memcpy(palette.begin, rose_default_palette, sizeof(rose_default_palette));
+}
+
+void rose_rt::reset_schema() {
+    rose_api_graphics_set_spritesheet_meta(this, 0, 256, 256, 1, 1);
+}
+
+void rose_rt::reset_screen() {
+    rose_api_graphics_cls(this);
+}
+
+void rose_rt::reset_userdata() {
+    memset(mem->begin(), 0, (size_t) (meta.hd ? ROSE_HD_USERSPACE_MEMORY_SIZE : ROSE_USERSPACE_MEMORY_SIZE));
+}
+
+void rose_rt::copy_input_from_other(rose_rt* other) {
+    auto len = prev_key_states.end - pointer_positions.begin;
+    memcpy(pointer_positions.begin, other->pointer_positions.begin, len);
+}
+
+
+void rose_rt::copy_screen_from_other(rose_rt* other) {
+    if (meta.hd == other->meta.hd) {
+        memcpy(screen.begin, other->screen.begin, screen.end - screen.begin);
+    } else if (meta.hd) {
+        uint8_t* this_screen_ptr = screen.begin;
+        uint8_t* other_screen_ptr = other->screen.begin;
+        for (auto i = 0; i < ROSE_SCREEN_SIZE; i++) {
+            this_screen_ptr[i*2] = other_screen_ptr[i];
+            this_screen_ptr[i*2+1] = other_screen_ptr[i];
+        }
+    } else {
+        uint8_t* this_screen_ptr = screen.begin;
+        uint8_t* other_screen_ptr = other->screen.begin;
+        for (auto i = 0; i < ROSE_SCREEN_SIZE; i++) {
+            this_screen_ptr[i] = other_screen_ptr[i*2];
+        }
+    }
+}
+
 void rose_rt::make_mem_ranges() {
     bool hd = this->meta.hd;
-    rose_memory_range* screen_range = this->screen == NULL ? new rose_memory_range() : this->screen;
     auto screen_begin = mem->end();
     std::advance(screen_begin, -(hd ? ROSE_HD_SCREEN_SIZE : ROSE_SCREEN_SIZE));
-    screen_range->begin = screen_begin; // Robert, Here
-    screen_range->end = mem->end();
+    screen.begin = screen_begin;
+    screen.end = mem->end();
 
-    rose_memory_range* schema_range = this->schema == NULL ? new rose_memory_range() : this->schema;
-    auto it = screen_range->end;
+    auto it = screen.end;
     std::advance(it, -(hd ? ROSE_HD_RUNTIME_RESERVED_MEMORY_SIZE : ROSE_RUNTIME_RESERVED_MEMORY_SIZE));
     std::advance(it, -ROSE_PALETTE_SIZE);
     std::advance(it, -ROSE_MEMORY_SCHEMA_SIZE);
-    schema_range->begin = it;
+    schema.begin = it;
     std::advance(it, ROSE_MEMORY_SCHEMA_SIZE);
-    schema_range->end = it;
+    schema.end = it;
 
-    rose_memory_range* palette_range = this->palette == NULL ? new rose_memory_range() : this->palette;
-    palette_range->begin = it;
+    this->palette.begin = it;
     std::advance(it, ROSE_PALETTE_SIZE);
-    palette_range->end = it;
+    this->palette.end = it;
 
-    rose_memory_range* palette_filter_range = this->palette_filter == NULL ? new rose_memory_range() : this->palette_filter;
-    palette_filter_range->begin = it;
+    palette_filter.begin = it;
     std::advance(it, ROSE_PALETTE_INDEX_NUM);
-    palette_filter_range->end = it;
+    palette_filter.end = it;
 
-    int i;
-    for (i = 0; i < ROSE_PALETTE_INDEX_NUM; ++i) {
-        palette_filter_range->begin[i] = (uint8_t) i;
-    }
-
-    rose_memory_range* palette_transparency_range = this->palette_transparency == NULL ? new rose_memory_range() : this->palette_transparency;
-    palette_transparency_range->begin = it;
+    palette_transparency.begin = it;
     std::advance(it, ROSE_PALETTE_INDEX_NUM / 8);
-    palette_transparency_range->end = it;
+    palette_transparency.end = it;
 
-    rose_set_bit(palette_transparency_range->begin, 0, true);
-
-    rose_memory_range* clipping_region_range = this->clipping_region == NULL ? new rose_memory_range() : this->clipping_region;
-    clipping_region_range->begin = it;
+    clipping_region.begin = it;
     std::advance(it, 8);
-    clipping_region_range->end = it;
+    clipping_region.end = it;
 
-    uint16_t* clipping_region = (uint16_t*) clipping_region_range->begin;
-    clipping_region[0] = 0;                      // x0
-    clipping_region[1] = 0;                      // y0
-    clipping_region[2] = (uint16_t) ((hd ? ROSE_HD_SCREEN_WIDTH : ROSE_SCREEN_WIDTH) - 1);  // x1
-    clipping_region[3] = (uint16_t) ((hd ? ROSE_HD_SCREEN_HEIGHT : ROSE_SCREEN_HEIGHT) - 1); // y1
+    pen_color_addr = it;
 
-    auto pen_color_addr = it;
-    *pen_color_addr = 6;
     std::advance(it, 1);
 
-    rose_memory_range* print_cursor_range = this->print_cursor == NULL ? new rose_memory_range() : this->print_cursor;
-    print_cursor_range->begin = it;
+    print_cursor.begin = it;
     std::advance(it, 4);
-    print_cursor_range->end = it;
+    print_cursor.end = it;
 
-    uint16_t* print_cursor = (uint16_t*) print_cursor_range->begin;
-    print_cursor[0] = 0; // x0
-    print_cursor[1] = 0; // y0 // TODO: replace with actual starting position
-    // once font size is finalized
-
-    rose_memory_range* camera_offset_range = this->camera_offset == NULL ? new rose_memory_range() : this->camera_offset;
-    camera_offset_range->begin = it;
+    camera_offset.begin = it;
     std::advance(it, 4);
-    camera_offset_range->end = it;
+    camera_offset.end = it;
 
-    int16_t* camera_offset = (int16_t*) camera_offset_range->begin;
-    camera_offset[0] = 0; // x0
-    camera_offset[1] = 0; // y0 // TODO: replace with actual starting position
-    // once font size is finalized
-
-    rose_memory_range* pointer_positions_range = this->pointer_positions == NULL ? new rose_memory_range() : this->pointer_positions;
-    pointer_positions_range->begin = it;
+    pointer_positions.begin = it;
     std::advance(it, 11 * 4 /* 2 16 bit number */);
-    pointer_positions_range->end = it;
+    pointer_positions.end = it;
 
-    rose_memory_range* btn_states_range = this->btn_states == NULL ? new rose_memory_range() : this->btn_states;
-    btn_states_range->begin = it;
+    btn_states.begin = it;
     std::advance(it, 4 /* 32 bit fields */);
-    btn_states_range->end = it;
+    btn_states.end = it;
 
-    rose_memory_range* prev_btn_states_range = this->prev_btn_states == NULL ? new rose_memory_range() : this->prev_btn_states;
-    prev_btn_states_range->begin = it;
+    prev_btn_states.begin = it;
     std::advance(it, 4 /* 32 bit fields */);
-    prev_btn_states_range->end = it;
+    prev_btn_states.end = it;
 
-    rose_memory_range* mouse_wheel_range = this->mouse_wheel == NULL ? new rose_memory_range() : this->mouse_wheel;
-    mouse_wheel_range->begin = it;
+    mouse_wheel.begin = it;
     std::advance(it, 5 /* 2 16 bit ints and one bool */);
-    mouse_wheel_range->end = it;
+    mouse_wheel.end = it;
 
-    rose_memory_range* key_states_range = this->key_states == NULL ? new rose_memory_range() : this->key_states;
-    key_states_range->begin = it;
+    key_states.begin = it;
     std::advance(it, 30 /* 240 bit fields */);
-    key_states_range->end = it;
+    key_states.end = it;
 
-    rose_memory_range* prev_key_states_range = this->prev_key_states == NULL ? new rose_memory_range() : this->prev_key_states;
-    prev_key_states_range->begin = it;
+    prev_key_states.begin = it;
     std::advance(it, 30 /* 240 bit fields */);
-    prev_key_states_range->end = it;
-
-    this->screen = screen_range;
-    this->schema = schema_range;
-    this->palette = palette_range;
-    this->palette_filter = palette_filter_range;
-    this->palette_transparency = palette_transparency_range;
-    this->clipping_region = clipping_region_range;
-    this->pen_color_addr = pen_color_addr;
-    this->print_cursor = print_cursor_range;
-    this->camera_offset = camera_offset_range;
-    this->pointer_positions = pointer_positions_range;
-    this->btn_states = btn_states_range;
-    this->prev_btn_states = prev_btn_states_range;
-    this->mouse_wheel = mouse_wheel_range;
-    this->key_states = key_states_range;
-    this->prev_key_states = prev_key_states_range;
+    prev_key_states.end = it;
 }
 
 rose_rt::rose_rt(rose_fs* fs) {
@@ -143,15 +201,29 @@ rose_rt::rose_rt(rose_fs* fs) {
         exit(1);
     }
 
-//    std::array<uint8_t, ROSE_MEMORY_SIZE>* mem = ;
-
-
     this->meta.name = "";
     this->meta.author = "";
     this->meta.hd = false;
     this->fs = fs;
+
     this->mem = new std::array<uint8_t, ROSE_MEMORY_SIZE>();
     this->make_mem_ranges();
+    this->mem->fill(0);
+    reset_palette_filter();
+    reset_palette_transparency();
+    reset_clipping_region();
+    reset_pen_color();
+    reset_print_cursor();
+    reset_camera_offset();
+    reset_pointer_positions();
+    reset_btn_states();
+    reset_mouse_wheel();
+    reset_key_states();
+    reset_palette();
+    reset_screen();
+    reset_schema();
+    reset_userdata();
+
     this->js = rose_js_create(this);
 }
 
@@ -159,23 +231,19 @@ rose_rt::~rose_rt() {
     rose_js_free(this->js);
     // dont free fs, managed by system layer
     delete this->mem;
-    delete this->screen;
-    delete this->schema;
-    delete this->palette;
-    delete this->palette_filter;
-    delete this->palette_transparency;
-    delete this->clipping_region;
-    delete this->print_cursor;
-    delete this->camera_offset;
-    delete this->pointer_positions;
-    delete this->btn_states;
-    delete this->mouse_wheel;
-    delete this->key_states;
 }
 
 bool rose_rt::clear() {
-    this->mem->fill(0);
-    this->js->module_cache.Reset(); // 16712468
+    reset_palette_filter();
+    reset_palette_transparency();
+    reset_clipping_region();
+    reset_pen_color();
+    reset_print_cursor();
+    reset_camera_offset();
+    reset_palette();
+    reset_schema();
+    reset_userdata();
+    this->js->module_cache.Reset();
     this->js->context.Reset();
     return true;
 }
@@ -213,13 +281,13 @@ bool rose_rt::load_run_main() {
 
         v8::Local<v8::String> json;
         if (!v8::String::NewFromUtf8(isolate, (const char*) cart_info->buffer, v8::NewStringType::kNormal).ToLocal(&json)) {
-            ReportException(isolate, &try_catch);
+            ReportException(isolate, &try_catch, this->error_cb);
             return false;
         }
 
         v8::Local<v8::Value> result;
         if (!v8::JSON::Parse(context, json).ToLocal(&result)) {
-            ReportException(isolate, &try_catch);
+            ReportException(isolate, &try_catch, this->error_cb);
             return false;
         }
         if (result->IsObject()) {
@@ -292,8 +360,6 @@ bool rose_rt::load_run_main() {
         main->last_modification = time(NULL);
     }
 
-
-
     this->js->context.Reset(isolate, context);
     if (context.IsEmpty()) {
         fprintf(stderr, "something went horribly wrong and I'm so, so sorry.\n");
@@ -303,7 +369,7 @@ bool rose_rt::load_run_main() {
     v8::Local<v8::String> file_name = v8::String::NewFromUtf8(isolate, main->name.c_str(), v8::NewStringType::kNormal).ToLocalChecked();
     v8::Local<v8::String> source;
     if (!v8::String::NewFromUtf8(isolate, (const char*) main->buffer, v8::NewStringType::kNormal).ToLocal(&source)) {
-        ReportException(isolate, &try_catch);
+        ReportException(isolate, &try_catch, this->error_cb);
         return false;
     }
 
@@ -311,9 +377,9 @@ bool rose_rt::load_run_main() {
     this->js->module_cache.Reset(isolate, module_cache);
 
     bool failed;
-    auto res = ExecuteString(isolate, source, file_name, true, &failed);
+    auto res = ExecuteString(isolate, source, file_name, true, &failed, this->error_cb);
     if (failed) {
-        ReportException(isolate, &try_catch);
+        ReportException(isolate, &try_catch, this->error_cb);
         return false;
     }
 
@@ -324,49 +390,33 @@ bool rose_rt::load_run_main() {
 }
 
 void rose_rt::save_input_frame() {
-    memcpy(this->prev_btn_states->begin, this->btn_states->begin, this->prev_btn_states->end - this->prev_btn_states->begin);
-    memcpy(this->prev_key_states->begin, this->key_states->begin, this->prev_key_states->end - this->prev_key_states->begin);
+    memcpy(this->prev_btn_states.begin, this->btn_states.begin, this->prev_btn_states.end - this->prev_btn_states.begin);
+    memcpy(this->prev_key_states.begin, this->key_states.begin, this->prev_key_states.end - this->prev_key_states.begin);
 }
 
-void rose_rt::update_mousestate(const rose_mousestate* mousestate) {
-    int16_t* pointer = (int16_t*) this->pointer_positions->begin;
-    pointer[20] = mousestate->x;
-    pointer[21] = mousestate->y;
+void rose_rt::update_mouse_pos(int16_t x, int16_t y) {
+    int16_t* pointer = (int16_t*) this->pointer_positions.begin;
+    pointer[20] = x;
+    pointer[21] = y;
+}
 
-    rose_set_bit(this->btn_states->begin, ROSE_LEFT_MOUSE_IDX, mousestate->left_btn_down);
-    rose_set_bit(this->btn_states->begin, ROSE_RIGHT_MOUSE_IDX, mousestate->right_btn_down);
-    rose_set_bit(this->btn_states->begin, ROSE_MIDDLE_MOUSE_IDX, mousestate->middle_btn_down);
-    rose_set_bit(this->btn_states->begin, ROSE_X1_MOUSE_IDX, mousestate->x1_btn_down);
-    rose_set_bit(this->btn_states->begin, ROSE_X2_MOUSE_IDX, mousestate->x2_btn_down);
+void rose_rt::update_btn_state(uint8_t btn, bool pressed) {
+    rose_set_bit(this->btn_states.begin, btn, pressed);
+}
 
-    int16_t* wheel_delta = (int16_t*) this->mouse_wheel->begin;
-    wheel_delta[0] = mousestate->wheel_x;
-    wheel_delta[1] = mousestate->wheel_y;
+void rose_rt::update_wheel_state(int16_t delta_x, int16_t delta_y, bool inverted) {
+    int16_t* wheel_delta = (int16_t*) this->mouse_wheel.begin;
+    wheel_delta[0] = delta_x;
+    wheel_delta[1] = delta_y;
 
-    bool* wheel_inverted = (bool*) (this->mouse_wheel->begin + 4);
-    *wheel_inverted = mousestate->wheel_inverted;
+    bool* wheel_inverted = (bool*) (this->mouse_wheel.begin + 4);
+    *wheel_inverted = inverted;
 }
 
 void rose_rt::update_keystate(rose_keycode keycode, bool pressed) {
     if (keycode < ROSE_KEYCODE_UNKNOWN) {
-        rose_set_bit(this->key_states->begin, keycode, pressed);
+        rose_set_bit(this->key_states.begin, keycode, pressed);
     }
-}
-
-void rose_rt::reset_input(rose_mousestate* mousestate) {
-    mousestate->left_btn_down = false;
-    mousestate->right_btn_down = false;
-    mousestate->middle_btn_down = false;
-    mousestate->x1_btn_down = false;
-    mousestate->x2_btn_down = false;
-    mousestate->wheel_x = 0;
-    mousestate->wheel_y = 0;
-
-    this->update_mousestate(mousestate);
-    for (int keycode = ROSE_KEYCODE_A; keycode < ROSE_KEYCODE_UNKNOWN; ++keycode) {
-        this->update_keystate((rose_keycode) keycode, false);
-    }
-    this->save_input_frame();
 }
 
 void rose_rt::retarget(rose_file* self, rose_file* target) {
@@ -374,77 +424,80 @@ void rose_rt::retarget(rose_file* self, rose_file* target) {
     this->target_cart = target;
 }
 
-rose_rt_error rose_rt::rose_call( const char* name, uint8_t nargs, Local<Value>* args) {
+bool rose_rt::rose_call( const char* name, uint8_t nargs, Local<Value>* args) {
     auto isolate = this->js->isolate;
     v8::Isolate::Scope isolate_scope(isolate);
     v8::HandleScope handle_scope(isolate);
     v8::Local<Context> context = this->js->context.Get(isolate);
     if (context.IsEmpty()) {
-        return ROSE_RT_CRITICAL_ERR;
+        this->error_cb("Error: Something went wrong and I'm so sorry.\n");
+        return false;
     }
     v8::Context::Scope context_scope(context);
     v8::TryCatch try_catch(isolate);
     Local<Object> jsGlobal = context->Global();
     Handle<Value> value = jsGlobal->Get(String::NewFromUtf8(isolate, name));
-    Handle<Function> jsUpdateFunc = Handle<Function>::Cast(value);
-    if (!jsUpdateFunc->IsFunction()) {
-        return ROSE_RT_FUN_NOT_FOUND;
+    Handle<Function> jsFunc = Handle<Function>::Cast(value);
+    if (!jsFunc->IsFunction()) {
+        return true;
     }
-    jsUpdateFunc->Call(jsGlobal, nargs, args);
-    if (try_catch.HasCaught()) {
-        v8::String::Utf8Value str(try_catch.Exception());
-        fprintf(stderr, "Error: %s\n", *str);
-        return ROSE_RT_CRITICAL_ERR;
+    v8::Local<v8::Value> result;
+    if (!jsFunc->Call(context, jsGlobal, nargs, args).ToLocal(&result)) {
+        assert(try_catch.HasCaught());
+        ReportException(isolate, &try_catch, this->error_cb);
+        return false;
     }
-    return ROSE_RT_NO_ERR;
+    assert(!try_catch.HasCaught());
+    return true;
 }
 
-rose_rt_error rose_rt::call_init() {
+bool rose_rt::call_init() {
     return rose_call("_init", 0, NULL);
 }
 
-rose_rt_error rose_rt::call_update() {
+bool rose_rt::call_update() {
     return rose_call("_update", 0, NULL);
 }
 
-rose_rt_error rose_rt::call_draw() {
+bool rose_rt::call_draw() {
     return rose_call("_draw", 0, NULL);
 }
 
-rose_rt_error rose_rt::call_onmouse(int16_t x, int16_t y) {
+bool rose_rt::call_onmouse(int16_t x, int16_t y) {
     auto isolate = this->js->isolate;
     v8::HandleScope handle_scope(isolate);
     Local<Value> args[2] = {Int32::New(isolate,(int16_t) x), Int32::New(isolate,(int16_t) y)};
     return rose_call("_onmouse", 2, args);
 }
 
-rose_rt_error rose_rt::call_onwheel(int16_t x, int16_t y, bool inverted) {
+bool rose_rt::call_onwheel(int16_t x, int16_t y, bool inverted) {
     auto isolate = this->js->isolate;
     v8::HandleScope handle_scope(isolate);
     Local<Value> args[3] = {Int32::New(isolate, x), Int32::New(isolate, y), Boolean::New(isolate, inverted)};
     return rose_call("_onwheel", 3, args);
 }
 
-rose_rt_error rose_rt::call_onbtn(uint8_t code, bool pressed) {
+bool rose_rt::call_onbtn(uint8_t code, bool pressed) {
     auto isolate = this->js->isolate;
     v8::HandleScope handle_scope(isolate);
     Local<Value> args[2] = {Int32::New(isolate, code), Boolean::New(isolate, pressed)};
     return rose_call("_onbtn", 2, args);
 }
 
-rose_rt_error rose_rt::call_onkey(rose_keycode keycode, bool pressed, bool repeat) {
+bool rose_rt::call_onkey(rose_keycode keycode, bool pressed, bool repeat) {
     auto isolate = this->js->isolate;
     v8::HandleScope handle_scope(isolate);
     Local<Value> args[3] = {Int32::New(isolate, keycode), Boolean::New(isolate, pressed), Boolean::New(isolate, repeat)};
     return rose_call("_onkey", 2, args);
 }
 
-rose_rt_error rose_rt::call_ontouch() {
+bool rose_rt::call_ontouch() {
     // TODO: make this actually do something
     return rose_call("_ontouch", 0, NULL);
 }
 
-void rose_set_bit(uint8_t* arr, uint8_t addr, bool val) {
+
+void rose_set_bit(std::array<uint8_t, ROSE_MEMORY_SIZE>::iterator arr, uint8_t addr, bool val) {
     uint8_t idx = (uint8_t) (addr / 8);
     uint8_t bit = (uint8_t) (addr % 8);
     if (val) {
@@ -454,7 +507,7 @@ void rose_set_bit(uint8_t* arr, uint8_t addr, bool val) {
     }
 }
 
-bool rose_get_bit(uint8_t* arr, uint8_t addr) {
+bool rose_get_bit(std::array<uint8_t, ROSE_MEMORY_SIZE>::iterator arr, uint8_t addr) {
     uint8_t idx = (uint8_t) (addr / 8);
     uint8_t bit = (uint8_t) (addr % 8);
     return (bool) ((arr[idx] >> bit) & 1);

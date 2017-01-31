@@ -273,6 +273,8 @@ enum rose_api_error {
 };
 
 enum rose_screenmode {
+    ROSE_STARTUPMODE,
     ROSE_GAMEMODE,
+    ROSE_CONSOLEMODE,
     ROSE_EDITORMODE
 };

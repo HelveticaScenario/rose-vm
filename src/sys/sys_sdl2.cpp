@@ -130,22 +130,15 @@ void rose_sys_sdl2_run(rose_system_sdl2* s) {
     // While application is running
     SDL_StartTextInput();
 
-    rose_mousestate mousestate;
-    mousestate.x = 0;
-    mousestate.y = 0;
-    mousestate.left_btn_down = false;
-    mousestate.right_btn_down = false;
-    mousestate.middle_btn_down = false;
-    mousestate.x1_btn_down = false;
-    mousestate.x2_btn_down = false;
-    mousestate.wheel_x = 0;
-    mousestate.wheel_y = 0;
-    bool wheel_changed = false;
     SDL_Rect screen_rect;
     make_screen_rect(s, &screen_rect);
-    rose_rt_error err = ROSE_RT_NO_ERR;
+    int i = 0;
     while (!quit) {
         s->player->save_input_frame();
+        int16_t wheel_x = 0;
+        int16_t wheel_y = 0;
+        bool wheel_inverted = false;
+
 
         // Handle events on queue
         while (SDL_PollEvent(&event)) {
@@ -172,6 +165,7 @@ void rose_sys_sdl2_run(rose_system_sdl2* s) {
                                 SDL_PushEvent(&event);
                                 break;
                             }
+                            default:break;
                         }
                     }
                     break;
@@ -179,15 +173,7 @@ void rose_sys_sdl2_run(rose_system_sdl2* s) {
                 case SDL_KEYUP:
                 case SDL_KEYDOWN: {
                     rose_keycode code = sdl_scancode_to_rose_keycode(event.key.keysym.scancode);
-                    s->player->update_keystate(code, event.key.state == SDL_PRESSED);
                     s->player->call_onkey(code, event.key.state == SDL_PRESSED, event.key.repeat != 0);
-                    switch (err) {
-                        case ROSE_RT_CRITICAL_ERR:
-                            quit = true;
-                            break;
-                        default:
-                            break;
-                    }
                     break;
                 }
                 case SDL_MOUSEMOTION: {
@@ -197,95 +183,15 @@ void rose_sys_sdl2_run(rose_system_sdl2* s) {
                     if (!s->player->is_hd()) {
                         mult *= 2;
                     }
-                    mousestate.x = (int16_t) ((event.motion.x - ((int32_t) screen_rect.x)) / mult);
-                    mousestate.y = (int16_t) ((event.motion.y - ((int32_t) screen_rect.y)) / mult);
-                    s->player->update_mousestate(&mousestate);
-                    err = s->player->call_onmouse(mousestate.x, mousestate.y);
-                    switch (err) {
-                        case ROSE_RT_CRITICAL_ERR:
-                            quit = true;
-                            break;
-                        default:
-                            break;
-                    }
+                    int16_t x = (int16_t) ((event.motion.x - ((int32_t) screen_rect.x)) / mult);
+                    int16_t y = (int16_t) ((event.motion.y - ((int32_t) screen_rect.y)) / mult);
+                    s->player->call_onmouse(x, y);
                     break;
                 }
-                case SDL_MOUSEBUTTONDOWN: {
-                    switch (event.button.button) {
-                        case SDL_BUTTON_LEFT:
-                            mousestate.left_btn_down = true;
-                            s->player->update_mousestate(&mousestate);
-                            err = s->player->call_onbtn( ROSE_LEFT_MOUSE_IDX, true);
-                            break;
-                        case SDL_BUTTON_RIGHT:
-                            mousestate.right_btn_down = true;
-                            s->player->update_mousestate( &mousestate);
-                            err = s->player->call_onbtn( ROSE_RIGHT_MOUSE_IDX, true);
-                            break;
-                        case SDL_BUTTON_MIDDLE:
-                            mousestate.middle_btn_down = true;
-                            s->player->update_mousestate(&mousestate);
-                            err = s->player->call_onbtn( ROSE_MIDDLE_MOUSE_IDX, true);
-                            break;
-                        case SDL_BUTTON_X1:
-                            mousestate.x1_btn_down = true;
-                            s->player->update_mousestate(&mousestate);
-                            err = s->player->call_onbtn( ROSE_X1_MOUSE_IDX, true);
-                            break;
-                        case SDL_BUTTON_X2:
-                            mousestate.x2_btn_down = true;
-                            s->player->update_mousestate( &mousestate);
-                            err = s->player->call_onbtn( ROSE_X2_MOUSE_IDX, true);
-                            break;
-                        default:
-                            break;
-                    }
-                    switch (err) {
-                        case ROSE_RT_CRITICAL_ERR:
-                            quit = true;
-                            break;
-                        default:
-                            break;
-                    }
-                    break;
-                }
+                case SDL_MOUSEBUTTONDOWN:
                 case SDL_MOUSEBUTTONUP: {
-                    switch (event.button.button) {
-                        case SDL_BUTTON_LEFT:
-                            mousestate.left_btn_down = false;
-                            s->player->update_mousestate(&mousestate);
-                            err = s->player->call_onbtn( ROSE_LEFT_MOUSE_IDX, false);
-                            break;
-                        case SDL_BUTTON_RIGHT:
-                            mousestate.right_btn_down = false;
-                            s->player->update_mousestate(&mousestate);
-                            err = s->player->call_onbtn( ROSE_RIGHT_MOUSE_IDX, false);
-                            break;
-                        case SDL_BUTTON_MIDDLE:
-                            mousestate.middle_btn_down = false;
-                            s->player->update_mousestate(&mousestate);
-                            err = s->player->call_onbtn( ROSE_MIDDLE_MOUSE_IDX, false);
-                            break;
-                        case SDL_BUTTON_X1:
-                            mousestate.x1_btn_down = false;
-                            s->player->update_mousestate(&mousestate);
-                            err = s->player->call_onbtn( ROSE_X1_MOUSE_IDX, false);
-                            break;
-                        case SDL_BUTTON_X2:
-                            mousestate.x2_btn_down = false;
-                            s->player->update_mousestate(&mousestate);
-                            err = s->player->call_onbtn( ROSE_X2_MOUSE_IDX, false);
-                            break;
-                        default:
-                            break;
-                    }
-                    switch (err) {
-                        case ROSE_RT_CRITICAL_ERR:
-                            quit = true;
-                            break;
-                        default:
-                            break;
-                    }
+                    bool pressed = event.button.state == SDL_PRESSED;
+                    s->player->call_onbtn((uint8_t) (event.button.button + 9), pressed);
                     break;
                 }
                 case SDL_MOUSEWHEEL: {
@@ -294,53 +200,19 @@ void rose_sys_sdl2_run(rose_system_sdl2* s) {
                     if (event.wheel.direction == SDL_MOUSEWHEEL_FLIPPED) {
                         x *= -1;
                         y *= -1;
-                        mousestate.wheel_inverted = true;
+                        wheel_inverted = true;
                     } else {
-                        mousestate.wheel_inverted = false;
+                        wheel_inverted = false;
                     }
-                    mousestate.wheel_x += x;
-                    mousestate.wheel_y += y;
-                    wheel_changed = true;
+                    wheel_x += x;
+                    wheel_y += y;
                     break;
                 }
+                default:break;
             }
-            // User requests quit
-            if (event.type == SDL_QUIT) {
-                quit = true;
-            }
-        }
-        if (wheel_changed) {
-            s->player->update_mousestate(&mousestate);
-            s->player->call_onwheel(mousestate.wheel_x, mousestate.wheel_x, mousestate.wheel_inverted);
-            switch (err) {
-                case ROSE_RT_CRITICAL_ERR:
-                    quit = true;
-                    break;
-                default:
-                    break;
-            }
-            wheel_changed = false;
-        }
-        err = s->player->call_update();
-        switch (err) {
-            case ROSE_RT_CRITICAL_ERR:
-                quit = true;
-                break;
-            default:
-                break;
         }
 
-        err = s->player->call_draw();
-        switch (err) {
-            case ROSE_RT_CRITICAL_ERR:
-                quit = true;
-                break;
-            default:
-                break;
-        }
-
-        mousestate.wheel_x = 0;
-        mousestate.wheel_y = 0;
+        s->player->call_onwheel(wheel_x, wheel_x, wheel_inverted);
 
         SDL_Texture* tex = NULL;
         bool hd = s->player->is_hd();
@@ -350,6 +222,12 @@ void rose_sys_sdl2_run(rose_system_sdl2* s) {
             tex = s->texture;
         }
 
+
+        s->player->call_update();
+
+        s->player->call_draw();
+
+
         if (lock_texture(&(s->pixels), &(s->pitch), tex)) {
             uint8_t* pixels = (uint8_t*) s->pixels;
             int pitch = s->pitch;
@@ -357,15 +235,16 @@ void rose_sys_sdl2_run(rose_system_sdl2* s) {
             rose_color color;
 
             auto screen_length = s->player->get_screen_length();
-            for (auto i = 0; i < screen_length; ++i) {
-                uint8_t c_index = s->player->get_color_index(i);
+            for (auto item = 0; item < screen_length; ++item) {
+                uint8_t c_index = s->player->get_color_index(item);
                 s->player->get_color(color, c_index);
-                pixels[(i * 3) + 0] = color.r;
-                pixels[(i * 3) + 1] = color.g;
-                pixels[(i * 3) + 2] = color.b;
+                pixels[(item * 3) + 0] = color.r;
+                pixels[(item * 3) + 1] = color.g;
+                pixels[(item * 3) + 2] = color.b;
             }
             unlock_texture(&(s->pixels), &(s->pitch), tex);
         }
+
         render(s, tex);
     }
 }

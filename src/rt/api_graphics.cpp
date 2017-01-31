@@ -1,7 +1,7 @@
 #include "rose.h"
 
 void coord_cam_offset(rose_rt* r, int16_t* x, int16_t* y) {
-    int16_t* camera_offset = (int16_t*) r->camera_offset->begin;
+    int16_t* camera_offset = (int16_t*) r->camera_offset.begin;
     int16_t x_cam = camera_offset[0];
     int16_t y_cam = camera_offset[1];
 
@@ -12,9 +12,10 @@ void coord_cam_offset(rose_rt* r, int16_t* x, int16_t* y) {
 
 rose_api_error rose_api_graphics_pset(rose_rt* r, int16_t x, int16_t y, uint8_t c) {
     coord_cam_offset(r, &x, &y);
-    if (x >= 0 && x < ROSE_SCREEN_WIDTH && y >= 0 && y < ROSE_SCREEN_HEIGHT) {
-        rose_memory_range* screen = r->screen;
-        *(screen->begin + (y * ROSE_SCREEN_WIDTH) + x) = c;
+    auto screen_width = r->meta.hd ? ROSE_HD_SCREEN_WIDTH : ROSE_SCREEN_WIDTH;
+    auto screen_height = r->meta.hd ? ROSE_HD_SCREEN_HEIGHT : ROSE_SCREEN_HEIGHT;
+    if (x >= 0 && x < screen_width && y >= 0 && y < screen_height) {
+        *(r->screen.begin + (y * screen_width) + x) = c;
         *r->pen_color_addr = c;
     }
     return ROSE_API_ERR_NONE;
@@ -26,9 +27,10 @@ rose_api_error rose_api_graphics_pset_default(rose_rt* r, int16_t x, int16_t y) 
 
 rose_api_error rose_api_graphics_pget(rose_rt* r, int16_t x, int16_t y, uint8_t* res) {
     coord_cam_offset(r, &x, &y);
-    if (x >= 0 && x < ROSE_SCREEN_WIDTH && y >= 0 && y < ROSE_SCREEN_HEIGHT) {
-        rose_memory_range* screen = r->screen;
-        *res = *(screen->begin + (y * ROSE_SCREEN_WIDTH) + x);
+    auto screen_width = r->meta.hd ? ROSE_HD_SCREEN_WIDTH : ROSE_SCREEN_WIDTH;
+    auto screen_height = r->meta.hd ? ROSE_HD_SCREEN_HEIGHT : ROSE_SCREEN_HEIGHT;
+    if (x >= 0 && x < screen_width && y >= 0 && y < screen_height) {
+        *res = *(r->screen.begin + (y * screen_width) + x);
     } else {
         *res = 0;
     }
@@ -36,7 +38,7 @@ rose_api_error rose_api_graphics_pget(rose_rt* r, int16_t x, int16_t y, uint8_t*
 }
 
 rose_api_error rose_api_graphics_palset(rose_rt* r, uint8_t idx, rose_color c) {
-    auto slot = r->palette->begin + (idx * 3);
+    auto slot = r->palette.begin + (idx * 3);
     *slot = c.r;
     *(slot + 1) = c.g;
     *(slot + 2) = c.b;
@@ -44,7 +46,7 @@ rose_api_error rose_api_graphics_palset(rose_rt* r, uint8_t idx, rose_color c) {
 }
 
 rose_api_error rose_api_graphics_palget(rose_rt* r, uint8_t idx, rose_color* res) {
-    auto slot = r->palette->begin + (idx * 3);
+    auto slot = r->palette.begin + (idx * 3);
     res->r = *slot;
     res->g = *(slot + 1);
     res->b = *(slot + 2);
@@ -117,22 +119,24 @@ rose_api_error rose_api_graphics_rect_default(rose_rt* r, int16_t x0, int16_t y0
     return rose_api_graphics_rect(r, x0, y0, x1, y1, *r->pen_color_addr);
 }
 
-int rect_clip(int16_t* x0, int16_t* y0, int16_t* x1, int16_t* y1) {
-    if ((*x0 < 0 && *x1 < 0) || *x0 > (ROSE_SCREEN_WIDTH - 1) || (*y0 < 0 && *y1 < 0) ||
-        *y0 > (ROSE_SCREEN_HEIGHT - 1)) {
+int rect_clip(rose_rt* r, int16_t* x0, int16_t* y0, int16_t* x1, int16_t* y1) {
+    auto screen_width = r->meta.hd ? ROSE_HD_SCREEN_WIDTH : ROSE_SCREEN_WIDTH;
+    auto screen_height = r->meta.hd ? ROSE_HD_SCREEN_HEIGHT : ROSE_SCREEN_HEIGHT;
+    if ((*x0 < 0 && *x1 < 0) || *x0 > (screen_width - 1) || (*y0 < 0 && *y1 < 0) ||
+        *y0 > (screen_height - 1)) {
         return 1;
     }
     if (*x0 < 0) {
         *x0 = 0;
     }
-    if (*x1 > (ROSE_SCREEN_WIDTH - 1)) {
-        *x1 = (ROSE_SCREEN_WIDTH - 1);
+    if (*x1 > (screen_width - 1)) {
+        *x1 = (screen_width - 1);
     }
     if (*y0 < 0) {
         *y0 = 0;
     }
-    if (*y1 > (ROSE_SCREEN_HEIGHT - 1)) {
-        *y1 = (ROSE_SCREEN_HEIGHT - 1);
+    if (*y1 > (screen_height - 1)) {
+        *y1 = (screen_height - 1);
     }
     return 0;
 }
@@ -141,13 +145,13 @@ rose_api_error rose_api_graphics_rectfill(rose_rt* r, int16_t x0, int16_t y0, in
     rect_swap(&x0, &y0, &x1, &y1);
     coord_cam_offset(r, &x0, &y0);
     coord_cam_offset(r, &x1, &y1);
-    int res = rect_clip(&x0, &y0, &x1, &y1);
+    int res = rect_clip(r, &x0, &y0, &x1, &y1);
     if (res == 1)
         return ROSE_API_ERR_NONE;
     // Draw
-    int i;
-    for (i = y0; i <= y1; ++i) {
-        memset(r->screen->begin + (i * ROSE_SCREEN_WIDTH) + x0, c,
+    auto screen_width = r->meta.hd ? ROSE_HD_SCREEN_WIDTH : ROSE_SCREEN_WIDTH;
+    for (int i = y0; i <= y1; ++i) {
+        memset(r->screen.begin + (i * screen_width) + x0, c,
                (size_t) (x1 - x0 + 1));
     }
     *r->pen_color_addr = c;
@@ -403,12 +407,12 @@ rose_api_error rose_api_graphics_trifill_default(rose_rt* r, int16_t v0_x, int16
 }
 
 rose_api_error rose_api_graphics_cls(rose_rt* r) {
-    memset(r->screen->begin, 0, r->screen->end - r->screen->begin);
+    memset(r->screen.begin, 0, r->screen.end - r->screen.begin);
     return ROSE_API_ERR_NONE;
 }
 
 rose_api_error rose_api_graphics_get_spritesheet_meta(rose_rt* r, uint32_t* addr, uint16_t* sheet_width, uint16_t* sheet_height, uint8_t* sprite_width_mult, uint8_t* sprite_height_mult) {
-    uint8_t* sprite_schema = r->schema->end - ROSE_MEMORY_SPRITE_SCHEMA_SIZE;
+    uint8_t* sprite_schema = r->schema.end - ROSE_MEMORY_SPRITE_SCHEMA_SIZE;
     *addr = *((uint32_t*)sprite_schema);
     sprite_schema += 4;
     *sheet_width = *((uint16_t*)sprite_schema);
@@ -422,7 +426,7 @@ rose_api_error rose_api_graphics_get_spritesheet_meta(rose_rt* r, uint32_t* addr
 }
 
 rose_api_error rose_api_graphics_set_spritesheet_meta(rose_rt* r, uint32_t addr, uint16_t sheet_width, uint16_t sheet_height, uint8_t sprite_width_mult, uint8_t sprite_height_mult) {
-    uint8_t* sprite_schema = r->schema->end - ROSE_MEMORY_SPRITE_SCHEMA_SIZE;
+    uint8_t* sprite_schema = r->schema.end - ROSE_MEMORY_SPRITE_SCHEMA_SIZE;
     *((uint32_t*)sprite_schema) = addr;
     sprite_schema += 4;
     *((uint16_t*)sprite_schema) = sheet_width;
