@@ -5,7 +5,7 @@ void rose_js_memory_poke(const v8::FunctionCallbackInfo<v8::Value>& args) {
     rose_rt* r = static_cast<rose_rt*>(Local<External>::Cast(args.Data())->Value());
     uint32_t idx = (uint32_t) args[0]->Uint32Value();
     uint8_t val = (uint8_t) args[1]->Int32Value();
-    int err = rose_api_memory_poke(r, idx, val);
+    int err = r->poke(idx, val);
     switch (err) {
         case ROSE_API_ERR_OUT_OF_BOUNDS: {
             Isolate* isolate = Isolate::GetCurrent();
@@ -25,7 +25,7 @@ void rose_js_memory_peek(const v8::FunctionCallbackInfo<v8::Value>& args) {
     if (args.Length() >= 1) {
         uint32_t idx = (uint32_t) args[0]->Uint32Value();
         uint8_t res;
-        int err = rose_api_memory_peek(r, idx, &res);
+        int err = r->peek(idx, &res);
         switch (err) {
             case ROSE_API_ERR_OUT_OF_BOUNDS: {
                 Isolate* isolate = Isolate::GetCurrent();
@@ -50,7 +50,7 @@ void rose_js_memory_memcpy(const v8::FunctionCallbackInfo<v8::Value>& args) {
         uint32_t dest_addr = (uint32_t) args[0]->Uint32Value();
         uint32_t source_addr = (uint32_t) args[1]->Uint32Value();
         uint32_t len = (uint32_t) args[2]->Uint32Value();
-        int err = rose_api_memory_memcpy(r, dest_addr, source_addr, len);
+        int err = r->rt_memcpy(dest_addr, source_addr, len);
         switch (err) {
             case ROSE_API_ERR_OUT_OF_BOUNDS: {
                 Isolate* isolate = Isolate::GetCurrent();
@@ -72,7 +72,7 @@ void rose_js_memory_memset(const v8::FunctionCallbackInfo<v8::Value>& args) {
         uint32_t dest_addr = (uint32_t) args[0]->Uint32Value();
         uint8_t val = (uint8_t) args[1]->Uint32Value();
         uint32_t len = (uint32_t) args[2]->Uint32Value();
-        int err = rose_api_memory_memset(r, dest_addr, val, len);
+        int err = r->rt_memset(dest_addr, val, len);
         switch (err) {
             case ROSE_API_ERR_OUT_OF_BOUNDS: {
                 Isolate* isolate = Isolate::GetCurrent();
@@ -95,7 +95,7 @@ void rose_js_memory_cstore(const v8::FunctionCallbackInfo<v8::Value>& args) {
         uint32_t dest_addr = (uint32_t) args[0]->Uint32Value();
         uint32_t source_addr = (uint32_t) args[1]->Uint32Value();
         uint32_t len = (uint32_t) args[2]->Uint32Value();
-        int err = rose_api_memory_cstore(r, dest_addr, source_addr, len);
+        int err = r->cstore(dest_addr, source_addr, len);
         switch (err) {
             case ROSE_API_ERR_OUT_OF_BOUNDS: {
                 Isolate* isolate = Isolate::GetCurrent();
@@ -119,7 +119,7 @@ void rose_js_memory_reload(const v8::FunctionCallbackInfo<v8::Value>& args) {
         uint32_t dest_addr = (uint32_t) args[0]->Uint32Value();
         uint32_t source_addr = (uint32_t) args[1]->Uint32Value();
         uint32_t len = (uint32_t) args[2]->Uint32Value();
-        int err = rose_api_memory_reload(r, dest_addr, source_addr, len);
+        int err = r->reload(dest_addr, source_addr, len);
         switch (err) {
             case ROSE_API_ERR_OUT_OF_BOUNDS: {
                 Isolate* isolate = Isolate::GetCurrent();

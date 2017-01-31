@@ -18,14 +18,12 @@ struct rose_rt_meta {
     string author;
 };
 
-struct rose_rt {
+struct rose_rt_base {
     rose_rt_meta meta;
-    std::function<void(string)> error_cb;
-
-    rose_js* js;
     rose_fs* fs;
     rose_file* self_cart;
     rose_file* target_cart;
+
     std::array<uint8_t, ROSE_MEMORY_SIZE>* mem;
     rose_memory_range screen;
     rose_memory_range schema;
@@ -43,13 +41,11 @@ struct rose_rt {
     rose_memory_range key_states;
     rose_memory_range prev_key_states;
 
-    rose_rt(rose_fs* fs);
-    ~rose_rt();
+    rose_rt_base(rose_fs* fs);
+    virtual ~rose_rt_base();
     void make_mem_ranges();
 
-    void retarget(rose_file* self, rose_file* target);
-    bool clear();
-    bool load_run_main();
+    virtual bool clear();
     void save_input_frame();
     void update_mouse_pos(int16_t x, int16_t y);
     void update_btn_state(uint8_t btn, bool pressed);
@@ -71,6 +67,104 @@ struct rose_rt {
     void reset_schema();
     void reset_userdata();
 
+    void copy_input_from_other(rose_rt* other);
+    void copy_screen_from_other(rose_rt* other);
+
+    // Graphics
+
+
+    rose_api_error pset(int16_t x, int16_t y, uint8_t val);
+
+    rose_api_error pset_default(int16_t x, int16_t y);
+
+    rose_api_error pget(int16_t x, int16_t y, uint8_t* res);
+
+    rose_api_error palset(uint8_t idx, rose_color c);
+
+    rose_api_error palget(uint8_t idx, rose_color* res);
+
+    rose_api_error line(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t c);
+
+    rose_api_error line_default(int16_t x0, int16_t y0, int16_t x1, int16_t y1);
+
+    rose_api_error rect(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t c);
+
+    rose_api_error rect_default(int16_t x0, int16_t y0, int16_t x1, int16_t y1);
+
+    rose_api_error rectfill(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint8_t c);
+
+    rose_api_error rectfill_default(int16_t x0, int16_t y0, int16_t x1, int16_t y1);
+
+    rose_api_error circ(int16_t x0, int16_t y0, uint16_t radius, uint8_t c);
+
+    rose_api_error circ_default(int16_t x0, int16_t y0, uint16_t radius);
+
+    rose_api_error circfill(int16_t x0, int16_t y0, uint16_t radius, uint8_t c);
+
+    rose_api_error circfill_default(int16_t x0, int16_t y0, uint16_t radius);
+
+    rose_api_error tri(int16_t v1_x, int16_t v1_y, int16_t v2_x, int16_t v2_y, int16_t v3_x, int16_t v3_y, uint8_t c);
+
+    rose_api_error tri_default(int16_t v0_x, int16_t v0_y, int16_t v1_x, int16_t v1_y, int16_t v2_x, int16_t v2_y);
+
+    rose_api_error trifill(int16_t v1_x, int16_t v1_y, int16_t v2_x, int16_t v2_y, int16_t v3_x, int16_t v3_y, uint8_t c);
+
+    rose_api_error trifill_default(int16_t v0_x, int16_t v0_y, int16_t v1_x, int16_t v1_y, int16_t v2_x, int16_t v2_y);
+
+    rose_api_error cls();
+
+    rose_api_error get_spritesheet_meta(uint32_t* addr, uint16_t* sheet_width, uint16_t* sheet_height, uint8_t* sprite_width_mult, uint8_t* sprite_height_mult);
+
+    rose_api_error set_spritesheet_meta(uint32_t addr, uint16_t sheet_width, uint16_t sheet_height, uint8_t sprite_width_mult, uint8_t sprite_height_mult);
+
+    rose_api_error spr(uint32_t n, int16_t x, int16_t y, uint8_t w, uint8_t h, bool flip_x, bool flip_y);
+
+
+    // input
+
+    rose_api_error mouse(int16_t* x, int16_t* y);
+
+    rose_api_error btn(uint8_t idx, bool* res);
+
+    rose_api_error btnp(uint8_t idx, bool* res);
+
+    rose_api_error wheel(int16_t* x, int16_t* y);
+
+    rose_api_error wheel_inverted(bool* res);
+
+    rose_api_error key(rose_keycode keycode, bool* res);
+
+    rose_api_error keyp(rose_keycode keycode, bool* res);
+
+    // memory
+
+    rose_api_error poke(uint32_t idx, uint8_t val);
+
+    rose_api_error peek(uint32_t idx, uint8_t* res);
+
+    rose_api_error rt_memcpy(uint32_t dest_addr, uint32_t source_addr, uint32_t len);
+
+    rose_api_error rt_memset(uint32_t dest_addr, uint8_t val, uint32_t len);
+
+    rose_api_error cstore(uint32_t dest_addr, uint32_t source_addr, uint32_t len);
+
+    rose_api_error reload(uint32_t dest_addr, uint32_t source_addr, uint32_t len);
+
+
+};
+
+struct rose_rt: public rose_rt_base {
+    std::function<void(string)> error_cb;
+
+    rose_js* js;
+
+    rose_rt(rose_fs* fs);
+    ~rose_rt();
+    bool clear();
+
+    void retarget(rose_file* self, rose_file* target);
+    bool load_run_main();
+
     bool call_init();
 
     bool call_update();
@@ -88,9 +182,6 @@ struct rose_rt {
     bool call_ontouch();
 
     bool rose_call( const char* name, uint8_t nargs, Local<Value>* args);
-
-    void copy_input_from_other(rose_rt* other);
-    void copy_screen_from_other(rose_rt* other);
 };
 
 void rose_set_bit(uint8_t* trans, uint8_t addr, bool val);

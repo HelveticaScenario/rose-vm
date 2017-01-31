@@ -209,10 +209,10 @@ rose_js* rose_js_create(rose_rt* r) {
     global->Set(String::NewFromUtf8(isolate, "peek", NewStringType::kNormal).ToLocalChecked(), peek);
 
     v8::Local<v8::FunctionTemplate> memcpy = FunctionTemplate::New(isolate, rose_js_memory_memcpy, r_ptr);
-    global->Set(String::NewFromUtf8(isolate, "memcpy", NewStringType::kNormal).ToLocalChecked(), memcpy);
+    global->Set(String::NewFromUtf8(isolate, "rt_memcpy", NewStringType::kNormal).ToLocalChecked(), memcpy);
 
     v8::Local<v8::FunctionTemplate> memset = FunctionTemplate::New(isolate, rose_js_memory_memset, r_ptr);
-    global->Set(String::NewFromUtf8(isolate, "memset", NewStringType::kNormal).ToLocalChecked(), memset);
+    global->Set(String::NewFromUtf8(isolate, "rt_memset", NewStringType::kNormal).ToLocalChecked(), memset);
 
     v8::Local<v8::FunctionTemplate> cstore = FunctionTemplate::New(isolate, rose_js_memory_cstore, r_ptr);
     global->Set(String::NewFromUtf8(isolate, "cstore", NewStringType::kNormal).ToLocalChecked(), cstore);

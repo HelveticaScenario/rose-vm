@@ -42,9 +42,5 @@ using namespace v8;
 
 #include "desktop_player.h"
 
-#include "api_graphics.h"
-#include "api_input.h"
-#include "api_memory.h"
-
 
 

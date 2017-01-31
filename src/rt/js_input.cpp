@@ -5,7 +5,7 @@ void rose_js_input_mouse(const v8::FunctionCallbackInfo<v8::Value>& args){
     rose_rt* r = static_cast<rose_rt*>(Local<External>::Cast(args.Data())->Value());
     int16_t x = 0;
     int16_t y = 0;
-    rose_api_error err = rose_api_input_mouse(r, &x, &y);
+    rose_api_error err = r->mouse(&x, &y);
     switch (err) {
         case ROSE_API_ERR_OUT_OF_BOUNDS: {
             Isolate* isolate = Isolate::GetCurrent();
@@ -42,7 +42,7 @@ void rose_js_input_btn(const v8::FunctionCallbackInfo<v8::Value>& args){
             idx = 31;
         }
         bool res;
-        int err = rose_api_input_btn(r, idx, &res);
+        int err = r->btn(idx, &res);
         switch (err) {
             case ROSE_API_ERR_OUT_OF_BOUNDS: {
                 Isolate* isolate = Isolate::GetCurrent();
@@ -70,7 +70,7 @@ void rose_js_input_btnp(const v8::FunctionCallbackInfo<v8::Value>& args){
             idx = 31;
         }
         bool res;
-        int err = rose_api_input_btnp(r, idx, &res);
+        int err = r->btnp(idx, &res);
         switch (err) {
             case ROSE_API_ERR_OUT_OF_BOUNDS: {
                 Isolate* isolate = Isolate::GetCurrent();
@@ -91,14 +91,14 @@ void rose_js_input_wheel(const v8::FunctionCallbackInfo<v8::Value>& args){
     HandleScope scope(args.GetIsolate());
     rose_rt* r = static_cast<rose_rt*>(Local<External>::Cast(args.Data())->Value());
     bool to_invert;
-    rose_api_input_wheel_inverted(r, &to_invert);
+    r->wheel_inverted(&to_invert);
     int nargs = args.Length();
     if (nargs > 0) {
         to_invert = args[0]->BooleanValue();
     }
     int16_t x = 0;
     int16_t y = 0;
-    int err = rose_api_input_wheel(r, &x, &y);
+    int err = r->wheel(&x, &y);
     if (to_invert) {
         x *= -1;
         y *= -1;
@@ -138,7 +138,7 @@ void rose_js_input_key(const v8::FunctionCallbackInfo<v8::Value>& args){
             idx = ROSE_KEYCODE_UNKNOWN - 1;
         }
         bool res;
-        int err = rose_api_input_key(r, (rose_keycode) idx, &res);
+        int err = r->key((rose_keycode) idx, &res);
         switch (err) {
             case ROSE_API_ERR_OUT_OF_BOUNDS: {
                 Isolate* isolate = Isolate::GetCurrent();
@@ -165,7 +165,7 @@ void rose_js_input_keyp(const v8::FunctionCallbackInfo<v8::Value>& args){
             idx = ROSE_KEYCODE_UNKNOWN - 1;
         }
         bool res;
-        int err = rose_api_input_keyp(r, (rose_keycode) idx, &res);
+        int err = r->keyp((rose_keycode) idx, &res);
         switch (err) {
             case ROSE_API_ERR_OUT_OF_BOUNDS: {
                 Isolate* isolate = Isolate::GetCurrent();
