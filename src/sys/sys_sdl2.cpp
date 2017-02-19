@@ -156,7 +156,6 @@ void rose_sys_sdl2_run(rose_system_sdl2* s) {
                                 s->width_mult = (uint16_t) (s->window_width / ROSE_HD_SCREEN_WIDTH);
                                 s->height_mult = (uint16_t) (s->window_height / ROSE_HD_SCREEN_HEIGHT);
                                 make_screen_rect(s, &screen_rect);
-                                printf("%d %d\n", s->width_mult, s->height_mult);
                                 break;
                             }
 
