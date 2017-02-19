@@ -43,9 +43,8 @@ void rose_rt_base::reset_pen_color() {
 
 void rose_rt_base::reset_print_cursor() {
     int16_t* ptr = (int16_t*) print_cursor.begin;
-    ptr[0] = 0; // x0
-    ptr[1] = 0; // y0 // TODO: replace with actual starting position
-    // once font size is finalized
+    ptr[0] = 0;
+    ptr[1] = 0;
 }
 
 void rose_rt_base::reset_camera_offset() {
@@ -100,6 +99,10 @@ void rose_rt_base::reset_screen() {
 
 void rose_rt_base::reset_userdata() {
     memset(mem->begin(), 0, (size_t) (meta.hd ? ROSE_HD_USERSPACE_MEMORY_SIZE : ROSE_USERSPACE_MEMORY_SIZE));
+}
+
+void rose_rt_base::reset_font_data() {
+    memcpy(font_data.begin, rose_bit_font, sizeof(rose_bit_font));
 }
 
 void rose_rt_base::copy_input_from_other(rose_rt* other) {
@@ -193,6 +196,10 @@ void rose_rt_base::make_mem_ranges() {
     prev_key_states.begin = it;
     std::advance(it, 30 /* 240 bit fields */);
     prev_key_states.end = it;
+
+    font_data.begin = it;
+    std::advance(it, sizeof(rose_bit_font));
+    font_data.end = it;
 }
 
 
@@ -225,6 +232,7 @@ rose_rt_base::rose_rt_base(rose_fs* fs) {
     reset_screen();
     reset_schema();
     reset_userdata();
+    reset_font_data();
 
 }
 
@@ -242,6 +250,7 @@ bool rose_rt_base::clear() {
     reset_palette();
     reset_schema();
     reset_userdata();
+    reset_font_data();
     return true;
 }
 
@@ -360,6 +369,7 @@ bool rose_rt::load_run_main() {
     }
 
     make_mem_ranges();
+    clear();
 
 //    mem->fill(0);
 //    rt_memcpy(palette->begin, rose_default_palette, sizeof(rose_default_palette));
@@ -410,7 +420,7 @@ bool rose_rt::load_run_main() {
 
     js->context.Reset(isolate, context);
     if (context.IsEmpty()) {
-        fprintf(stderr, "something went horribly wrong and I'm so, so sorry.\n");
+        fprintf(stderr, "context was empty in load run main\n");
     }
     v8::Context::Scope context_scope(context);
 
@@ -449,7 +459,7 @@ bool rose_rt::rose_call( const char* name, uint8_t nargs, Local<Value>* args) {
     v8::HandleScope handle_scope(isolate);
     v8::Local<Context> context = js->context.Get(isolate);
     if (context.IsEmpty()) {
-        error_cb("Error: Something went wrong and I'm so sorry.\n");
+        error_cb("Error: Context was empty in rose_call.\n");
         return false;
     }
     v8::Context::Scope context_scope(context);
@@ -506,8 +516,18 @@ bool rose_rt::call_onbtn(uint8_t code, bool pressed) {
 bool rose_rt::call_onkey(rose_keycode keycode, bool pressed, bool repeat) {
     auto isolate = js->isolate;
     v8::HandleScope handle_scope(isolate);
-    Local<Value> args[3] = {Int32::New(isolate, keycode), Boolean::New(isolate, pressed), Boolean::New(isolate, repeat)};
-    return rose_call("_onkey", 2, args);
+    char character = rose_keycode_to_printable_char(keycode, rose_get_bit(key_states.begin, ROSE_KEYCODE_LSHIFT) || rose_get_bit(key_states.begin, ROSE_KEYCODE_RSHIFT));
+    char str[2];
+    str[0] = character;
+    str[1] = '\0';
+//    printf("%c\n", character);
+    Local<Value> args[4] = {
+            Int32::New(isolate, keycode),
+            Boolean::New(isolate, pressed),
+            Boolean::New(isolate, repeat),
+            String::NewFromUtf8(isolate, str)
+    };
+    return rose_call("_onkey", 4, args);
 }
 
 bool rose_rt::call_ontouch() {

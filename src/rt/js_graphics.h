@@ -24,3 +24,7 @@ void rose_js_graphics_trifill(const v8::FunctionCallbackInfo<v8::Value>& args);
 
 void rose_js_graphics_cls(const v8::FunctionCallbackInfo<v8::Value>& args);
 
+void rose_js_graphics_print(const v8::FunctionCallbackInfo<v8::Value>& args);
+
+void rose_js_graphics_color(const v8::FunctionCallbackInfo<v8::Value>& args);
+

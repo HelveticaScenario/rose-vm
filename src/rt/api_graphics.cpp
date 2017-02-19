@@ -408,6 +408,8 @@ rose_api_error rose_rt_base::trifill_default(int16_t v0_x, int16_t v0_y, int16_t
 
 rose_api_error rose_rt_base::cls() {
     memset(screen.begin, 0, screen.end - screen.begin);
+    reset_print_cursor();
+    reset_clipping_region();
     return ROSE_API_ERR_NONE;
 }
 
@@ -472,5 +474,40 @@ rose_api_error rose_rt_base::spr(uint32_t n, int16_t x, int16_t y, uint8_t w, ui
             pset(x + x_, y + y_, c);
         }
     }
+    return ROSE_API_ERR_NONE;
+}
+
+rose_api_error rose_rt_base::print(string str, int16_t x, int16_t y, uint8_t c) {
+    int16_t _x = x;
+    int16_t _y = y;
+    for ( std::string::iterator it=str.begin(); it!=str.end(); ++it) {
+        uint8_t character = (uint8_t) *it;
+        if (character > 32 && character < 128) {
+            for (int16_t i = 0; i < 8; i++) {
+                uint8_t line = *(font_data.begin + ((character - 33)*8) + i);
+                for (int16_t j =0; j < 8; j++) {
+                    if (rose_get_bit(&line, (uint8_t) j)) {
+                        pset(_x + j, _y + i, c);
+                    }
+                }
+            }
+            _x += 8;
+        } else if (character == 13) {
+            // carriage return, do nothing
+        } else if (character == 10) {
+            _x = x;
+            _y += 9;
+        } else {
+            _x += 8;
+        }
+    }
+    int16_t* ptr = (int16_t*) print_cursor.begin;
+    ptr[0] = _x;
+    ptr[1] = _y;
+    return ROSE_API_ERR_NONE;
+}
+
+rose_api_error rose_rt_base::color(uint8_t c) {
+    *pen_color_addr = c;
     return ROSE_API_ERR_NONE;
 }

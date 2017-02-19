@@ -37,6 +37,7 @@ using namespace v8;
 #include "js_graphics.h"
 #include "js_input.h"
 #include "js_memory.h"
+#include "js_sys.h"
 
 #include "rt.h"
 

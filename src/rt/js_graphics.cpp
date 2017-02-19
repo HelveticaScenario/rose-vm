@@ -366,4 +366,61 @@ void rose_js_graphics_cls(const v8::FunctionCallbackInfo<v8::Value>& args) {
 
 }
 
+void rose_js_graphics_print(const v8::FunctionCallbackInfo<v8::Value>& args) {
+    if (args.Length() < 1) return;
+    HandleScope scope(args.GetIsolate());
+    rose_rt* r = static_cast<rose_rt*>(Local<External>::Cast(args.Data())->Value());
+
+    v8::String::Utf8Value strArg(args[0]->ToString());
+    string str = ToCString(strArg);
+    uint8_t color;
+    int16_t x, y;
+     if (args.Length() <= 2) {
+        color = *(r->pen_color_addr);
+        int16_t* ptr = (int16_t*) r->print_cursor.begin;
+        x = ptr[0];
+        y = ptr[1];
+    } else if (args.Length() == 3) {
+        color = *(r->pen_color_addr);
+        x = clamp(args[1]->Int32Value());
+        y = clamp(args[2]->Int32Value());
+    } else {
+        color = (uint8_t) args[3]->Uint32Value();
+        x = clamp(args[1]->Int32Value());
+        y = clamp(args[2]->Int32Value());
+    }
+    rose_api_error err = r->print(str, x, y, color);
+    switch (err) {
+        case ROSE_API_ERR_OUT_OF_BOUNDS: {
+            Isolate* isolate = Isolate::GetCurrent();
+            isolate->ThrowException(String::NewFromUtf8(isolate, "Bad Memory Access"));
+            break;
+        }
+        case ROSE_API_ERR_NONE:
+        default: {
+            break;
+        }
+    }
+}
+
+void rose_js_graphics_color(const v8::FunctionCallbackInfo<v8::Value>& args) {
+    if (args.Length() < 1) return;
+    HandleScope scope(args.GetIsolate());
+    rose_rt* r = static_cast<rose_rt*>(Local<External>::Cast(args.Data())->Value());
+
+    uint8_t color = (uint8_t) args[0]->Uint32Value();
+    rose_api_error err = r->color(color);
+    switch (err) {
+        case ROSE_API_ERR_OUT_OF_BOUNDS: {
+            Isolate* isolate = Isolate::GetCurrent();
+            isolate->ThrowException(String::NewFromUtf8(isolate, "Bad Memory Access"));
+            break;
+        }
+        case ROSE_API_ERR_NONE:
+        default: {
+            break;
+        }
+    }
+}
+
 

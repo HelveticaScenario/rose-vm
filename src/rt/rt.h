@@ -40,6 +40,7 @@ struct rose_rt_base {
     rose_memory_range mouse_wheel;
     rose_memory_range key_states;
     rose_memory_range prev_key_states;
+    rose_memory_range font_data;
 
     rose_rt_base(rose_fs* fs);
     virtual ~rose_rt_base();
@@ -66,6 +67,7 @@ struct rose_rt_base {
     void reset_screen();
     void reset_schema();
     void reset_userdata();
+    void reset_font_data();
 
     void copy_input_from_other(rose_rt* other);
     void copy_screen_from_other(rose_rt* other);
@@ -119,6 +121,10 @@ struct rose_rt_base {
 
     rose_api_error spr(uint32_t n, int16_t x, int16_t y, uint8_t w, uint8_t h, bool flip_x, bool flip_y);
 
+    rose_api_error print(string str, int16_t x, int16_t y, uint8_t c);
+
+    rose_api_error color(uint8_t c);
+
 
     // input
 
@@ -164,6 +170,8 @@ struct rose_rt: public rose_rt_base {
 
     void retarget(rose_file* self, rose_file* target);
     bool load_run_main();
+
+    function<void(const v8::FunctionCallbackInfo<v8::Value>& args)> extcmd_cb;
 
     bool call_init();
 

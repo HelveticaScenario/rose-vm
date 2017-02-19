@@ -5,6 +5,11 @@
 #define ROSE_MAIN_CODE_FILE_NAME ("main.js")
 #define ROSE_CODE_FILE_SUFFIX (".js")
 #define ROSE_INFO_FILE_NAME ("cartridge.json")
+#define ROSE_CART_DIR_NAME ("carts")
+#define ROSE_SYS_DIR_NAME ("sys")
+#define ROSE_SHELL_CART_NAME ("shell")
+#define ROSE_CODE_CART_NAME ("code")
+#define ROSE_SPRITE_CART_NAME ("sprite")
 
 #define ROSE_MIN_INT16 (-32767)
 #define ROSE_MAX_INT16 (32767)

@@ -13,6 +13,7 @@ struct rose_editor_instance {
 struct rose_desktop_player {
     rose_fs* fs;
     rose_file* cart;
+    rose_rt* shell_rt;
     rose_rt* game_rt;
 
     vector<rose_editor_instance*> editors;
@@ -20,7 +21,6 @@ struct rose_desktop_player {
     rose_screenmode screenmode;
 
     vector<rose_file*> default_editors;
-    rose_file* carts_root;
 
     rose_desktop_player(rose_fs* fs);
     ~rose_desktop_player();
@@ -36,6 +36,10 @@ struct rose_desktop_player {
     void update_keystate(rose_keycode keycode, bool pressed);
     void error_cb(string exception_string);
 
+    function<void(const v8::FunctionCallbackInfo<v8::Value>& args)> shell_extcmd_cb;
+    function<void(const v8::FunctionCallbackInfo<v8::Value>& args)> game_extcmd_cb;
+    function<void(const v8::FunctionCallbackInfo<v8::Value>& args)> editor_extcmd_cb;
+
     void call_update();
 
     void call_draw();
@@ -50,9 +54,29 @@ struct rose_desktop_player {
 
     void call_ontouch();
 
-private:
+
+    void writestr(const v8::FunctionCallbackInfo<v8::Value>& args);
+
+    void readstr(const v8::FunctionCallbackInfo<v8::Value>& args);
+
+    void savefile(const v8::FunctionCallbackInfo<v8::Value>& args);
+
+    void mkfile(const v8::FunctionCallbackInfo<v8::Value>& args);
+
+    void rmfile(const v8::FunctionCallbackInfo<v8::Value>& args);
+
+    void load(const v8::FunctionCallbackInfo<v8::Value>& args);
+
+    void run(const v8::FunctionCallbackInfo<v8::Value>& args);
+
+    void log(const v8::FunctionCallbackInfo<v8::Value>& args);
+
+    rose_file* fetch_sys_cart(string cart_name);
+
     rose_rt* get_active_rt();
     bool is_reload_shortcut(rose_keycode keycode, bool pressed);
+
+
 };
 
 

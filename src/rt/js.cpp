@@ -1,18 +1,5 @@
 #include "rose.h"
 
-void js_print(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    if (args.Length() < 1) return;
-    HandleScope scope(args.GetIsolate());
-    rose_rt* r = static_cast<rose_rt*>(Local<External>::Cast(args.Data())->Value());
-    for (int i = 0; i < args.Length(); i++){
-        const v8::String::Utf8Value value(args[i]);
-        printf("%s", *value);
-        if (i < (args.Length()-1))
-            printf(", ");
-    }
-    printf("\n");
-}
-
 void js_require(const v8::FunctionCallbackInfo<v8::Value>& args) {
     Isolate* isolate = args.GetIsolate();
     if (args.Length() < 1) {
@@ -158,11 +145,14 @@ rose_js* rose_js_create(rose_rt* r) {
     Local<External> r_ptr = External::New(isolate, r);
 
     Local<ObjectTemplate> global = ObjectTemplate::New(isolate);
-    v8::Local<v8::FunctionTemplate> print = FunctionTemplate::New(isolate, js_print, r_ptr);
-    global->Set(String::NewFromUtf8(isolate, "print", NewStringType::kNormal).ToLocalChecked(), print);
 
     v8::Local<v8::FunctionTemplate> require = FunctionTemplate::New(isolate, js_require, r_ptr);
     global->Set(String::NewFromUtf8(isolate, "require", NewStringType::kNormal).ToLocalChecked(), require);
+
+    v8::Local<v8::FunctionTemplate> extcmd = FunctionTemplate::New(isolate, rose_js_sys_extcmd, r_ptr);
+    global->Set(String::NewFromUtf8(isolate, "extcmd", NewStringType::kNormal).ToLocalChecked(), extcmd);
+
+
 
     v8::Local<v8::FunctionTemplate> pset = FunctionTemplate::New(isolate, rose_js_graphics_pset, r_ptr);
     global->Set(String::NewFromUtf8(isolate, "pset", NewStringType::kNormal).ToLocalChecked(), pset);
@@ -200,6 +190,12 @@ rose_js* rose_js_create(rose_rt* r) {
     v8::Local<v8::FunctionTemplate> cls = FunctionTemplate::New(isolate, rose_js_graphics_cls, r_ptr);
     global->Set(String::NewFromUtf8(isolate, "cls", NewStringType::kNormal).ToLocalChecked(), cls);
 
+    v8::Local<v8::FunctionTemplate> print = FunctionTemplate::New(isolate, rose_js_graphics_print, r_ptr);
+    global->Set(String::NewFromUtf8(isolate, "print", NewStringType::kNormal).ToLocalChecked(), print);
+
+    v8::Local<v8::FunctionTemplate> color = FunctionTemplate::New(isolate, rose_js_graphics_color, r_ptr);
+    global->Set(String::NewFromUtf8(isolate, "color", NewStringType::kNormal).ToLocalChecked(), color);
+
 
 
     v8::Local<v8::FunctionTemplate> poke = FunctionTemplate::New(isolate, rose_js_memory_poke, r_ptr);
@@ -208,33 +204,17 @@ rose_js* rose_js_create(rose_rt* r) {
     v8::Local<v8::FunctionTemplate> peek = FunctionTemplate::New(isolate, rose_js_memory_peek, r_ptr);
     global->Set(String::NewFromUtf8(isolate, "peek", NewStringType::kNormal).ToLocalChecked(), peek);
 
-    v8::Local<v8::FunctionTemplate> memcpy = FunctionTemplate::New(isolate, rose_js_memory_memcpy, r_ptr);
-    global->Set(String::NewFromUtf8(isolate, "rt_memcpy", NewStringType::kNormal).ToLocalChecked(), memcpy);
+    v8::Local<v8::FunctionTemplate> rt_memcpy = FunctionTemplate::New(isolate, rose_js_memory_memcpy, r_ptr);
+    global->Set(String::NewFromUtf8(isolate, "memcpy", NewStringType::kNormal).ToLocalChecked(), rt_memcpy);
 
-    v8::Local<v8::FunctionTemplate> memset = FunctionTemplate::New(isolate, rose_js_memory_memset, r_ptr);
-    global->Set(String::NewFromUtf8(isolate, "rt_memset", NewStringType::kNormal).ToLocalChecked(), memset);
+    v8::Local<v8::FunctionTemplate> rt_memset = FunctionTemplate::New(isolate, rose_js_memory_memset, r_ptr);
+    global->Set(String::NewFromUtf8(isolate, "memset", NewStringType::kNormal).ToLocalChecked(), rt_memset);
 
     v8::Local<v8::FunctionTemplate> cstore = FunctionTemplate::New(isolate, rose_js_memory_cstore, r_ptr);
     global->Set(String::NewFromUtf8(isolate, "cstore", NewStringType::kNormal).ToLocalChecked(), cstore);
 
     v8::Local<v8::FunctionTemplate> reload = FunctionTemplate::New(isolate, rose_js_memory_reload, r_ptr);
     global->Set(String::NewFromUtf8(isolate, "reload", NewStringType::kNormal).ToLocalChecked(), reload);
-
-    v8::Local<v8::FunctionTemplate> _readstr = FunctionTemplate::New(isolate, rose_js_memory__readstr, r_ptr);
-    global->Set(String::NewFromUtf8(isolate, "_readstr", NewStringType::kNormal).ToLocalChecked(), _readstr);
-
-    v8::Local<v8::FunctionTemplate> _writestr = FunctionTemplate::New(isolate, rose_js_memory__writestr, r_ptr);
-    global->Set(String::NewFromUtf8(isolate, "_writestr", NewStringType::kNormal).ToLocalChecked(), _writestr);
-
-    v8::Local<v8::FunctionTemplate> _mkfile = FunctionTemplate::New(isolate, rose_js_memory__mkfile, r_ptr);
-    global->Set(String::NewFromUtf8(isolate, "_mkfile", NewStringType::kNormal).ToLocalChecked(), _mkfile);
-
-    v8::Local<v8::FunctionTemplate> _rmfile = FunctionTemplate::New(isolate, rose_js_memory__rmfile, r_ptr);
-    global->Set(String::NewFromUtf8(isolate, "_rmfile", NewStringType::kNormal).ToLocalChecked(), _rmfile);
-
-    v8::Local<v8::FunctionTemplate> _savefile = FunctionTemplate::New(isolate, rose_js_memory__savefile, r_ptr);
-    global->Set(String::NewFromUtf8(isolate, "_savefile", NewStringType::kNormal).ToLocalChecked(), _savefile);
-
 
 
     v8::Local<v8::FunctionTemplate> mouse = FunctionTemplate::New(isolate, rose_js_input_mouse, r_ptr);

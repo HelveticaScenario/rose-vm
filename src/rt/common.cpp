@@ -726,3 +726,253 @@ const char* rose_keycode_to_string(rose_keycode key) {
             return NULL;
     }
 }
+
+char rose_keycode_to_printable_char(rose_keycode key, bool shift) {
+    switch (key) {
+        case ROSE_KEYCODE_A:
+            return shift ? 'A' : 'a';
+            break;
+        case ROSE_KEYCODE_B:
+            return shift ? 'B' : 'b';
+            break;
+        case ROSE_KEYCODE_C:
+            return shift ? 'C' : 'c';
+            break;
+        case ROSE_KEYCODE_D:
+            return shift ? 'D' : 'd';
+            break;
+        case ROSE_KEYCODE_E:
+            return shift ? 'E' : 'e';
+            break;
+        case ROSE_KEYCODE_F:
+            return shift ? 'F' : 'f';
+            break;
+        case ROSE_KEYCODE_G:
+            return shift ? 'G' : 'g';
+            break;
+        case ROSE_KEYCODE_H:
+            return shift ? 'H' : 'h';
+            break;
+        case ROSE_KEYCODE_I:
+            return shift ? 'I' : 'i';
+            break;
+        case ROSE_KEYCODE_J:
+            return shift ? 'J' : 'j';
+            break;
+        case ROSE_KEYCODE_K:
+            return shift ? 'K' : 'k';
+            break;
+        case ROSE_KEYCODE_L:
+            return shift ? 'L' : 'l';
+            break;
+        case ROSE_KEYCODE_M:
+            return shift ? 'M' : 'm';
+            break;
+        case ROSE_KEYCODE_N:
+            return shift ? 'N' : 'n';
+            break;
+        case ROSE_KEYCODE_O:
+            return shift ? 'O' : 'o';
+            break;
+        case ROSE_KEYCODE_P:
+            return shift ? 'P' : 'p';
+            break;
+        case ROSE_KEYCODE_Q:
+            return shift ? 'Q' : 'q';
+            break;
+        case ROSE_KEYCODE_R:
+            return shift ? 'R' : 'r';
+            break;
+        case ROSE_KEYCODE_S:
+            return shift ? 'S' : 's';
+            break;
+        case ROSE_KEYCODE_T:
+            return shift ? 'T' : 't';
+            break;
+        case ROSE_KEYCODE_U:
+            return shift ? 'U' : 'u';
+            break;
+        case ROSE_KEYCODE_V:
+            return shift ? 'V' : 'v';
+            break;
+        case ROSE_KEYCODE_W:
+            return shift ? 'W' : 'w';
+            break;
+        case ROSE_KEYCODE_X:
+            return shift ? 'X' : 'x';
+            break;
+        case ROSE_KEYCODE_Y:
+            return shift ? 'Y' : 'y';
+            break;
+        case ROSE_KEYCODE_Z:
+            return shift ? 'Z' : 'z';
+            break;
+        case ROSE_KEYCODE_1:
+            return shift ? '!' : '1';
+            break;
+        case ROSE_KEYCODE_2:
+            return shift ? '@' : '2';
+            break;
+        case ROSE_KEYCODE_3:
+            return shift ? '#' : '3';
+            break;
+        case ROSE_KEYCODE_4:
+            return shift ? '$' : '4';
+            break;
+        case ROSE_KEYCODE_5:
+            return shift ? '%' : '5';
+            break;
+        case ROSE_KEYCODE_6:
+            return shift ? '^' : '6';
+            break;
+        case ROSE_KEYCODE_7:
+            return shift ? '&' : '7';
+            break;
+        case ROSE_KEYCODE_8:
+            return shift ? '*' : '8';
+            break;
+        case ROSE_KEYCODE_9:
+            return shift ? '(' : '9';
+            break;
+        case ROSE_KEYCODE_0:
+            return shift ? ')' : '0';
+            break;
+        case ROSE_KEYCODE_RETURN:
+            return '\n';
+            break;
+        case ROSE_KEYCODE_TAB:
+            return ' ';
+            break;
+        case ROSE_KEYCODE_SPACE:
+            return ' ';
+            break;
+        case ROSE_KEYCODE_MINUS:
+            return shift ? '_' : '-';
+            break;
+        case ROSE_KEYCODE_EQUALS:
+            return shift ? '+' : '=';
+            break;
+        case ROSE_KEYCODE_LEFTBRACKET:
+            return shift ? '{' : '[';
+            break;
+        case ROSE_KEYCODE_RIGHTBRACKET:
+            return shift ? '}' : ']';
+            break;
+        case ROSE_KEYCODE_BACKSLASH:
+            return (const char) (shift ? '|' : '\\');
+            break;
+        case ROSE_KEYCODE_SEMICOLON:
+            return shift ? ':' : ';';
+            break;
+        case ROSE_KEYCODE_APOSTROPHE:
+            return (const char) (shift ? '"' : '\'');
+            break;
+        case ROSE_KEYCODE_GRAVE:
+            return shift ? '~' : '`';
+            break;
+        case ROSE_KEYCODE_COMMA:
+            return shift ? '<' : ',';
+            break;
+        case ROSE_KEYCODE_PERIOD:
+            return shift ? '>' : '.';
+            break;
+        case ROSE_KEYCODE_SLASH:
+            return shift ? '?' : '/';
+            break;
+        case ROSE_KEYCODE_KP_DIVIDE:
+            return '/';
+            break;
+        case ROSE_KEYCODE_KP_MULTIPLY:
+            return '*';
+            break;
+        case ROSE_KEYCODE_KP_MINUS:
+            return '-';
+            break;
+        case ROSE_KEYCODE_KP_PLUS:
+            return '+';
+            break;
+        case ROSE_KEYCODE_KP_ENTER:
+            return '\n';
+            break;
+        case ROSE_KEYCODE_KP_1:
+            return '1';
+            break;
+        case ROSE_KEYCODE_KP_2:
+            return '2';
+            break;
+        case ROSE_KEYCODE_KP_3:
+            return '3';
+            break;
+        case ROSE_KEYCODE_KP_4:
+            return '4';
+            break;
+        case ROSE_KEYCODE_KP_5:
+            return '5';
+            break;
+        case ROSE_KEYCODE_KP_6:
+            return '6';
+            break;
+        case ROSE_KEYCODE_KP_7:
+            return '7';
+            break;
+        case ROSE_KEYCODE_KP_8:
+            return '8';
+            break;
+        case ROSE_KEYCODE_KP_9:
+            return '9';
+            break;
+        case ROSE_KEYCODE_KP_0:
+            return '0';
+            break;
+        case ROSE_KEYCODE_KP_PERIOD:
+            return '.';
+            break;
+        case ROSE_KEYCODE_KP_EQUALS:
+            return '=';
+            break;
+        case ROSE_KEYCODE_KP_COMMA:
+            return ',';
+            break;
+        case ROSE_KEYCODE_KP_LEFTPAREN:
+            return '(';
+            break;
+        case ROSE_KEYCODE_KP_RIGHTPAREN:
+            return ')';
+            break;
+        case ROSE_KEYCODE_KP_LEFTBRACE:
+            return '{';
+            break;
+        case ROSE_KEYCODE_KP_RIGHTBRACE:
+            return '}';
+            break;
+        case ROSE_KEYCODE_KP_TAB:
+            return ' ';
+            break;
+        case ROSE_KEYCODE_KP_PERCENT:
+            return '%';
+            break;
+        case ROSE_KEYCODE_KP_LESS:
+            return '<';
+            break;
+        case ROSE_KEYCODE_KP_GREATER:
+            return '>';
+            break;
+        case ROSE_KEYCODE_KP_AMPERSAND:
+            return '&';
+            break;
+        case ROSE_KEYCODE_KP_VERTICALBAR:
+            return '|';
+            break;
+        case ROSE_KEYCODE_KP_COLON:
+            return ':';
+            break;
+        case ROSE_KEYCODE_KP_HASH:
+            return '#';
+            break;
+        case ROSE_KEYCODE_KP_SPACE:
+            return ' ';
+            break;
+        default:
+            return 0;
+    }
+}
