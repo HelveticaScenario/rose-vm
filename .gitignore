@@ -41,3 +41,9 @@ cmake-build-debug
 
 third_party/v8
 third_party/¬
+
+node_modules
+
+bin
+
+build

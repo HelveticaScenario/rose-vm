@@ -1,6 +1,6 @@
 
 #include <SDL_scancode.h>
-#include "rt/rose.h"
+#include "vm/rose.h"
 
 SDL_Scancode rose_keycode_to_sdl_scancode(rose_keycode key);
 

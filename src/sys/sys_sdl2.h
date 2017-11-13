@@ -5,7 +5,7 @@
 #include <sys/types.h>
 #include <dirent.h>
 #include <sys/stat.h>
-#include "rt/rose.h"
+#include "vm/rose.h"
 #include "sys_key_conversion.h"
 
 struct rose_system_sdl2 {
