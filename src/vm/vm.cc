@@ -16,195 +16,228 @@
 //     delete static_platform;
 // }
 
-void rose_vm::reset_palette_filter() {
-    for (int i = 0; i < ROSE_PALETTE_INDEX_NUM; ++i) {
-        palette_filter.begin[i] = (uint8_t) i;
+void rose_vm::reset_palette_filter()
+{
+    for (int i = 0; i < ROSE_PALETTE_INDEX_NUM; ++i)
+    {
+        palette_filter.begin[i] = (uint8_t)i;
     }
 }
 
-void rose_vm::reset_palette_transparency() {
-    for (auto it = palette_transparency.begin; it != palette_transparency.end; it++) {
+void rose_vm::reset_palette_transparency()
+{
+    for (auto it = palette_transparency.begin; it > palette_transparency.end; it++)
+    {
         *it = 0;
     }
     rose_set_bit(palette_transparency.begin, 0, true);
 }
 
-void rose_vm::reset_clipping_region() {
-    int16_t* ptr = (int16_t*) clipping_region.begin;
-    ptr[0] = 0;                      // x0
-    ptr[1] = 0;                      // y0
-    ptr[2] = (int16_t) ((meta.hd ? ROSE_HD_SCREEN_WIDTH : ROSE_SCREEN_WIDTH) - 1);  // x1
-    ptr[3] = (int16_t) ((meta.hd ? ROSE_HD_SCREEN_HEIGHT : ROSE_SCREEN_HEIGHT) - 1); // y1
+void rose_vm::reset_clipping_region()
+{
+    int16_t *ptr = (int16_t *)clipping_region.begin;
+    ptr[0] = 0;                                                                     // x0
+    ptr[1] = 0;                                                                     // y0
+    ptr[2] = (int16_t)((meta.hd ? ROSE_HD_SCREEN_WIDTH : ROSE_SCREEN_WIDTH) - 1);   // x1
+    ptr[3] = (int16_t)((meta.hd ? ROSE_HD_SCREEN_HEIGHT : ROSE_SCREEN_HEIGHT) - 1); // y1
 }
 
-void rose_vm::reset_pen_color() {
+void rose_vm::reset_pen_color()
+{
     *pen_color_addr = 6;
 }
 
-void rose_vm::reset_print_cursor() {
-    int16_t* ptr = (int16_t*) print_cursor.begin;
+void rose_vm::reset_print_cursor()
+{
+    int16_t *ptr = (int16_t *)print_cursor.begin;
     ptr[0] = 0;
     ptr[1] = 0;
 }
 
-void rose_vm::reset_camera_offset() {
-    int16_t* ptr = (int16_t*) camera_offset.begin;
+void rose_vm::reset_camera_offset()
+{
+    int16_t *ptr = (int16_t *)camera_offset.begin;
     ptr[0] = 0; // x0
     ptr[1] = 0; // y0 // TODO: replace with actual starting position
     // once font size is finalized
 }
 
-void rose_vm::reset_pointer_positions() {
-    int16_t* ptr = (int16_t*) pointer_positions.begin;
+void rose_vm::reset_pointer_positions()
+{
+    int16_t *ptr = (int16_t *)pointer_positions.begin;
     ptr[0] = 0; // x0
     ptr[1] = 0; // y0 // TODO: replace with actual starting position
-
 }
 
-void rose_vm::reset_btn_states() {
-    for (auto it = btn_states.begin; it != btn_states.end; it++) {
+void rose_vm::reset_btn_states()
+{
+    for (auto it = btn_states.begin; it < btn_states.end; it++)
+    {
         *it = 0;
     }
-    for (auto it = prev_btn_states.begin; it != prev_btn_states.end; it++) {
-        *it = 0;
-    }
-}
-
-void rose_vm::reset_mouse_wheel() {
-    for (auto it = mouse_wheel.begin; it != mouse_wheel.end; it++) {
+    for (auto it = prev_btn_states.begin; it < prev_btn_states.end; it++)
+    {
         *it = 0;
     }
 }
 
-void rose_vm::reset_key_states() {
-    for (auto it = key_states.begin; it != key_states.end; it++) {
-        *it = 0;
-    }
-    for (auto it = prev_key_states.begin; it != prev_key_states.end; it++) {
+void rose_vm::reset_mouse_wheel()
+{
+    for (auto it = mouse_wheel.begin; it < mouse_wheel.end; it++)
+    {
         *it = 0;
     }
 }
 
-void rose_vm::reset_palette() {
+void rose_vm::reset_key_states()
+{
+    for (auto it = key_states.begin; it < key_states.end; it++)
+    {
+        *it = 0;
+    }
+    for (auto it = prev_key_states.begin; it < prev_key_states.end; it++)
+    {
+        *it = 0;
+    }
+}
+
+void rose_vm::reset_palette()
+{
     memcpy(palette.begin, rose_default_palette, sizeof(rose_default_palette));
 }
 
-void rose_vm::reset_schema() {
+void rose_vm::reset_schema()
+{
     set_spritesheet_meta(0, 256, 256, 1, 1);
 }
 
-void rose_vm::reset_screen() {
+void rose_vm::reset_screen()
+{
     cls();
 }
 
-void rose_vm::reset_userdata() {
-    memset(mem->begin(), 0, (size_t) (meta.hd ? ROSE_HD_USERSPACE_MEMORY_SIZE : ROSE_USERSPACE_MEMORY_SIZE));
+void rose_vm::reset_userdata()
+{
+    memset(mem, 0, (size_t)(meta.hd ? ROSE_HD_USERSPACE_MEMORY_SIZE : ROSE_USERSPACE_MEMORY_SIZE));
 }
 
-void rose_vm::reset_font_data() {
+void rose_vm::reset_font_data()
+{
     memcpy(font_data.begin, rose_bit_font, sizeof(rose_bit_font));
 }
 
-void rose_vm::copy_input_from_other(rose_vm* other) {
+void rose_vm::copy_input_from_other(rose_vm *other)
+{
     auto len = prev_key_states.end - pointer_positions.begin;
     memcpy(pointer_positions.begin, other->pointer_positions.begin, len);
 }
 
-
-void rose_vm::copy_screen_from_other(rose_vm* other) {
-    if (meta.hd == other->meta.hd) {
+void rose_vm::copy_screen_from_other(rose_vm *other)
+{
+    if (meta.hd == other->meta.hd)
+    {
         memcpy(screen.begin, other->screen.begin, screen.end - screen.begin);
-    } else if (meta.hd) {
-        uint8_t* this_screen_ptr = screen.begin;
-        uint8_t* other_screen_ptr = other->screen.begin;
-        for (auto i = 0; i < ROSE_SCREEN_SIZE; i++) {
-            this_screen_ptr[i*2] = other_screen_ptr[i];
-            this_screen_ptr[i*2+1] = other_screen_ptr[i];
+    }
+    else if (meta.hd)
+    {
+        uint8_t *this_screen_ptr = screen.begin;
+        uint8_t *other_screen_ptr = other->screen.begin;
+        for (auto i = 0; i < ROSE_SCREEN_SIZE; i++)
+        {
+            this_screen_ptr[i * 2] = other_screen_ptr[i];
+            this_screen_ptr[i * 2 + 1] = other_screen_ptr[i];
         }
-    } else {
-        uint8_t* this_screen_ptr = screen.begin;
-        uint8_t* other_screen_ptr = other->screen.begin;
-        for (auto i = 0; i < ROSE_SCREEN_SIZE; i++) {
-            this_screen_ptr[i] = other_screen_ptr[i*2];
+    }
+    else
+    {
+        uint8_t *this_screen_ptr = screen.begin;
+        uint8_t *other_screen_ptr = other->screen.begin;
+        for (auto i = 0; i < ROSE_SCREEN_SIZE; i++)
+        {
+            this_screen_ptr[i] = other_screen_ptr[i * 2];
         }
     }
 }
 
-void rose_vm::make_mem_ranges() {
+
+// TODO: need some way of testing that these are correct, makes me nervous
+void rose_vm::make_mem_ranges()
+{
     bool hd = meta.hd;
-    auto screen_begin = mem->end();
-    std::advance(screen_begin, -(hd ? ROSE_HD_SCREEN_SIZE : ROSE_SCREEN_SIZE));
-    screen.begin = screen_begin;
-    screen.end = mem->end();
+    screen.end = mem + ROSE_MEMORY_SIZE;
+    screen.begin  = screen.end -  (hd ? ROSE_HD_SCREEN_SIZE : ROSE_SCREEN_SIZE);
 
     auto it = screen.end;
-    std::advance(it, -(hd ? ROSE_HD_RUNTIME_RESERVED_MEMORY_SIZE : ROSE_RUNTIME_RESERVED_MEMORY_SIZE));
-    std::advance(it, -ROSE_PALETTE_SIZE);
-    std::advance(it, -ROSE_MEMORY_SCHEMA_SIZE);
+    it -= (hd ? ROSE_HD_RUNTIME_RESERVED_MEMORY_SIZE : ROSE_RUNTIME_RESERVED_MEMORY_SIZE);
+    it -= ROSE_PALETTE_SIZE;
+    it -= ROSE_MEMORY_SCHEMA_SIZE;
     schema.begin = it;
-    std::advance(it, ROSE_MEMORY_SCHEMA_SIZE);
+    it += ROSE_MEMORY_SCHEMA_SIZE;
     schema.end = it;
 
     palette.begin = it;
-    std::advance(it, ROSE_PALETTE_SIZE);
+    it += ROSE_PALETTE_SIZE;
     palette.end = it;
 
     palette_filter.begin = it;
-    std::advance(it, ROSE_PALETTE_INDEX_NUM);
+    it += ROSE_PALETTE_INDEX_NUM;
     palette_filter.end = it;
 
     palette_transparency.begin = it;
-    std::advance(it, ROSE_PALETTE_INDEX_NUM / 8);
+    it += (ROSE_PALETTE_INDEX_NUM / 8);
     palette_transparency.end = it;
 
     clipping_region.begin = it;
-    std::advance(it, 8);
+    it += 8;
     clipping_region.end = it;
 
     pen_color_addr = it;
 
-    std::advance(it, 1);
+    it += 1;
 
     print_cursor.begin = it;
-    std::advance(it, 4);
+    it += 4;
     print_cursor.end = it;
 
     camera_offset.begin = it;
-    std::advance(it, 4);
+    it += 4;
     camera_offset.end = it;
 
     pointer_positions.begin = it;
-    std::advance(it, 11 * 4 /* 2 16 bit number */);
+    it += (11 * 4 /* 2 16 bit number */);
     pointer_positions.end = it;
 
     btn_states.begin = it;
-    std::advance(it, 4 /* 32 bit fields */);
+    it += (4 /* 32 bit fields */);
     btn_states.end = it;
 
     prev_btn_states.begin = it;
-    std::advance(it, 4 /* 32 bit fields */);
+    it += (4 /* 32 bit fields */);
     prev_btn_states.end = it;
 
     mouse_wheel.begin = it;
-    std::advance(it, 5 /* 2 16 bit ints and one bool */);
+    it += (5 /* 2 16 bit ints and one bool */);
     mouse_wheel.end = it;
 
     key_states.begin = it;
-    std::advance(it, 30 /* 240 bit fields */);
+    it += (30 /* 240 bit fields */);
     key_states.end = it;
 
     prev_key_states.begin = it;
-    std::advance(it, 30 /* 240 bit fields */);
+    it += (30 /* 240 bit fields */);
     prev_key_states.end = it;
 
     font_data.begin = it;
-    std::advance(it, sizeof(rose_bit_font));
+    it += (sizeof(rose_bit_font));
     font_data.end = it;
 }
+// rose_vm::rose_vm() {
 
+// }
 
 // rose_vm::rose_vm(rose_fs* fs) {
-rose_vm::rose_vm() {
+rose_vm::rose_vm(unsigned char *mem)
+{
     // if (fs == NULL) {
     //     fprintf(stderr, "tried to create runtime base with null fs\n");
     //     exit(1);
@@ -216,9 +249,9 @@ rose_vm::rose_vm() {
     meta.author = "";
     meta.hd = false;
 
-    mem = new std::array<uint8_t, ROSE_MEMORY_SIZE>();
+    this->mem = mem;
     make_mem_ranges();
-    mem->fill(0);
+    memset(this->mem, 0, ROSE_MEMORY_SIZE);
     reset_palette_filter();
     reset_palette_transparency();
     reset_clipping_region();
@@ -234,14 +267,15 @@ rose_vm::rose_vm() {
     reset_schema();
     reset_userdata();
     reset_font_data();
-
 }
 
-rose_vm::~rose_vm() {
-    delete mem;
+rose_vm::~rose_vm()
+{
+    // delete mem;
 }
 
-bool rose_vm::clear() {
+bool rose_vm::clear()
+{
     reset_palette_filter();
     reset_palette_transparency();
     reset_clipping_region();
@@ -255,37 +289,41 @@ bool rose_vm::clear() {
     return true;
 }
 
-
-void rose_vm::save_input_frame() {
+void rose_vm::save_input_frame()
+{
     memcpy(prev_btn_states.begin, btn_states.begin, prev_btn_states.end - prev_btn_states.begin);
     memcpy(prev_key_states.begin, key_states.begin, prev_key_states.end - prev_key_states.begin);
 }
 
-void rose_vm::update_mouse_pos(int16_t x, int16_t y) {
-    int16_t* pointer = (int16_t*) pointer_positions.begin;
+void rose_vm::update_mouse_pos(int16_t x, int16_t y)
+{
+    int16_t *pointer = (int16_t *)pointer_positions.begin;
     pointer[20] = x;
     pointer[21] = y;
 }
 
-void rose_vm::update_btn_state(uint8_t btn, bool pressed) {
+void rose_vm::update_btn_state(uint8_t btn, bool pressed)
+{
     rose_set_bit(btn_states.begin, btn, pressed);
 }
 
-void rose_vm::update_wheel_state(int16_t delta_x, int16_t delta_y, bool inverted) {
-    int16_t* wheel_delta = (int16_t*) mouse_wheel.begin;
+void rose_vm::update_wheel_state(int16_t delta_x, int16_t delta_y, bool inverted)
+{
+    int16_t *wheel_delta = (int16_t *)mouse_wheel.begin;
     wheel_delta[0] = delta_x;
     wheel_delta[1] = delta_y;
 
-    bool* wheel_inverted = (bool*) (mouse_wheel.begin + 4);
+    bool *wheel_inverted = (bool *)(mouse_wheel.begin + 4);
     *wheel_inverted = inverted;
 }
 
-void rose_vm::update_keystate(rose_keycode keycode, bool pressed) {
-    if (keycode < ROSE_KEYCODE_UNKNOWN) {
+void rose_vm::update_keystate(rose_keycode keycode, bool pressed)
+{
+    if (keycode < ROSE_KEYCODE_UNKNOWN)
+    {
         rose_set_bit(key_states.begin, keycode, pressed);
     }
 }
-
 
 // rose_vm::rose_vm(rose_fs* fs): rose_vm(fs) {
 //     js = rose_js_create(this);
@@ -295,8 +333,6 @@ void rose_vm::update_keystate(rose_keycode keycode, bool pressed) {
 //     rose_js_free(js);
 // }
 
-
-
 // bool rose_vm::clear() {
 //     if (rose_vm::clear()) {
 //         js->module_cache.Reset();
@@ -305,7 +341,6 @@ void rose_vm::update_keystate(rose_keycode keycode, bool pressed) {
 //     }
 //     return false;
 // }
-
 
 // bool rose_vm::load_run_main() {
 //     if (self_cart == NULL) {
@@ -335,7 +370,6 @@ void rose_vm::update_keystate(rose_keycode keycode, bool pressed) {
 //             cart_info->buffer[cart_info->buffer_len-1] = '\0';
 //             cart_info->last_modification = time(NULL);
 //         }
-
 
 //         v8::Local<v8::String> json;
 //         if (!v8::String::NewFromUtf8(isolate, (const char*) cart_info->buffer, v8::NewStringType::kNormal).ToLocal(&json)) {
@@ -411,7 +445,6 @@ void rose_vm::update_keystate(rose_keycode keycode, bool pressed) {
 //         fs->read_file(main);
 //     }
 
-
 //     if (main->buffer[main->buffer_len-1] != '\0') {
 //         main->buffer_len++;
 //         main->buffer = (uint8_t*) realloc(main->buffer, main->buffer_len);
@@ -447,7 +480,6 @@ void rose_vm::update_keystate(rose_keycode keycode, bool pressed) {
 
 //     return true;
 // }
-
 
 // void rose_vm::retarget(rose_file* self, rose_file* target) {
 //     self_cart = self;
@@ -536,21 +568,23 @@ void rose_vm::update_keystate(rose_keycode keycode, bool pressed) {
 //     return rose_call("_ontouch", 0, NULL);
 // }
 
-
-void rose_set_bit(std::array<uint8_t, ROSE_MEMORY_SIZE>::iterator arr, uint8_t addr, bool val) {
-    uint8_t idx = (uint8_t) (addr / 8);
-    uint8_t bit = (uint8_t) (addr % 8);
-    if (val) {
+void rose_set_bit(uint8_t* arr, uint8_t addr, bool val)
+{
+    uint8_t idx = (uint8_t)(addr / 8);
+    uint8_t bit = (uint8_t)(addr % 8);
+    if (val)
+    {
         arr[idx] |= 1 << bit;
-    } else {
+    }
+    else
+    {
         arr[idx] &= ~(1 << bit);
     }
 }
 
-bool rose_get_bit(std::array<uint8_t, ROSE_MEMORY_SIZE>::iterator arr, uint8_t addr) {
-    uint8_t idx = (uint8_t) (addr / 8);
-    uint8_t bit = (uint8_t) (addr % 8);
-    return (bool) ((arr[idx] >> bit) & 1);
+bool rose_get_bit(uint8_t* arr, uint8_t addr)
+{
+    uint8_t idx = (uint8_t)(addr / 8);
+    uint8_t bit = (uint8_t)(addr % 8);
+    return (bool)((arr[idx] >> bit) & 1);
 }
-
-

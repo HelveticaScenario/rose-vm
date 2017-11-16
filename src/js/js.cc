@@ -169,14 +169,15 @@ NAN_MODULE_INIT(RosebudJS::Init)
 
     constructor.Reset(Nan::GetFunction(tpl).ToLocalChecked());
     Nan::Set(target, Nan::New("RosebudVM").ToLocalChecked(), Nan::GetFunction(tpl).ToLocalChecked());
+    Nan::Set(target, Nan::New("MEMSIZE").ToLocalChecked(), Nan::New(ROSE_MEMORY_SIZE));
 }
 
 // Buffers free their memory when they are gc'd, we dont want that
 void bufferFreeCallback(char *data, void *hint) {}
 
-RosebudJS::RosebudJS()
+RosebudJS::RosebudJS(uint8_t *mem)
 {
-    vm = new rose_vm();
+    vm = new rose_vm(mem);
 }
 
 RosebudJS::~RosebudJS()
@@ -189,30 +190,35 @@ void RosebudJS::New(const Nan::FunctionCallbackInfo<v8::Value> &info)
     if (info.IsConstructCall())
     {
         // Invoked as constructor: `new RosebudJS(...)`
-        RosebudJS *obj = new RosebudJS();
-        if (info.Length() > 0 && info[0]->IsTrue()) {
+        Nan::TypedArrayContents<uint8_t> bufferObject(info[0]);
+        RosebudJS *obj = new RosebudJS(*bufferObject);
+        if (info.Length() > 1 && info[1]->IsTrue())
+        {
             obj->vm->meta.hd = true;
             obj->vm->make_mem_ranges();
         }
         obj->Wrap(info.This());
-        v8::Local<v8::Object> screenBuffer = Nan::NewBuffer((char *)obj->vm->screen.begin,
-                                                             obj->vm->screen.end - obj->vm->screen.begin,
-                                                             bufferFreeCallback,
-                                                             nullptr)
-                                                  .ToLocalChecked();
-        Nan::Set(info.This(), Nan::New("screen").ToLocalChecked(), screenBuffer);
+        Nan::Set(info.This(), Nan::New("memory").ToLocalChecked(), info[0]);
+        // v8::Local<v8::Object> screenBuffer = Nan::NewBuffer((char *)obj->vm->screen.begin,
+        //                                                      obj->vm->screen.end - obj->vm->screen.begin,
+        //                                                      bufferFreeCallback,
+        //                                                      nullptr)
+        //                                           .ToLocalChecked();
+        Nan::Set(info.This(), Nan::New("screenOffset").ToLocalChecked(), Nan::New<v8::Integer, uint32_t>(obj->vm->screen.begin - obj->vm->mem));
+        Nan::Set(info.This(), Nan::New("screenLength").ToLocalChecked(), Nan::New<v8::Integer, uint32_t>(obj->vm->screen.end - obj->vm->screen.begin));
 
-        v8::Local<v8::Object> paletteBuffer = Nan::NewBuffer((char *)obj->vm->palette.begin,
-                                                             obj->vm->palette.end - obj->vm->palette.begin,
-                                                             bufferFreeCallback,
-                                                             nullptr)
-                                                  .ToLocalChecked();
-        Nan::Set(info.This(), Nan::New("palette").ToLocalChecked(), paletteBuffer);
-        const uint32_t requiredDataSize = obj->vm->mem->size() - (obj->vm->meta.hd ? ROSE_HD_RUNTIME_RESERVED_MEMORY_SIZE : ROSE_RUNTIME_RESERVED_MEMORY_SIZE);
+        // v8::Local<v8::Object> paletteBuffer = Nan::NewBuffer((char *)obj->vm->palette.begin,
+        //                                                      obj->vm->palette.end - obj->vm->palette.begin,
+        //                                                      bufferFreeCallback,
+        //                                                      nullptr)
+        //                                           .ToLocalChecked();
+        // Nan::Set(info.This(), Nan::New("palette").ToLocalChecked(), paletteBuffer);
+        Nan::Set(info.This(), Nan::New("paletteOffset").ToLocalChecked(), Nan::New<v8::Integer, uint32_t>(obj->vm->palette.begin - obj->vm->mem));
+        Nan::Set(info.This(), Nan::New("paletteLength").ToLocalChecked(), Nan::New<v8::Integer, uint32_t>(obj->vm->palette.end - obj->vm->palette.begin));
+        const uint32_t requiredDataSize = ROSE_MEMORY_SIZE - (obj->vm->meta.hd ? ROSE_HD_RUNTIME_RESERVED_MEMORY_SIZE : ROSE_RUNTIME_RESERVED_MEMORY_SIZE);
         Nan::Set(info.This(), Nan::New("cartSize").ToLocalChecked(), Nan::New(requiredDataSize));
         Nan::Set(info.This(), Nan::New("screenWidth").ToLocalChecked(), Nan::New((obj->vm->meta.hd ? ROSE_HD_SCREEN_WIDTH : ROSE_SCREEN_WIDTH)));
         Nan::Set(info.This(), Nan::New("screenHeight").ToLocalChecked(), Nan::New((obj->vm->meta.hd ? ROSE_HD_SCREEN_HEIGHT : ROSE_SCREEN_HEIGHT)));
-        
 
         info.GetReturnValue().Set(info.This());
     }
@@ -224,26 +230,30 @@ void RosebudJS::New(const Nan::FunctionCallbackInfo<v8::Value> &info)
     }
 }
 
-void RosebudJS::LoadCartData(const Nan::FunctionCallbackInfo<v8::Value> &info) {
-    RosebudJS* obj = Nan::ObjectWrap::Unwrap<RosebudJS>(info.This());
-    rose_vm* vm = obj->vm;
-    const uint32_t requiredDataSize = vm->mem->size() - (vm->meta.hd ? ROSE_HD_RUNTIME_RESERVED_MEMORY_SIZE : ROSE_RUNTIME_RESERVED_MEMORY_SIZE);
+void RosebudJS::LoadCartData(const Nan::FunctionCallbackInfo<v8::Value> &info)
+{
+    RosebudJS *obj = Nan::ObjectWrap::Unwrap<RosebudJS>(info.This());
+    rose_vm *vm = obj->vm;
+    const uint32_t requiredDataSize = ROSE_MEMORY_SIZE - (vm->meta.hd ? ROSE_HD_RUNTIME_RESERVED_MEMORY_SIZE : ROSE_RUNTIME_RESERVED_MEMORY_SIZE);
     std::string errorMessage = "First argument must be a Buffer or TypedArray of length " + std::to_string(requiredDataSize);
-    if (info.Length() == 0) {
+    if (info.Length() == 0)
+    {
         Nan::ThrowError(errorMessage.c_str());
         return;
     }
-    Nan::TypedArrayContents<unsigned char> bufferObject(info[0]);
-    if (*bufferObject == nullptr) {
+    Nan::TypedArrayContents<uint8_t> bufferObject(info[0]);
+    if (*bufferObject == nullptr)
+    {
         Nan::ThrowError(errorMessage.c_str());
         return;
     }
 
-    if (bufferObject.length() != requiredDataSize) {
+    if (bufferObject.length() != requiredDataSize)
+    {
         Nan::ThrowError(errorMessage.c_str());
         return;
     }
-    memcpy(vm->mem->data(), *bufferObject, bufferObject.length());
+    memcpy(vm->mem, *bufferObject, bufferObject.length());
 }
 
 // rose_js* rose_js_create(rose_vm* r) {

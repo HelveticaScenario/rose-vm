@@ -9,7 +9,7 @@ public:
     static NAN_MODULE_INIT(Init);
 
 private:
-    explicit RosebudJS();
+    explicit RosebudJS(uint8_t* mem);
     ~RosebudJS();
 
     static NAN_METHOD(New);

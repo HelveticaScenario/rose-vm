@@ -1,8 +1,9 @@
 {
-  "name": "rosebud",
+  "name": "rose-vm",
   "version": "1.0.0",
   "description": "pico-8 but better and a library",
   "main": "index.js",
+  "types": "index.d.ts",
   "scripts": {
     "configure": "node-gyp configure",
     "build": "node-gyp build",

@@ -6,8 +6,8 @@
 #include "enums.h"
 
 struct rose_memory_range {
-    std::array<uint8_t, ROSE_MEMORY_SIZE>::iterator begin;
-    std::array<uint8_t, ROSE_MEMORY_SIZE>::iterator end;
+    uint8_t* begin;
+    uint8_t* end;
 };
 
 struct rose_vm_meta {
@@ -22,14 +22,14 @@ struct rose_vm {
     // rose_file* self_cart;
     // rose_file* target_cart;
 
-    std::array<uint8_t, ROSE_MEMORY_SIZE>* mem;
+    uint8_t* mem;
     rose_memory_range screen;
     rose_memory_range schema;
     rose_memory_range palette;
     rose_memory_range palette_filter; // TODO: rename this to something not shit
     rose_memory_range palette_transparency;
     rose_memory_range clipping_region;
-    std::array<uint8_t, ROSE_MEMORY_SIZE>::iterator pen_color_addr;
+    uint8_t* pen_color_addr;
     rose_memory_range print_cursor;
     rose_memory_range camera_offset;
     rose_memory_range pointer_positions;
@@ -41,7 +41,7 @@ struct rose_vm {
     rose_memory_range font_data;
 
     // rose_vm(rose_fs* fs);
-    rose_vm();
+    rose_vm(uint8_t* mem);
     virtual ~rose_vm();
     void make_mem_ranges();
 

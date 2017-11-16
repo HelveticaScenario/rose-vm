@@ -5,5 +5,5 @@ void InitAll(v8::Local<v8::Object> exports) {
     RosebudJS::Init(exports);
 }
   
-NODE_MODULE(rosebud, InitAll)
+NODE_MODULE(rosevm, InitAll)
 

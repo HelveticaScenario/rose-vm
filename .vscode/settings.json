@@ -27,5 +27,6 @@
         "streambuf": "cpp",
         "type_traits": "cpp",
         "typeinfo": "cpp"
-    }
+    },
+    "prettier.printWidth": 120
 }
