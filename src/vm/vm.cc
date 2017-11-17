@@ -1,4 +1,4 @@
-#include "rose.h"
+#include "vm.h"
 
 // static v8::Platform* static_platform;
 

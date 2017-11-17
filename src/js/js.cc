@@ -167,6 +167,13 @@ NAN_MODULE_INIT(RosebudJS::Init)
 
     Nan::SetPrototypeMethod(tpl, "loadCartData", LoadCartData);
 
+    Nan::SetPrototypeMethod(tpl, "updateMousePos", UpdateMousePos);
+    Nan::SetPrototypeMethod(tpl, "updateBtnState", UpdateBtnState);
+    Nan::SetPrototypeMethod(tpl, "updateWheelState", UpdateWheelState);
+    Nan::SetPrototypeMethod(tpl, "updateKeyState", UpdateKeyState);
+
+    Nan::SetPrototypeMethod(tpl, "resetSystemMemory", ResetSystemMemory);
+
     constructor.Reset(Nan::GetFunction(tpl).ToLocalChecked());
     Nan::Set(target, Nan::New("RosebudVM").ToLocalChecked(), Nan::GetFunction(tpl).ToLocalChecked());
     Nan::Set(target, Nan::New("MEMSIZE").ToLocalChecked(), Nan::New(ROSE_MEMORY_SIZE));

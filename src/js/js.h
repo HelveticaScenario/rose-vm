@@ -1,7 +1,7 @@
 #pragma once
 
 #include <nan.h>
-#include "../vm/rose.h"
+#include "../vm/vm.h"
 #include "js_common.h"
 
 class RosebudJS : public Nan::ObjectWrap {
@@ -45,6 +45,13 @@ private:
     static NAN_METHOD(Color);
 
     static NAN_METHOD(LoadCartData);
+
+    static NAN_METHOD(UpdateMousePos);
+    static NAN_METHOD(UpdateBtnState);
+    static NAN_METHOD(UpdateWheelState);
+    static NAN_METHOD(UpdateKeyState);
+
+    static NAN_METHOD(ResetSystemMemory);
 
     static void RectCommon(const Nan::FunctionCallbackInfo<v8::Value>& info, bool fill);
     static void CircCommon(const Nan::FunctionCallbackInfo<v8::Value>& info, bool fill);

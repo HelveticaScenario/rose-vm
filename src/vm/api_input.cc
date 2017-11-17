@@ -1,4 +1,4 @@
-#include "rose.h"
+#include "vm.h"
 
 rose_api_error rose_vm::mouse(int16_t* x, int16_t* y) {
     int16_t* pointer = (int16_t*) pointer_positions.begin;

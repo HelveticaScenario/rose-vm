@@ -253,10 +253,20 @@ declare namespace rosevm {
   }
 
   interface RosebudJS {
+    cartSize: number;
+    memory: Buffer;
+
     screen: Buffer;
     palette: Buffer;
     screenWidth: number;
     screenHeight: number;
+
+    updateMousePos(x: number, y: number): void;
+    updateBtnState(btn: number, pressed: boolean): void;
+    updateWheelState(deltaX: number, deltaY: number, inverted: boolean): void;
+    updateKeyState(keycode: number, pressed: boolean): void;
+
+    resetSystemMemory(): void;
 
     pset(x: number, y: number): void;
     pset(x: number, y: number, color: number): void;

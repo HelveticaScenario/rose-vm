@@ -2,7 +2,7 @@
     "targets": [
         {
             "target_name": "rosevm",
-            "sources": [ "addon.cc", "./src/vm/vm.cc", "./src/vm/api_graphics.cc", "./src/vm/api_input.cc", "./src/vm/api_memory.cc", "./src/vm/common.cc", "./src/js/js.cc", "./src/js/js_memory.cc", "./src/js/js_graphics.cc", "./src/js/js_input.cc", "./src/js/js_common.cc"],
+            "sources": [ "addon.cc", "./src/vm/vm.cc", "./src/vm/api_graphics.cc", "./src/vm/api_input.cc", "./src/vm/api_memory.cc", "./src/vm/common.cc", "./src/js/js.cc", "./src/js/js_memory.cc", "./src/js/js_graphics.cc", "./src/js/js_input.cc", "./src/js/js_sys.cc", "./src/js/js_common.cc"],
             "include_dirs" : [
  	 			"<!(node -e \"require('nan')\")"
 			],

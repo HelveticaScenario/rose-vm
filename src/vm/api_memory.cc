@@ -1,4 +1,4 @@
-#include "rose.h"
+#include "vm.h"
 
 rose_api_error rose_vm::poke(uint32_t idx, uint8_t val) {
     if (idx >= ROSE_MEMORY_SIZE) {

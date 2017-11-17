@@ -1,4 +1,4 @@
-#include "rose.h"
+#include "vm.h"
 
 void coord_cam_offset(rose_vm *r, int16_t *x, int16_t *y)
 {

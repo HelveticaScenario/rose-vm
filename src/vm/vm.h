@@ -1,9 +1,28 @@
 #pragma once
 
-#include "config.h"
+#include <cstdint>
+#include <cmath>
+#include <cstdbool>
+#include <cstdlib>
+#include <cerrno>
+#include <ctime>
+#include <cstring>
+#include <cassert>
+#include <iostream>
+#include <string>
+#include <vector>
+#include <sstream>
+#include <algorithm>
+#include <iterator>
+#include <map>
 #include <array>
-#include "common.h"
+
+using namespace std;
+
+#include "config.h"
 #include "enums.h"
+#include "common.h"
+
 
 struct rose_memory_range {
     uint8_t* begin;
