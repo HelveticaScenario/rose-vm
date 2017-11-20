@@ -158,23 +158,23 @@ declare namespace rosevm {
      */
     Oem102: 92;
 
-    Numpad0: 93; // VK_NUMPAD0, 0x60, Numeric keypad 0 key
-    Numpad1: 94; // VK_NUMPAD1, 0x61, Numeric keypad 1 key
-    Numpad2: 95; // VK_NUMPAD2, 0x62, Numeric keypad 2 key
-    Numpad3: 96; // VK_NUMPAD3, 0x63, Numeric keypad 3 key
-    Numpad4: 97; // VK_NUMPAD4, 0x64, Numeric keypad 4 key
-    Numpad5: 98; // VK_NUMPAD5, 0x65, Numeric keypad 5 key
-    Numpad6: 99; // VK_NUMPAD6, 0x66, Numeric keypad 6 key
-    Numpad7: 100; // VK_NUMPAD7, 0x67, Numeric keypad 7 key
-    Numpad8: 101; // VK_NUMPAD8, 0x68, Numeric keypad 8 key
-    Numpad9: 102; // VK_NUMPAD9, 0x69, Numeric keypad 9 key
+    NumPad0: 93; // VK_NUMPAD0, 0x60, Numeric keypad 0 key
+    NumPad1: 94; // VK_NUMPAD1, 0x61, Numeric keypad 1 key
+    NumPad2: 95; // VK_NUMPAD2, 0x62, Numeric keypad 2 key
+    NumPad3: 96; // VK_NUMPAD3, 0x63, Numeric keypad 3 key
+    NumPad4: 97; // VK_NUMPAD4, 0x64, Numeric keypad 4 key
+    NumPad5: 98; // VK_NUMPAD5, 0x65, Numeric keypad 5 key
+    NumPad6: 99; // VK_NUMPAD6, 0x66, Numeric keypad 6 key
+    NumPad7: 100; // VK_NUMPAD7, 0x67, Numeric keypad 7 key
+    NumPad8: 101; // VK_NUMPAD8, 0x68, Numeric keypad 8 key
+    NumPad9: 102; // VK_NUMPAD9, 0x69, Numeric keypad 9 key
 
-    NumpadMultiply: 103; // VK_MULTIPLY, 0x6A, Multiply key
-    NumpadAdd: 104; // VK_ADD, 0x6B, Add key
-    NumpadSeparator: 105; // VK_SEPARATOR, 0x6C, Separator key
-    NumpadSubtract: 106; // VK_SUBTRACT, 0x6D, Subtract key
-    NumpadDecimal: 107; // VK_DECIMAL, 0x6E, Decimal key
-    NumpadDivide: 108; // VK_DIVIDE, 0x6F,
+    NumPadMultiply: 103; // VK_MULTIPLY, 0x6A, Multiply key
+    NumPadAdd: 104; // VK_ADD, 0x6B, Add key
+    NumPadSeparator: 105; // VK_SEPARATOR, 0x6C, Separator key
+    NumPadSubtract: 106; // VK_SUBTRACT, 0x6D, Subtract key
+    NumPadDecimal: 107; // VK_DECIMAL, 0x6E, Decimal key
+    NumPadDivide: 108; // VK_DIVIDE, 0x6F,
 
     /**
      * Cover all key codes when IME is processing input.
