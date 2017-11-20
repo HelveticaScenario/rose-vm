@@ -38,7 +38,7 @@ void RosebudJS::UpdateKeyState(
     const Nan::FunctionCallbackInfo<v8::Value>& info) {
   RosebudJS* obj = Nan::ObjectWrap::Unwrap<RosebudJS>(info.This());
   rose_vm* vm = obj->vm;
-  if (info.Length() >= 3) {
+  if (info.Length() >= 2) {
     rose_keycode keycode = (rose_keycode)info[0]->Uint32Value();
     bool pressed = (bool)info[1]->BooleanValue();
     vm->update_keystate(keycode, pressed);
