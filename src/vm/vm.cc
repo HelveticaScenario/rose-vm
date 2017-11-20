@@ -16,11 +16,11 @@
 //     delete static_platform;
 // }
 
-void rose_vm::reset_palette_filter()
+void rose_vm::reset_palette_map()
 {
     for (int i = 0; i < ROSE_PALETTE_INDEX_NUM; ++i)
     {
-        palette_filter.begin[i] = (uint8_t)i;
+        palette_map.begin[i] = (uint8_t)i;
     }
 }
 
@@ -179,9 +179,9 @@ void rose_vm::make_mem_ranges()
     it += ROSE_PALETTE_SIZE;
     palette.end = it;
 
-    palette_filter.begin = it;
+    palette_map.begin = it;
     it += ROSE_PALETTE_INDEX_NUM;
-    palette_filter.end = it;
+    palette_map.end = it;
 
     palette_transparency.begin = it;
     it += (ROSE_PALETTE_INDEX_NUM / 8);
@@ -252,7 +252,7 @@ rose_vm::rose_vm(unsigned char *mem)
     this->mem = mem;
     make_mem_ranges();
     memset(this->mem, 0, ROSE_MEMORY_SIZE);
-    reset_palette_filter();
+    reset_palette_map();
     reset_palette_transparency();
     reset_clipping_region();
     reset_pen_color();
@@ -276,7 +276,7 @@ rose_vm::~rose_vm()
 
 bool rose_vm::clear()
 {
-    reset_palette_filter();
+    reset_palette_map();
     reset_palette_transparency();
     reset_clipping_region();
     reset_pen_color();

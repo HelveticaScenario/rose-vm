@@ -45,7 +45,7 @@ struct rose_vm {
     rose_memory_range screen;
     rose_memory_range schema;
     rose_memory_range palette;
-    rose_memory_range palette_filter; // TODO: rename this to something not shit
+    rose_memory_range palette_map; // TODO: rename this to something not shit
     rose_memory_range palette_transparency;
     rose_memory_range clipping_region;
     uint8_t* pen_color_addr;
@@ -71,7 +71,7 @@ struct rose_vm {
     void update_wheel_state(int16_t delta_x, int16_t delta_y, bool inverted);
     void update_keystate(rose_keycode keycode, bool pressed);
 
-    void reset_palette_filter();
+    void reset_palette_map();
     void reset_palette_transparency();
     void reset_clipping_region();
     void reset_pen_color();

@@ -45,6 +45,13 @@ void RosebudJS::UpdateKeyState(
   }
 }
 
+void RosebudJS::SaveInputFrame(
+    const Nan::FunctionCallbackInfo<v8::Value>& info) {
+  RosebudJS* obj = Nan::ObjectWrap::Unwrap<RosebudJS>(info.This());
+  rose_vm* vm = obj->vm;
+  vm->save_input_frame();
+}
+
 void RosebudJS::ResetSystemMemory(
     const Nan::FunctionCallbackInfo<v8::Value>& info) {
   RosebudJS* obj = Nan::ObjectWrap::Unwrap<RosebudJS>(info.This());

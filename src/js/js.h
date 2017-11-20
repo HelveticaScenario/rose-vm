@@ -53,6 +53,8 @@ private:
 
     static NAN_METHOD(ResetSystemMemory);
 
+    static NAN_METHOD(SaveInputFrame);
+
     static void RectCommon(const Nan::FunctionCallbackInfo<v8::Value>& info, bool fill);
     static void CircCommon(const Nan::FunctionCallbackInfo<v8::Value>& info, bool fill);
 

@@ -174,6 +174,8 @@ NAN_MODULE_INIT(RosebudJS::Init)
 
     Nan::SetPrototypeMethod(tpl, "resetSystemMemory", ResetSystemMemory);
 
+    Nan::SetPrototypeMethod(tpl, "saveInputFrame", SaveInputFrame);
+
     constructor.Reset(Nan::GetFunction(tpl).ToLocalChecked());
     Nan::Set(target, Nan::New("RosebudVM").ToLocalChecked(), Nan::GetFunction(tpl).ToLocalChecked());
     Nan::Set(target, Nan::New("MEMSIZE").ToLocalChecked(), Nan::New(ROSE_MEMORY_SIZE));
@@ -206,22 +208,16 @@ void RosebudJS::New(const Nan::FunctionCallbackInfo<v8::Value> &info)
         }
         obj->Wrap(info.This());
         Nan::Set(info.This(), Nan::New("memory").ToLocalChecked(), info[0]);
-        // v8::Local<v8::Object> screenBuffer = Nan::NewBuffer((char *)obj->vm->screen.begin,
-        //                                                      obj->vm->screen.end - obj->vm->screen.begin,
-        //                                                      bufferFreeCallback,
-        //                                                      nullptr)
-        //                                           .ToLocalChecked();
+        
         Nan::Set(info.This(), Nan::New("screenOffset").ToLocalChecked(), Nan::New<v8::Integer, uint32_t>(obj->vm->screen.begin - obj->vm->mem));
         Nan::Set(info.This(), Nan::New("screenLength").ToLocalChecked(), Nan::New<v8::Integer, uint32_t>(obj->vm->screen.end - obj->vm->screen.begin));
 
-        // v8::Local<v8::Object> paletteBuffer = Nan::NewBuffer((char *)obj->vm->palette.begin,
-        //                                                      obj->vm->palette.end - obj->vm->palette.begin,
-        //                                                      bufferFreeCallback,
-        //                                                      nullptr)
-        //                                           .ToLocalChecked();
-        // Nan::Set(info.This(), Nan::New("palette").ToLocalChecked(), paletteBuffer);
         Nan::Set(info.This(), Nan::New("paletteOffset").ToLocalChecked(), Nan::New<v8::Integer, uint32_t>(obj->vm->palette.begin - obj->vm->mem));
         Nan::Set(info.This(), Nan::New("paletteLength").ToLocalChecked(), Nan::New<v8::Integer, uint32_t>(obj->vm->palette.end - obj->vm->palette.begin));
+        
+        Nan::Set(info.This(), Nan::New("paletteMapOffset").ToLocalChecked(), Nan::New<v8::Integer, uint32_t>(obj->vm->palette_map.begin - obj->vm->mem));
+        Nan::Set(info.This(), Nan::New("paletteMapLength").ToLocalChecked(), Nan::New<v8::Integer, uint32_t>(obj->vm->palette_map.end - obj->vm->palette_map.begin));
+
         const uint32_t requiredDataSize = ROSE_MEMORY_SIZE - (obj->vm->meta.hd ? ROSE_HD_RUNTIME_RESERVED_MEMORY_SIZE : ROSE_RUNTIME_RESERVED_MEMORY_SIZE);
         Nan::Set(info.This(), Nan::New("cartSize").ToLocalChecked(), Nan::New(requiredDataSize));
         Nan::Set(info.This(), Nan::New("screenWidth").ToLocalChecked(), Nan::New((obj->vm->meta.hd ? ROSE_HD_SCREEN_WIDTH : ROSE_SCREEN_WIDTH)));
