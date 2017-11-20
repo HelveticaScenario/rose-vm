@@ -198,8 +198,10 @@ declare namespace rosevm {
 
     screen: Buffer;
     palette: Buffer;
+    paletteMap: Buffer;
     screenWidth: number;
     screenHeight: number;
+
 
     updateMousePos(x: number, y: number): void;
     updateBtnState(btn: number, pressed: boolean): void;
@@ -207,6 +209,8 @@ declare namespace rosevm {
     updateKeyState(keycode: number, pressed: boolean): void;
 
     resetSystemMemory(): void;
+
+    saveInputFrame(): void;
 
     pset(x: number, y: number): void;
     pset(x: number, y: number, color: number): void;

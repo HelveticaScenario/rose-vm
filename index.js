@@ -12,6 +12,7 @@ module.exports = function(hd) {
   const vm = new RosebudVM(buf, hd);
   vm.screen = buf.slice(vm.screenOffset, vm.screenOffset + vm.screenLength);
   vm.palette = buf.slice(vm.paletteOffset, vm.paletteOffset + vm.paletteLength);
+  vm.paletteMap = buf.slice(vm.paletteMapOffset, vm.paletteMapOffset + vm.paletteMapLength);
   // delete vm.screenOffset
   // delete vm.screenLength
   // delete vm.paletteOffset
