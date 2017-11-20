@@ -4,252 +4,192 @@ declare function rosevm(hd?: boolean): rosevm.RosebudJS;
 
 declare namespace rosevm {
   interface Keycodes {
-    A: 0;
-    B: 1;
-    C: 2;
-    D: 3;
-    E: 4;
-    F: 5;
-    G: 6;
-    H: 7;
-    I: 8;
-    J: 9;
-    K: 10;
-    L: 11;
-    M: 12;
-    N: 13;
-    O: 14;
-    P: 15;
-    Q: 16;
-    R: 17;
-    S: 18;
-    T: 19;
-    U: 20;
-    V: 21;
-    W: 22;
-    X: 23;
-    Y: 24;
-    Z: 25;
-    Number1: 26;
-    Number2: 27;
-    Number3: 28;
-    Number4: 29;
-    Number5: 30;
-    Number6: 31;
-    Number7: 32;
-    Number8: 33;
-    Number9: 34;
-    Number0: 35;
-    Return: 36;
-    Escape: 37;
-    Backspace: 38;
-    Tab: 39;
-    Space: 40;
-    Minus: 41;
-    Equals: 42;
-    Leftbracket: 43;
-    Rightbracket: 44;
-    Backslash: 45;
-    Nonushash: 46;
-    Semicolon: 47;
-    Apostrophe: 48;
-    Grave: 49;
-    Comma: 50;
-    Period: 51;
-    Slash: 52;
-    Capslock: 53;
-    F1: 54;
-    F2: 55;
-    F3: 56;
-    F4: 57;
-    F5: 58;
-    F6: 59;
-    F7: 60;
-    F8: 61;
-    F9: 62;
-    F10: 63;
-    F11: 64;
-    F12: 65;
-    Printscreen: 66;
-    Scrolllock: 67;
-    Pause: 68;
-    Insert: 69;
-    Home: 70;
-    Pageup: 71;
-    Delete: 72;
-    End: 73;
-    Pagedown: 74;
-    Right: 75;
-    Left: 76;
-    Down: 77;
-    Up: 78;
-    Numlockclear: 79;
-    KpDivide: 80;
-    KpMultiply: 81;
-    KpMinus: 82;
-    KpPlus: 83;
-    KpEnter: 84;
-    Keypad1: 85;
-    Keypad2: 86;
-    Keypad3: 87;
-    Keypad4: 88;
-    Keypad5: 89;
-    Keypad6: 90;
-    Keypad7: 91;
-    Keypad8: 92;
-    Keypad9: 93;
-    Keypad0: 94;
-    KpPeriod: 95;
-    Nonusbackslash: 96;
-    Application: 97;
-    Power: 98;
-    KpEquals: 99;
-    F13: 100;
-    F14: 101;
-    F15: 102;
-    F16: 103;
-    F17: 104;
-    F18: 105;
-    F19: 106;
-    F20: 107;
-    F21: 108;
-    F22: 109;
-    F23: 110;
-    F24: 111;
-    Execute: 112;
-    Help: 113;
-    Menu: 114;
-    Select: 115;
-    Stop: 116;
-    Again: 117;
-    Undo: 118;
-    Cut: 119;
-    Copy: 120;
-    Paste: 121;
-    Find: 122;
-    Mute: 123;
-    Volumeup: 124;
-    Volumedown: 125;
-    KpComma: 126;
-    KpEqualsas400: 127;
-    International1: 128;
-    International2: 129;
-    International3: 130;
-    International4: 131;
-    International5: 132;
-    International6: 133;
-    International7: 134;
-    International8: 135;
-    International9: 136;
-    Lang1: 137;
-    Lang2: 138;
-    Lang3: 139;
-    Lang4: 140;
-    Lang5: 141;
-    Lang6: 142;
-    Lang7: 143;
-    Lang8: 144;
-    Lang9: 145;
-    Alterase: 146;
-    Sysreq: 147;
-    Cancel: 148;
-    Clear: 149;
-    Prior: 150;
-    Return2: 151;
-    Separator: 152;
-    Out: 153;
-    Oper: 154;
-    Clearagain: 155;
-    Crsel: 156;
-    Exsel: 157;
-    Kp00_158;
-    Kp000_159;
-    Thousandsseparator: 160;
-    Decimalseparator: 161;
-    Currencyunit: 162;
-    Currencysubunit: 163;
-    KpLeftparen: 164;
-    KpRightparen: 165;
-    KpLeftbrace: 166;
-    KpRightbrace: 167;
-    KpTab: 168;
-    KpBackspace: 169;
-    KpA: 170;
-    KpB: 171;
-    KpC: 172;
-    KpD: 173;
-    KpE: 174;
-    KpF: 175;
-    KpXor: 176;
-    KpPower: 177;
-    KpPercent: 178;
-    KpLess: 179;
-    KpGreater: 180;
-    KpAmpersand: 181;
-    KpDblampersand: 182;
-    KpVerticalbar: 183;
-    KpDblverticalbar: 184;
-    KpColon: 185;
-    KpHash: 186;
-    KpSpace: 187;
-    KpAt: 188;
-    KpExclam: 189;
-    KpMemstore: 190;
-    KpMemrecall: 191;
-    KpMemclear: 192;
-    KpMemadd: 193;
-    KpMemsubtract: 194;
-    KpMemmultiply: 195;
-    KpMemdivide: 196;
-    KpPlusminus: 197;
-    KpClear: 198;
-    KpClearentry: 199;
-    KpBinary: 200;
-    KpOctal: 201;
-    KpDecimal: 202;
-    KpHexadecimal: 203;
-    Lctrl: 204;
-    Lshift: 205;
-    Lalt: 206;
-    Lgui: 207;
-    Rctrl: 208;
-    Rshift: 209;
-    Ralt: 210;
-    Rgui: 211;
-    Mode: 212;
-    Audionext: 213;
-    Audioprev: 214;
-    Audiostop: 215;
-    Audioplay: 216;
-    Audiomute: 217;
-    Mediaselect: 218;
-    Www: 219;
-    Mail: 220;
-    Calculator: 221;
-    Computer: 222;
-    AcSearch: 223;
-    AcHome: 224;
-    AcBack: 225;
-    AcForward: 226;
-    AcStop: 227;
-    AcRefresh: 228;
-    AcBookmarks: 229;
-    Brightnessdown: 230;
-    Brightnessup: 231;
-    Displayswitch: 232;
-    Kbdillumtoggle: 233;
-    Kbdillumdown: 234;
-    Kbdillumup: 235;
-    Eject: 236;
-    Sleep: 237;
-    App1: 238;
-    App2: 239;
-    Unknown: 240;
+    /**
+	 * Placed first to cover the 0 value of the enum.
+	 */
+    Unknown: 0;
+
+    Backspace: 1;
+    Tab: 2;
+    Enter: 3;
+    Shift: 4;
+    Ctrl: 5;
+    Alt: 6;
+    PauseBreak: 7;
+    CapsLock: 8;
+    Escape: 9;
+    Space: 10;
+    PageUp: 11;
+    PageDown: 12;
+    End: 13;
+    Home: 14;
+    LeftArrow: 15;
+    UpArrow: 16;
+    RightArrow: 17;
+    DownArrow: 18;
+    Insert: 19;
+    Delete: 20;
+
+    Key0: 21;
+    Key1: 22;
+    Key2: 23;
+    Key3: 24;
+    Key4: 25;
+    Key5: 26;
+    Key6: 27;
+    Key7: 28;
+    Key8: 29;
+    Key9: 30;
+
+    KeyA: 31;
+    KeyB: 32;
+    KeyC: 33;
+    KeyD: 34;
+    KeyE: 35;
+    KeyF: 36;
+    KeyG: 37;
+    KeyH: 38;
+    KeyI: 39;
+    KeyJ: 40;
+    KeyK: 41;
+    KeyL: 42;
+    KeyM: 43;
+    KeyN: 44;
+    KeyO: 45;
+    KeyP: 46;
+    KeyQ: 47;
+    KeyR: 48;
+    KeyS: 49;
+    KeyT: 50;
+    KeyU: 51;
+    KeyV: 52;
+    KeyW: 53;
+    KeyX: 54;
+    KeyY: 55;
+    KeyZ: 56;
+
+    Meta: 57;
+    ContextMenu: 58;
+
+    F1: 59;
+    F2: 60;
+    F3: 61;
+    F4: 62;
+    F5: 63;
+    F6: 64;
+    F7: 65;
+    F8: 66;
+    F9: 67;
+    F10: 68;
+    F11: 69;
+    F12: 70;
+    F13: 71;
+    F14: 72;
+    F15: 73;
+    F16: 74;
+    F17: 75;
+    F18: 76;
+    F19: 77;
+
+    NumLock: 78;
+    ScrollLock: 79;
+
+    /**
+     * Used for miscellaneous characters; it can vary by keyboard.
+     * For the US standard keyboard, the ';:' key
+     */
+    Semicolon: 80;
+    /**
+     * For any country/region, the '+' key
+     * For the US standard keyboard, the '=+' key
+     */
+    Equal: 81;
+    /**
+     * For any country/region, the ',' key
+     * For the US standard keyboard, the ',<' key
+     */
+    Comma: 82;
+    /**
+     * For any country/region, the '-' key
+     * For the US standard keyboard, the '-_' key
+     */
+    Minus: 83;
+    /**
+     * For any country/region, the '.' key
+     * For the US standard keyboard, the '.>' key
+     */
+    Dot: 84;
+    /**
+     * Used for miscellaneous characters; it can vary by keyboard.
+     * For the US standard keyboard, the '/?' key
+     */
+    Slash: 85;
+    /**
+     * Used for miscellaneous characters; it can vary by keyboard.
+     * For the US standard keyboard, the '`~' key
+     */
+    Backtick: 86;
+    /**
+     * Used for miscellaneous characters; it can vary by keyboard.
+     * For the US standard keyboard, the '[{' key
+     */
+    OpenSquareBracket: 87;
+    /**
+     * Used for miscellaneous characters; it can vary by keyboard.
+     * For the US standard keyboard, the '\|' key
+     */
+    Backslash: 88;
+    /**
+     * Used for miscellaneous characters; it can vary by keyboard.
+     * For the US standard keyboard, the ']}' key
+     */
+    CloseSquareBracket: 89;
+    /**
+     * Used for miscellaneous characters; it can vary by keyboard.
+     * For the US standard keyboard, the ''"' key
+     */
+    Quote: 90;
+    /**
+     * Used for miscellaneous characters; it can vary by keyboard.
+     */
+    Oem8: 91;
+    /**
+     * Either the angle bracket key or the backslash key on the RT 102-key keyboard.
+     */
+    Oem102: 92;
+
+    Numpad0: 93; // VK_NUMPAD0, 0x60, Numeric keypad 0 key
+    Numpad1: 94; // VK_NUMPAD1, 0x61, Numeric keypad 1 key
+    Numpad2: 95; // VK_NUMPAD2, 0x62, Numeric keypad 2 key
+    Numpad3: 96; // VK_NUMPAD3, 0x63, Numeric keypad 3 key
+    Numpad4: 97; // VK_NUMPAD4, 0x64, Numeric keypad 4 key
+    Numpad5: 98; // VK_NUMPAD5, 0x65, Numeric keypad 5 key
+    Numpad6: 99; // VK_NUMPAD6, 0x66, Numeric keypad 6 key
+    Numpad7: 100; // VK_NUMPAD7, 0x67, Numeric keypad 7 key
+    Numpad8: 101; // VK_NUMPAD8, 0x68, Numeric keypad 8 key
+    Numpad9: 102; // VK_NUMPAD9, 0x69, Numeric keypad 9 key
+
+    NumpadMultiply: 103; // VK_MULTIPLY, 0x6A, Multiply key
+    NumpadAdd: 104; // VK_ADD, 0x6B, Add key
+    NumpadSeparator: 105; // VK_SEPARATOR, 0x6C, Separator key
+    NumpadSubtract: 106; // VK_SUBTRACT, 0x6D, Subtract key
+    NumpadDecimal: 107; // VK_DECIMAL, 0x6E, Decimal key
+    NumpadDivide: 108; // VK_DIVIDE, 0x6F,
+
+    /**
+     * Cover all key codes when IME is processing input.
+     */
+    KeyInComposition: 109;
+
+    AbntC1: 110; // Brazilian (ABNT) Keyboard
+    AbntC2: 111; // Brazilian (ABNT) Keyboard
   }
 
   interface Key {
     (idx: number): boolean;
     codes: Keycodes;
+    codeFromString(str: string): number;
+    codeToString(code: number): string;
   }
 
   interface RosebudJS {

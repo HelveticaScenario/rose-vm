@@ -10,9 +10,9 @@ struct rose_color{
     uint8_t b;
 };
 
-const char* rose_keycode_to_string(rose_keycode key);
+// const char* rose_keycode_to_string(rose_keycode key);
 
-char rose_keycode_to_printable_char(rose_keycode key, bool shift);
+// char rose_keycode_to_printable_char(rose_keycode key, bool shift);
 
 
 static uint8_t rose_default_palette[16 * 3] = {

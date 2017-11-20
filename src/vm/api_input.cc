@@ -33,7 +33,7 @@ rose_api_error rose_vm::wheel_inverted(bool* res) {
 }
 
 rose_api_error rose_vm::key(rose_keycode keycode, bool* res) {
-    if (keycode >= ROSE_KEYCODE_UNKNOWN) {
+    if (keycode >= ROSE_KEYCODE_MAX_VALUE) {
         return ROSE_API_ERR_OUT_OF_BOUNDS;
     }
     *res = rose_get_bit(key_states.begin, keycode);
@@ -41,7 +41,7 @@ rose_api_error rose_vm::key(rose_keycode keycode, bool* res) {
 }
 
 rose_api_error rose_vm::keyp(rose_keycode keycode, bool* res) {
-    if (keycode >= ROSE_KEYCODE_UNKNOWN) {
+    if (keycode >= ROSE_KEYCODE_MAX_VALUE) {
         return ROSE_API_ERR_OUT_OF_BOUNDS;
     }
     bool cur_state = rose_get_bit(key_states.begin, keycode);

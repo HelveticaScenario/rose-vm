@@ -319,7 +319,7 @@ void rose_vm::update_wheel_state(int16_t delta_x, int16_t delta_y, bool inverted
 
 void rose_vm::update_keystate(rose_keycode keycode, bool pressed)
 {
-    if (keycode < ROSE_KEYCODE_UNKNOWN)
+    if (keycode < ROSE_KEYCODE_MAX_VALUE)
     {
         rose_set_bit(key_states.begin, keycode, pressed);
     }

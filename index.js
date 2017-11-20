@@ -1,7 +1,11 @@
 var { RosebudVM, MEMSIZE } = require("bindings")("rosevm");
-const keycodes = require("./keycodes");
-RosebudVM.prototype.key.keycodes = keycodes;
-RosebudVM.prototype.keyp.keycodes = keycodes;
+const {Keycodes, keycodeFromString, keycodeToString} = require("./keycodes");
+RosebudVM.prototype.key.codes = Keycodes;
+RosebudVM.prototype.keyp.codes = Keycodes;
+RosebudVM.prototype.key.codeFromString = keycodeFromString;
+RosebudVM.prototype.keyp.codeFromString = keycodeFromString;
+RosebudVM.prototype.key.codeToString = keycodeToString;
+RosebudVM.prototype.keyp.codeToString = keycodeToString;
 
 module.exports = function(hd) {
   const buf = new Buffer(MEMSIZE);

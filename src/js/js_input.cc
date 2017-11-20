@@ -128,8 +128,8 @@ void RosebudJS::Key(const Nan::FunctionCallbackInfo<v8::Value>& info){
     uint32_t i;
     for (i = 0; i < info.Length(); i++) {
         uint8_t idx = (uint8_t) info[i]->Int32Value();
-        if (idx >= ROSE_KEYCODE_UNKNOWN) {
-            idx = ROSE_KEYCODE_UNKNOWN - 1;
+        if (idx >= ROSE_KEYCODE_MAX_VALUE) {
+            idx = ROSE_KEYCODE_MAX_VALUE - 1;
         }
         bool res;
         int err = vm->key((rose_keycode) idx, &res);
@@ -154,8 +154,8 @@ void RosebudJS::Keyp(const Nan::FunctionCallbackInfo<v8::Value>& info){
     uint32_t i;
     for (i = 0; i < info.Length(); i++) {
         uint8_t idx = (uint8_t) info[i]->Int32Value();
-        if (idx >= ROSE_KEYCODE_UNKNOWN) {
-            idx = ROSE_KEYCODE_UNKNOWN - 1;
+        if (idx >= ROSE_KEYCODE_MAX_VALUE) {
+            idx = ROSE_KEYCODE_MAX_VALUE - 1;
         }
         bool res;
         int err = vm->keyp((rose_keycode) idx, &res);
