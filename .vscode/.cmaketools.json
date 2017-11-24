@@ -6,5 +6,262 @@
       "buildType": "debug"
     },
     "description": "Emit debug information without performing optimizations"
+  },
+  "codeModel": {
+    "configurations": [
+      {
+        "name": "Debug",
+        "projects": [
+          {
+            "buildDirectory": "/Users/helveticascenario/Documents/Play/rose-vm/build",
+            "name": "rosebud",
+            "sourceDirectory": "/Users/helveticascenario/Documents/Play/rose-vm",
+            "targets": [
+              {
+                "artifacts": [
+                  "/Users/helveticascenario/Documents/Play/rose-vm/build/rosebud"
+                ],
+                "buildDirectory": "/Users/helveticascenario/Documents/Play/rose-vm/build",
+                "crossReferences": {
+                  "backtrace": [
+                    {
+                      "line": 3,
+                      "name": "_add_executable",
+                      "path": "/Users/helveticascenario/Documents/Play/rose-vm/build/_cmt_tmp.cmake"
+                    },
+                    {
+                      "path": "/Users/helveticascenario/Documents/Play/rose-vm/build/_cmt_tmp.cmake"
+                    },
+                    {
+                      "line": 10,
+                      "name": "include",
+                      "path": "/Users/helveticascenario/Documents/Play/rose-vm/build/CMakeTools/CMakeToolsHelpers.cmake"
+                    },
+                    {
+                      "line": 20,
+                      "name": "_cmt_invoke",
+                      "path": "/Users/helveticascenario/Documents/Play/rose-vm/build/CMakeTools/CMakeToolsHelpers.cmake"
+                    },
+                    {
+                      "line": 25,
+                      "name": "add_executable",
+                      "path": "/Users/helveticascenario/Documents/Play/rose-vm/CMakeLists.txt"
+                    },
+                    {
+                      "path": "/Users/helveticascenario/Documents/Play/rose-vm/CMakeLists.txt"
+                    }
+                  ],
+                  "relatedStatements": [
+                    {
+                      "backtrace": [
+                        {
+                          "line": 18,
+                          "name": "include_directories",
+                          "path": "/Users/helveticascenario/Documents/Play/rose-vm/CMakeLists.txt"
+                        },
+                        {
+                          "path": "/Users/helveticascenario/Documents/Play/rose-vm/CMakeLists.txt"
+                        }
+                      ],
+                      "type": "target_include_directories"
+                    },
+                    {
+                      "backtrace": [
+                        {
+                          "line": 26,
+                          "name": "target_link_libraries",
+                          "path": "/Users/helveticascenario/Documents/Play/rose-vm/CMakeLists.txt"
+                        },
+                        {
+                          "path": "/Users/helveticascenario/Documents/Play/rose-vm/CMakeLists.txt"
+                        }
+                      ],
+                      "type": "target_link_libraries"
+                    },
+                    {
+                      "backtrace": [
+                        {
+                          "line": 26,
+                          "name": "target_link_libraries",
+                          "path": "/Users/helveticascenario/Documents/Play/rose-vm/CMakeLists.txt"
+                        },
+                        {
+                          "path": "/Users/helveticascenario/Documents/Play/rose-vm/CMakeLists.txt"
+                        }
+                      ],
+                      "type": "target_link_libraries"
+                    },
+                    {
+                      "backtrace": [
+                        {
+                          "line": 26,
+                          "name": "target_link_libraries",
+                          "path": "/Users/helveticascenario/Documents/Play/rose-vm/CMakeLists.txt"
+                        },
+                        {
+                          "path": "/Users/helveticascenario/Documents/Play/rose-vm/CMakeLists.txt"
+                        }
+                      ],
+                      "type": "target_link_libraries"
+                    },
+                    {
+                      "backtrace": [
+                        {
+                          "line": 26,
+                          "name": "target_link_libraries",
+                          "path": "/Users/helveticascenario/Documents/Play/rose-vm/CMakeLists.txt"
+                        },
+                        {
+                          "path": "/Users/helveticascenario/Documents/Play/rose-vm/CMakeLists.txt"
+                        }
+                      ],
+                      "type": "target_link_libraries"
+                    },
+                    {
+                      "backtrace": [
+                        {
+                          "line": 26,
+                          "name": "target_link_libraries",
+                          "path": "/Users/helveticascenario/Documents/Play/rose-vm/CMakeLists.txt"
+                        },
+                        {
+                          "path": "/Users/helveticascenario/Documents/Play/rose-vm/CMakeLists.txt"
+                        }
+                      ],
+                      "type": "target_link_libraries"
+                    },
+                    {
+                      "backtrace": [
+                        {
+                          "line": 26,
+                          "name": "target_link_libraries",
+                          "path": "/Users/helveticascenario/Documents/Play/rose-vm/CMakeLists.txt"
+                        },
+                        {
+                          "path": "/Users/helveticascenario/Documents/Play/rose-vm/CMakeLists.txt"
+                        }
+                      ],
+                      "type": "target_link_libraries"
+                    },
+                    {
+                      "backtrace": [
+                        {
+                          "line": 26,
+                          "name": "target_link_libraries",
+                          "path": "/Users/helveticascenario/Documents/Play/rose-vm/CMakeLists.txt"
+                        },
+                        {
+                          "path": "/Users/helveticascenario/Documents/Play/rose-vm/CMakeLists.txt"
+                        }
+                      ],
+                      "type": "target_link_libraries"
+                    },
+                    {
+                      "backtrace": [
+                        {
+                          "line": 26,
+                          "name": "target_link_libraries",
+                          "path": "/Users/helveticascenario/Documents/Play/rose-vm/CMakeLists.txt"
+                        },
+                        {
+                          "path": "/Users/helveticascenario/Documents/Play/rose-vm/CMakeLists.txt"
+                        }
+                      ],
+                      "type": "target_link_libraries"
+                    },
+                    {
+                      "backtrace": [
+                        {
+                          "line": 26,
+                          "name": "target_link_libraries",
+                          "path": "/Users/helveticascenario/Documents/Play/rose-vm/CMakeLists.txt"
+                        },
+                        {
+                          "path": "/Users/helveticascenario/Documents/Play/rose-vm/CMakeLists.txt"
+                        }
+                      ],
+                      "type": "target_link_libraries"
+                    },
+                    {
+                      "backtrace": [
+                        {
+                          "line": 26,
+                          "name": "target_link_libraries",
+                          "path": "/Users/helveticascenario/Documents/Play/rose-vm/CMakeLists.txt"
+                        },
+                        {
+                          "path": "/Users/helveticascenario/Documents/Play/rose-vm/CMakeLists.txt"
+                        }
+                      ],
+                      "type": "target_link_libraries"
+                    },
+                    {
+                      "backtrace": [
+                        {
+                          "line": 26,
+                          "name": "target_link_libraries",
+                          "path": "/Users/helveticascenario/Documents/Play/rose-vm/CMakeLists.txt"
+                        },
+                        {
+                          "path": "/Users/helveticascenario/Documents/Play/rose-vm/CMakeLists.txt"
+                        }
+                      ],
+                      "type": "target_link_libraries"
+                    }
+                  ]
+                },
+                "fileGroups": [
+                  {
+                    "compileFlags": "-g   -std=gnu++14",
+                    "includePath": [
+                      {
+                        "path": "/usr/local/include/SDL2"
+                      },
+                      {
+                        "path": "/Users/helveticascenario/Documents/Play/rose-vm/third_party/v8/include"
+                      },
+                      {
+                        "path": "/Users/helveticascenario/Documents/Play/rose-vm/src"
+                      }
+                    ],
+                    "isGenerated": false,
+                    "language": "CXX",
+                    "sources": [
+                      "src/main.cpp",
+                      "src/rt/api_graphics.cpp",
+                      "src/rt/api_input.cpp",
+                      "src/rt/api_memory.cpp",
+                      "src/rt/common.cpp",
+                      "src/rt/desktop_player.cpp",
+                      "src/rt/file.cpp",
+                      "src/rt/fs.cpp",
+                      "src/rt/js.cpp",
+                      "src/rt/js_common.cpp",
+                      "src/rt/js_graphics.cpp",
+                      "src/rt/js_input.cpp",
+                      "src/rt/js_memory.cpp",
+                      "src/rt/js_sys.cpp",
+                      "src/rt/rt.cpp",
+                      "src/sys/sys_key_conversion.cpp",
+                      "src/sys/sys_sdl2.cpp"
+                    ]
+                  }
+                ],
+                "fullName": "rosebud",
+                "linkLanguageFlags": "-g",
+                "linkLibraries": "/usr/local/lib/libSDL2main.a /usr/local/lib/libSDL2.dylib -framework Cocoa ../third_party/v8/out.gn/x64.release/obj/libv8_base.a ../third_party/v8/out.gn/x64.release/obj/libv8_libbase.a ../third_party/v8/out.gn/x64.release/obj/libv8_libsampler.a ../third_party/v8/out.gn/x64.release/obj/libv8_libplatform.a ../third_party/v8/out.gn/x64.release/obj/libv8_external_snapshot.a ../third_party/v8/out.gn/x64.release/obj/third_party/icu/libicui18n.a ../third_party/v8/out.gn/x64.release/obj/third_party/icu/libicuuc.a ../third_party/v8/out.gn/x64.release/obj/src/inspector/libinspector.a",
+                "linkerLanguage": "CXX",
+                "name": "rosebud",
+                "sourceDirectory": "/Users/helveticascenario/Documents/Play/rose-vm",
+                "type": "EXECUTABLE"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "cookie": "0.5091116598120238",
+    "inReplyTo": "codemodel",
+    "type": "reply"
   }
 }

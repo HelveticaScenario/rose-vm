@@ -10,9 +10,6 @@
 #include <cassert>
 #include <iostream>
 #include <string>
-#include <zlib.h>
-#include <archive.h>
-#include <archive_entry.h>
 #include <vector>
 #include <sstream>
 #include <algorithm>
